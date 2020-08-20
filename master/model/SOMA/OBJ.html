@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>OBJ.pl -- Interface predicates for EASE-OBJ model.</title>
+
+<link rel="stylesheet" type="text/css" href="../../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>OBJ.pl -- Interface predicates for EASE-OBJ model.</h1>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Daniel Beßler</dd>
+<dt class="keyword-license">license</dt><dd class="keyword-license">- BSD</dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_physical_quality/1"><b class="pred">is_physical_quality</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of soma:'PhysicalQuality'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_social_quality/1"><b class="pred">is_social_quality</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of soma:'SocialQuality'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_intrinsic/1"><b class="pred">is_intrinsic</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of soma:'Intrinsic'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_extrinsic/1"><b class="pred">is_extrinsic</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of soma:'Extrinsic'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="object_localization/2"><b class="pred">object_localization</b><var class="arglist">(?Obj, ?Loc)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Relates an object to its localization quality.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Obj</var></td><td class="argdescr">- object resource</td></tr>
+<tr><td><var>Loc</var></td><td class="argdescr">- localization quality</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="object_color_rgb/2"><b class="pred">object_color_rgb</b><var class="arglist">(?Obj, ?Col)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True if <var>Col</var> is the main color of <var>Obj</var>.
+<var>Col</var> is encoded as as [float red, green, blue], on a scale of 0-1.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Obj</var></td><td class="argdescr">- object resource</td></tr>
+<tr><td><var>Col</var></td><td class="argdescr">- rgb color data</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="object_shape/3"><b class="pred">object_shape</b><var class="arglist">(?Obj, ?ShapeTerm, ?ShapeOrigin)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Relates objects to shapes and their origin (usually a pose relative to the object).
+The shape is represented as a Prolog term that encodes the shape type
+and its geometrical properties.
+
+<p>
+<var>ShapeTerm</var> may be one of:</p>
+
+<dl class="termlist">
+<dt class="term"><b class="pred">mesh</b><var class="arglist">(File, Scale)</var></dt><dd></dd>
+<dt class="term"><b class="pred">box</b><var class="arglist">(X, Y, Z)</var></dt><dd></dd>
+<dt class="term"><b class="pred">cylinder</b><var class="arglist">(Radius, Length)</var></dt><dd></dd>
+<dt class="term"><b class="pred">sphere</b><var class="arglist">(Radius)</var></dt><dd><var>ShapeOrigin</var> is a list of frame-position-quaternion.
+
+<p>
+@<var>Obj</var> IRI atom
+@<var>ShapeTerm</var> A shape term
+@<var>ShapeOrigin</var> The origin of the shape</p></dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="object_shape_type/2"><b class="pred">object_shape_type</b><var class="arglist">(?Obj, ?ShapeType)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Relates an object to the type of its <code>shape(s)</code>.
+An object may have multiple shapes associated that
+provide different level of detail.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Obj</var></td><td class="argdescr">- Object resource</td></tr>
+<tr><td><var>ShapeType</var></td><td class="argdescr">- IRI of shape type</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="object_dimensions/4"><b class="pred">object_dimensions</b><var class="arglist">(?Obj, ?Depth, ?Width, ?Height)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True if <var>Depth</var> x <var>Width</var> x <var>Height</var> are (exactly) the extends of the bounding box of <var>Obj</var>.
+NOTE that we use ROS conventions here: Coordinate systems in ROS are
+always right-handed, with X forward, Y left, and Z up.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Obj</var></td><td class="argdescr">- Object resource</td></tr>
+<tr><td><var>Depth</var></td><td class="argdescr">- <var>Depth</var> of the bounding box (x-dimension)</td></tr>
+<tr><td><var>Width</var></td><td class="argdescr">- <var>Width</var> of the bounding box (y-dimension)</td></tr>
+<tr><td><var>Height</var></td><td class="argdescr">- <var>Height</var> of the bounding box (z-dimension)</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="object_mesh_path/2"><b class="pred">object_mesh_path</b><var class="arglist">(?Obj, -FilePath)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True if <var>FilePath</var> is a path to a mesh file (stl or dae) for <var>Obj</var>.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Obj</var></td><td class="argdescr">- Object resource</td></tr>
+<tr><td><var>FilePath</var></td><td class="argdescr">- the file path</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_feature/1"><b class="pred">is_feature</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of soma:'Feature'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="object_feature/2"><b class="pred">object_feature</b><var class="arglist">(+Obj, ?Feature)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Associates an object resource to features it hosts.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Obj</var></td><td class="argdescr">- Object resource</td></tr>
+<tr><td><var>Feature</var></td><td class="argdescr">- <var>Feature</var> resource</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_affordance/1"><b class="pred">is_affordance</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of soma:'Affordance'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_disposition/1"><b class="pred">is_disposition</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of soma:'Disposition'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="has_disposition/2"><b class="pred">has_disposition</b><var class="arglist">(?Obj, ?Disposition)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Relates an object to its dispositions.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Obj</var></td><td class="argdescr">- Object resource</td></tr>
+<tr><td><var>Disposition</var></td><td class="argdescr">- <var>Disposition</var> resource</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="disposition_trigger_type/2"><b class="pred">disposition_trigger_type</b><var class="arglist">(?Disposition, ?TriggerType)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Relates a disposition to the type of objects that can be the
+trigger of the disposition.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Disposition</var></td><td class="argdescr">- <var>Disposition</var> resource</td></tr>
+<tr><td><var>TriggerType</var></td><td class="argdescr">- Class resource</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_patient/1"><b class="pred">is_patient</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of soma:'Patient'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_instrument/1"><b class="pred">is_instrument</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of soma:'Instrument'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_location/1"><b class="pred">is_location</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of soma:'Location'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_destination/1"><b class="pred">is_destination</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of soma:'Destination'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_origin/1"><b class="pred">is_origin</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of soma:'Origin'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+</dl>
+
+<h2 class="undoc">Undocumented predicates</h2>
+
+<p>
+The following predicates are exported, but not or incorrectly documented.</p>
+
+<dl class="undoc">
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="has_disposition_type/3"><b class="pred">has_disposition_type</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="object_feature_type/3"><b class="pred">object_feature_type</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+</dl>
+
+</body>
+</html>

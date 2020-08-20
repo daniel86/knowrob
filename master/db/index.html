@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>db</title>
+
+<link rel="stylesheet" type="text/css" href="../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="wiki">knowrob_db</h1>
+
+<p>
+KnowRob distinguishes between two different types of databases:
+The triple DB which is used to store factual knowledge,
+and DBs which are used to store quantitative information.
+Interfaces are defined for the both distinct cases such
+that it is possible to configure the triple DB used by KnowRob,
+and to dynamically link the knowledge base to new sources
+of quantitative information.</p>
+
+<h3 class="wiki">triple DB</h3>
+
+<p>
+The triple store holds the RDF data of the knowledge base.
+However, KnowRob requires a storage that allows to associate
+additional information to triples stored in the DB.
+In particular, triples in KnowRob are (temporally) scoped,
+meaning that they are only true within a limited scope.
+KnowRob may further associate a unit to data values,
+which must also be associated to the corresponding data triple.</p>
+
+<p>
+Another requirement is that the triple DB supports RDFS semantics
+directly -- so to have very fast retrieval of subclass-of and
+subproperty-of relationships.</p>
+
+<p>
+Finally, triples are stored in named graphs.
+This allows to separate triple data from distinct contexts.
+The graphs in the triple store form a subgraph-of hierarchy:
+triples of the supergraphs are included in subgraphs.
+So to allow common super graphs shared in different contexts.</p>
+
+<h3 class="wiki">OBDA</h3>
+
+<p>
+Quantitative information is incorporated into the knowledge base
+through ontology-based data access (OBDA).
+KnowRob defines a common interface for OBDA sources where
+each source declares a binary predicate that maps to a binary
+relation symbol.
+More specifically, each OBDA predicate maps to some sub-property
+of the relation hasDataValue (a datatype property).
+This mapping is used by KnowRob to incorporate OBDA sources
+into question answering where questions are structured according to
+the formal model used by KnowRob.</p>
+
+<h2 class="wiki subdirs">Sub directories</h2>
+
+<table class="subdirs">
+<tr><td><a class="subdir" href="mongo/index.html">[dir] mongo</a></td></tr>
+</table>
+
+<h2 class="wiki plfiles">Prolog files</h2>
+
+<table class="summary">
+<tr><th colspan="3" class="file"><span style="float:left"><a href="__init__.html">__init__.pl</a></span><span style="float:right"></span></th></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="itripledb.html">itripledb.pl</a></span><span style="float:right"></span></th></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="obda.html">obda.pl</a></span>&nbsp; -- Predicates for Ontology-based Data Access (OBDA).<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="obda.html#access/2">access/2</a></td><td class="summary">Try accessing a data statement with registered OBDA modules by calling their access predicate.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="obda.html#obda_add/1">obda_add/1</a></td><td class="summary">Registers a Prolog Module that implements the OBDA interface.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="obda.html#obda_export/1">obda_export/1</a></td><td class="summary">Calls export on any registered OBDA module with given directory.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="obda.html#obda_import/1">obda_import/1</a></td><td class="summary">Calls import on any registered OBDA module with given directory.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="obda.html#obda_remove/1">obda_remove/1</a></td><td class="summary">Removes a previously registered OBDA module.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="obda.html#obda_whipe/0">obda_whipe/0</a></td><td class="summary">Whipe all OBDA databases of registered modules.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="scope.html">scope.pl</a></span>&nbsp; -- The scope of statements being true.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="scope.html#current_scope/1">current_scope/1</a></td><td class="summary">The scope of facts that are currently true.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="scope.html#scope_intersect/3">scope_intersect/3</a></td><td class="summary">Intersect two scopes.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="scope.html#scope_merge/3">scope_merge/3</a></td><td class="summary">Merge two scopes.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="scope.html#scope_overlaps_query/2">scope_overlaps_query/2</a></td><td class="summary">B is the scope of all facts whose scope overlaps with A.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="scope.html#scope_remove/4">scope_remove/4</a></td><td class="summary">Removes a key from a scope dictionary.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="scope.html#scope_update/3">scope_update/3</a></td><td class="summary">Update a scope with new values taken from another scope dictionary.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="scope.html#subscope_of/2">subscope_of/2</a></td><td class="summary">True if scope Sup contains all facts that are contained in scope Sub.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="scope.html#universal_scope/1">universal_scope/1</a></td><td class="summary">The scope of facts that are universally true.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="scope.html#wildcard_scope/1">wildcard_scope/1</a></td><td class="summary">A scope that matches any fact.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="subgraph.html">subgraph.pl</a></span>&nbsp; -- subgraph-of relationship between RDF graphs.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="subgraph.html#tripledb_add_subgraph/2">tripledb_add_subgraph/2</a></td><td class="summary">Adds the subgraph-of relation between two named graphs.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="subgraph.html#tripledb_get_subgraphs/2">tripledb_get_subgraphs/2</a></td><td class="summary">Get all subgraphs of a named graph.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="subgraph.html#tripledb_get_supgraphs/2">tripledb_get_supgraphs/2</a></td><td class="summary">Get all super-graphs of a named graph.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="tripledb.html">tripledb.pl</a></span>&nbsp; -- Interface for loading, storing, and retrieving triple data.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="tripledb.html#tripledb_ask/3">tripledb_ask/3</a></td><td class="summary">Same as <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=tripledb_ask/6">tripledb_ask/6</a> but uses wildcard scope, and an empty options list.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="tripledb.html#tripledb_ask/5">tripledb_ask/5</a></td><td class="summary">Same as <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=tripledb_ask/6">tripledb_ask/6</a> but uses an empty options list.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="tripledb.html#tripledb_forget/3">tripledb_forget/3</a></td><td class="summary">Same as <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=tripledb_forget/5">tripledb_forget/5</a> but uses wildcard scope, and an empty options list.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="tripledb.html#tripledb_forget/4">tripledb_forget/4</a></td><td class="summary">Same as <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=tripledb_forget/5">tripledb_forget/5</a> but uses an empty options list.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="tripledb.html#tripledb_load/1">tripledb_load/1</a></td><td class="summary">Same as <a href="tripledb.html#tripledb_load/2">tripledb_load/2</a> with empty Options list.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="tripledb.html#tripledb_load/2">tripledb_load/2</a></td><td class="summary">Same as <a href="tripledb.html#tripledb_load/3">tripledb_load/3</a> with universal scope, and graph name argument as given in the options list or "user" if none is given.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="tripledb.html#tripledb_load/3">tripledb_load/3</a></td><td class="summary">Load RDF data from file, and assert it into the triple DB using the scope provided, and into the graph with the name provided.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="tripledb.html#tripledb_tell/3">tripledb_tell/3</a></td><td class="summary">Same as <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=tripledb_tell/5">tripledb_tell/5</a> but uses universal scope, and an empty options list.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="tripledb.html#tripledb_tell/4">tripledb_tell/4</a></td><td class="summary">Same as <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=tripledb_tell/5">tripledb_tell/5</a> but uses universal scope, and an empty options list.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="tripledb_tests.html">tripledb_tests.pl</a></span>&nbsp; -- A test environment for running tests using the tripledb.<span style="float:right"></span></th></tr>
+</table>
+
+</body>
+</html>

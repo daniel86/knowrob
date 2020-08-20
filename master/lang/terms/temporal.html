@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>temporal.pl -- Temporally scoped statements.</title>
+
+<link rel="stylesheet" type="text/css" href="../../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>temporal.pl -- Temporally scoped statements.</h1>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Daniel Beßler</dd>
+<dt class="keyword-license">license</dt><dd class="keyword-license">- BSD</dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="during/2"><var class="arglist">+Statement</var> <b class="pred">during</b> <var class="arglist">?Time</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True for statements that hold during the whole
+duration of some time interval.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Statement</var></td><td class="argdescr">- A language term.</td></tr>
+<tr><td><var>Interval</var></td><td class="argdescr">- A time interval, instant, or event.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="since/2"><var class="arglist">+Statement</var> <b class="pred">since</b> <var class="arglist">?Interval</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True for statements that hold (at least) since some time
+instant.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Statement</var></td><td class="argdescr">- A language term.</td></tr>
+<tr><td><var>Interval</var></td><td class="argdescr">- A time interval, instant, or event.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="until/2"><var class="arglist">+Statement</var> <b class="pred">until</b> <var class="arglist">?Interval</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True for statements that hold (at least) until some time
+instant.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Statement</var></td><td class="argdescr">- A language term.</td></tr>
+<tr><td><var>Interval</var></td><td class="argdescr">- A time interval, instant, or event.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+</dl>
+
+</body>
+</html>

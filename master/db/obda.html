@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>obda.pl -- Predicates for Ontology-based Data Access (OBDA).</title>
+
+<link rel="stylesheet" type="text/css" href="../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>obda.pl -- Predicates for Ontology-based Data Access (OBDA).</h1>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Daniel Beßler</dd>
+<dt class="keyword-license">license</dt><dd class="keyword-license">- BSD</dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="obda_add/1"><b class="pred">obda_add</b><var class="arglist">(+Module)</var></a> is <b class="det">det</b></dt><dd class="defbody">Registers a Prolog <var>Module</var> that implements the OBDA
+interface.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Module</var></td><td class="argdescr">- a Prolog module.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="obda_remove/1"><b class="pred">obda_remove</b><var class="arglist">(+Module)</var></a> is <b class="det">det</b></dt><dd class="defbody">Removes a previously registered OBDA module.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Module</var></td><td class="argdescr">- a Prolog module.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="obda_import/1"><b class="pred">obda_import</b><var class="arglist">(+Directory)</var></a> is <b class="det">det</b></dt><dd class="defbody">Calls import on any registered OBDA module
+with given directory.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Directory</var></td><td class="argdescr">- a Prolog module.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="obda_export/1"><b class="pred">obda_export</b><var class="arglist">(+Directory)</var></a> is <b class="det">det</b></dt><dd class="defbody">Calls export on any registered OBDA module
+with given directory.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Directory</var></td><td class="argdescr">- a Prolog module.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="obda_whipe/0"><b class="pred">obda_whipe</b></a> is <b class="det">det</b></dt><dd class="defbody">Whipe all OBDA databases of registered modules.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="access/2"><b class="pred">access</b><var class="arglist">(+DataStatement, +Scope)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Try accessing a data statement with registered
+OBDA modules by calling their access predicate.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>DataStatement</var></td><td class="argdescr">- a term <code>holds(Subject,Property,Value)</code>.</td></tr>
+<tr><td><var>Scope</var></td><td class="argdescr">- a term of the form QueryScope-&gt;FactScope.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+</dl>
+
+</body>
+</html>

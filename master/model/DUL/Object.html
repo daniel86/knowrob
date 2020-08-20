@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Object.pl -- DUL notion of Object.</title>
+
+<link rel="stylesheet" type="text/css" href="../../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>Object.pl -- DUL notion of Object.</h1>
+
+<p>
+In DUL, Object is defined as:
+"Any physical, social, or mental object, or a substance. Following DOLCE Full, objects are always participating in some event (at least their own life), and are spatially located."</p>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Daniel Beßler</dd>
+<dt class="keyword-license">license</dt><dd class="keyword-license">- BSD</dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_object/1"><b class="pred">is_object</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of dul:'Object'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_quality/1"><b class="pred">is_quality</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of dul:'Quality'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_concept/1"><b class="pred">is_concept</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of dul:'Concept'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_role/1"><b class="pred">is_role</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of dul:'Role'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_agent/1"><b class="pred">is_agent</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of dul:'Agent'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_physical_object/1"><b class="pred">is_physical_object</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of dul:'PhysicalObject'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_social_object/1"><b class="pred">is_social_object</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of dul:'SocialObject'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="has_quality_type/2"><b class="pred">has_quality_type</b><var class="arglist">(+Entity, ?Type)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Relates an entity to its types that are sub-classes
+of the Quality concept.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- named individual</td></tr>
+<tr><td><var>Type</var></td><td class="argdescr">- class resource</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="has_object_type/2"><b class="pred">has_object_type</b><var class="arglist">(+Entity, ?Type)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Relates an entity to its types that are sub-classes
+of the Object concept.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- named individual</td></tr>
+<tr><td><var>Type</var></td><td class="argdescr">- class resource</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="has_location/2"><b class="pred">has_location</b><var class="arglist">(?Object, ?Location)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">A generic, relative spatial location, holding between any entities. E.g.
+<ul>
+<li>'the cat is on the mat',</li>
+<li>'Omar is in Samarcanda',</li>
+<li>'the wound is close to the femural artery'.
+@param <var>Object</var> named individual
+@param <var>Location</var> named individual</li>
+</ul>
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="has_role/2"><b class="pred">has_role</b><var class="arglist">(?Entity, ?Role)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Relates an object to its roles.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- named individual</td></tr>
+<tr><td><var>Role</var></td><td class="argdescr">- named individual</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="has_part/2"><b class="pred">has_part</b><var class="arglist">(?Entity, ?Part)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Relates an object to its parts.
+
+<p>
+@<var>Entity</var> IRI atom
+@<var>Part</var> IRI atom</p>
+
+<p>
+<code class="nofile">TODO</code>: not object related, probably best to add a module <code class="nofile">DUL.pl</code> and add it there</p></dd>
+</dl>
+
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>client.pl -- A mongo DB client for Prolog.</title>
+
+<link rel="stylesheet" type="text/css" href="../../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>client.pl -- A mongo DB client for Prolog.</h1>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Daniel Beßler</dd>
+<dt class="keyword-license">license</dt><dd class="keyword-license">- BSD</dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_collection/2"><b class="pred">mng_collection</b><var class="arglist">(+DB, ?Collection)</var></a> is <b class="det">det</b></dt><dd class="defbody">True iff <b><var>Collection</var></b> is an existing collection
+in the current <var>DB</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_regex_prefix/2"><b class="pred">mng_regex_prefix</b><var class="arglist">(+Prefix, -Pattern)</var></a> is <b class="det">det</b></dt><dd class="defbody">Create a regex pattern for matching entries
+with some prefix.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Prefix</var></td><td class="argdescr">- an atom</td></tr>
+<tr><td><var>Pattern</var></td><td class="argdescr">- regex pattern for matching the prefix of values</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_cursor_next/2"><b class="pred">mng_cursor_next</b><var class="arglist">(+Cursor, ?Dict)</var></a> is <b class="det">semidet</b></dt><dd class="defbody"></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_get_dict/3"><b class="pred">mng_get_dict</b><var class="arglist">(?Key, +Doc, ?PlValue)</var></a> is <b class="det">semidet</b></dt><dd class="defbody">Get a key-value pair from a dictionary, and map
+any data value to native Prolog types using <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=mng_pl_value/2">mng_pl_value/2</a>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_dump/2"><b class="pred">mng_dump</b><var class="arglist">(+DB, +Dir)</var></a> is <b class="det">det</b></dt><dd class="defbody">Dump mongo <var>DB</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_dump_collection/3"><b class="pred">mng_dump_collection</b><var class="arglist">(+DB, +Collection, +Dir)</var></a> is <b class="det">det</b></dt><dd class="defbody">Dump mongo <var>DB</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_restore/2"><b class="pred">mng_restore</b><var class="arglist">(+DB, +Dir)</var></a> is <b class="det">det</b></dt><dd class="defbody">Restore mongo <var>DB</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_drop/2"><b class="pred">mng_drop</b><var class="arglist">(+DB, +Collection)</var></a> is <b class="det">det</b></dt><dd class="defbody">Drop a collection.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>DB</var></td><td class="argdescr">- The database name</td></tr>
+<tr><td><var>Collection</var></td><td class="argdescr">- The collection name</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_store/3"><b class="pred">mng_store</b><var class="arglist">(+DB, +Collection, +Dict)</var></a></dt><dd class="defbody">Stores a dictionary in a mongo <var>DB</var> collection
+with the provided name.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>DB</var></td><td class="argdescr">- The database name</td></tr>
+<tr><td><var>Collection</var></td><td class="argdescr">- The collection name</td></tr>
+<tr><td><var>Dict</var></td><td class="argdescr">- A Prolog dictionary</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_cursor_create/3"><b class="pred">mng_cursor_create</b><var class="arglist">(+DB, +Collection, -Cursor)</var></a> is <b class="det">det</b></dt><dd class="defbody">Creates a new query cursor.
+Make sure to call <b><a href="client.html#mng_cursor_destroy/1">mng_cursor_destroy/1</a></b> once
+you are done querying.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>DB</var></td><td class="argdescr">- The database name</td></tr>
+<tr><td><var>Collection</var></td><td class="argdescr">- The collection name</td></tr>
+<tr><td><var>Cursor</var></td><td class="argdescr">- The id of a new mongo <var>DB</var> cursor</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_cursor_destroy/1"><b class="pred">mng_cursor_destroy</b><var class="arglist">(+Cursor)</var></a> is <b class="det">det</b></dt><dd class="defbody">Destroys a query cursor.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Cursor</var></td><td class="argdescr">- A mongo DB cursor id</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_cursor_limit/2"><b class="pred">mng_cursor_limit</b><var class="arglist">(+Cursor, +Limit)</var></a> is <b class="det">det</b></dt><dd class="defbody">Out is the same mongo DB cursor as In but limited to N results.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Cursor</var></td><td class="argdescr">- A mongo DB cursor id</td></tr>
+<tr><td><var>Limit</var></td><td class="argdescr">- The maximum number of documents yielded by the cursor</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_cursor_descending/2"><b class="pred">mng_cursor_descending</b><var class="arglist">(+Cursor, +Key)</var></a> is <b class="det">det</b></dt><dd class="defbody">Sorts the DB cursor In w.r.t. <var>Key</var>, the sorted collection
+can be accessed via the new DB cursor Out.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Cursor</var></td><td class="argdescr">- A mongo DB cursor id</td></tr>
+<tr><td><var>Key</var></td><td class="argdescr">- The sort key</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_cursor_ascending/2"><b class="pred">mng_cursor_ascending</b><var class="arglist">(+Cursor, +Key)</var></a> is <b class="det">det</b></dt><dd class="defbody">Sorts the DB cursor In w.r.t. <var>Key</var>, the sorted collection
+can be accessed via the new DB cursor Out.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Cursor</var></td><td class="argdescr">- A mongo DB cursor id</td></tr>
+<tr><td><var>Key</var></td><td class="argdescr">- The sort key</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+</dl>
+
+<h2 class="undoc">Undocumented predicates</h2>
+
+<p>
+The following predicates are exported, but not or incorrectly documented.</p>
+
+<dl class="undoc">
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_cursor_materialize/2"><b class="pred">mng_cursor_materialize</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_cursor_filter/2"><b class="pred">mng_cursor_filter</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_export/1"><b class="pred">mng_export</b><var class="arglist">(Arg1)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_export_collection/2"><b class="pred">mng_export_collection</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_remove/3"><b class="pred">mng_remove</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_index_create/2"><b class="pred">mng_index_create</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_distinct_values/4"><b class="pred">mng_distinct_values</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_db_name/1"><b class="pred">mng_db_name</b><var class="arglist">(Arg1)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_update/4"><b class="pred">mng_update</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
+</dl>
+
+</body>
+</html>

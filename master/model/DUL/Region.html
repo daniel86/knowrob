@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Region.pl -- DUL notion of Region.</title>
+
+<link rel="stylesheet" type="text/css" href="../../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>Region.pl -- DUL notion of Region.</h1>
+
+<p>
+In DUL, Region is defined as:
+"Any region in a dimensional space (a dimensional space is a maximal Region), which can be used as a value for a quality of an Entity."</p>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Daniel Beßler</dd>
+<dt class="keyword-license">license</dt><dd class="keyword-license">- BSD</dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_region/1"><b class="pred">is_region</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of dul:'Region'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_parameter/1"><b class="pred">is_parameter</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of dul:'Parameter'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_space_region/1"><b class="pred">is_space_region</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of dul:'SpaceRegion'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_amount/1"><b class="pred">is_amount</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of dul:'Amount'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_physical_attribute/1"><b class="pred">is_physical_attribute</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of dul:'PhysicalAttribute'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_social_attribute/1"><b class="pred">is_social_attribute</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of dul:'SocialAttribute'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_time_interval/1"><b class="pred">is_time_interval</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of dul:'TimeInterval'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="has_region/2"><b class="pred">has_region</b><var class="arglist">(?Entity, ?Region)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">A relation between entities and regions, e.g.
+<ul>
+<li>'the number of wheels of that truck is 12',</li>
+<li>'the time of the experiment is August 9th, 2004',</li>
+<li>'the whale has been localized at 34 degrees E, 20 degrees S'.
+@param <var>Entity</var> An entity IRI.
+@param <var>Region</var> An region IRI.</li>
+</ul>
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="has_parameter/2"><b class="pred">has_parameter</b><var class="arglist">(?Entity, ?Param)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">A Concept can have a Parameter that constrains the attributes
+that a classified <var>Entity</var> can have in a certain Situation,
+e.g. a WheelDriver Role definedIn the ItalianTrafficLaw has
+a MinimumAge parameter on the Amount 16.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+<tr><td><var>Param</var></td><td class="argdescr">- An parameter IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="has_parameter/3"><b class="pred">has_parameter</b><var class="arglist">(?Entity, ?Param, ?ParamType)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Same as <a href="Region.html#has_parameter/2">has_parameter/2</a> but in addition unifies the
+type of the parameter with the third argument.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- entity IRI.</td></tr>
+<tr><td><var>Param</var></td><td class="argdescr">- parameter IRI.</td></tr>
+<tr><td><var>Param</var></td><td class="argdescr">- parameter type IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="has_parameter_range/3"><b class="pred">has_parameter_range</b><var class="arglist">(?Entity, ?Param, ?Range)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Same as <a href="Region.html#has_parameter/2">has_parameter/2</a> but in addition unifies the
+range of the parameter with the third argument.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- entity IRI.</td></tr>
+<tr><td><var>Param</var></td><td class="argdescr">- parameter IRI.</td></tr>
+<tr><td><var>Range</var></td><td class="argdescr">- parameter range IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="has_assignment/2"><b class="pred">has_assignment</b><var class="arglist">(?Param, ?Region)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Associates a parameter to an assignment.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Param</var></td><td class="argdescr">- parameter IRI.</td></tr>
+<tr><td><var>Region</var></td><td class="argdescr">- region IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="has_data_value/2"><b class="pred">has_data_value</b><var class="arglist">(?Entity, ?DataValue)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">A datatype property that encodes values from a datatype for an <var>Entity</var>.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- entity IRI.</td></tr>
+<tr><td><var>DataValue</var></td><td class="argdescr">- typed data value.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="has_time_interval/2"><b class="pred">has_time_interval</b><var class="arglist">(+Entity, ?Interval)</var></a> is <b class="det">semidet</b></dt><dd class="defbody"></dd>
+</dl>
+
+</body>
+</html>
