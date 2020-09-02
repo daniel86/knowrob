@@ -53,6 +53,19 @@ catkin_make</pre>
 You may further need to set the <b>SWI_HOME_DIR</b> environment variable to the installation location of <b>swipl</b>:</p>
 
 <pre class="code" ext="">
+export SWI_HOME_DIR=/usr/lib/swi-prolog</pre><pre class="code" ext="Bash">
+rosdep update
+cd ~/catkin_ws/src
+wstool merge https://raw.github.com/knowrob/knowrob/master/rosinstall/knowrob-base.rosinstall
+wstool update
+rosdep install --ignore-src --from-paths .
+cd ~/catkin_ws
+catkin_make</pre>
+
+<p>
+You may further need to set the <b>SWI_HOME_DIR</b> environment variable to the installation location of <b>swipl</b>:</p>
+
+<pre class="code" ext="">
 export SWI_HOME_DIR=/usr/lib/swi-prolog</pre>
 
 <h3 class="wiki">Launching</h3>
