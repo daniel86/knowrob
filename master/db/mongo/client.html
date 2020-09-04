@@ -18,6 +18,22 @@
 </dl>
 
 <dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_get_db/3"><b class="pred">mng_get_db</b><var class="arglist">(?DB, -CollectionName, +DBType)</var></a> is <b class="det">det</b></dt><dd class="defbody">Get db and collection for this type
+of data, e.g. triples
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>DB</var></td><td class="argdescr">- The database name</td></tr>
+<tr><td><var>CollectionNAme</var></td><td class="argdescr">- The Name of the collection for the type</td></tr>
+<tr><td><var>DBType</var></td><td class="argdescr">- </td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_collection/2"><b class="pred">mng_collection</b><var class="arglist">(+DB, ?Collection)</var></a> is <b class="det">det</b></dt><dd class="defbody">True iff <b><var>Collection</var></b> is an existing collection
 in the current <var>DB</var>.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_regex_prefix/2"><b class="pred">mng_regex_prefix</b><var class="arglist">(+Prefix, -Pattern)</var></a> is <b class="det">det</b></dt><dd class="defbody">Create a regex pattern for matching entries
@@ -36,6 +52,21 @@ with some prefix.
 
 </dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_cursor_next/2"><b class="pred">mng_cursor_next</b><var class="arglist">(+Cursor, ?Dict)</var></a> is <b class="det">semidet</b></dt><dd class="defbody"></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_index_create/3"><b class="pred">mng_index_create</b><var class="arglist">(+DB, +Collection, +Keys)</var></a> is <b class="det">det</b></dt><dd class="defbody">Creates search index.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>DB</var></td><td class="argdescr">- The database name</td></tr>
+<tr><td><var>Collection</var></td><td class="argdescr">- The collection name</td></tr>
+<tr><td><var>Keys</var></td><td class="argdescr">- List of keys for which an index shall be created</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_get_dict/3"><b class="pred">mng_get_dict</b><var class="arglist">(?Key, +Doc, ?PlValue)</var></a> is <b class="det">semidet</b></dt><dd class="defbody">Get a key-value pair from a dictionary, and map
 any data value to native Prolog types using <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=mng_pl_value/2">mng_pl_value/2</a>.</dd>
 <dt class="pubdef"><span style="float:right">&nbsp;</span><a name="mng_dump/2"><b class="pred">mng_dump</b><var class="arglist">(+DB, +Dir)</var></a> is <b class="det">det</b></dt><dd class="defbody">Dump mongo <var>DB</var>.</dd>
@@ -155,10 +186,10 @@ The following predicates are exported, but not or incorrectly documented.</p>
 <dl class="undoc">
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_cursor_materialize/2"><b class="pred">mng_cursor_materialize</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_cursor_filter/2"><b class="pred">mng_cursor_filter</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_export/1"><b class="pred">mng_export</b><var class="arglist">(Arg1)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_export_collection/2"><b class="pred">mng_export_collection</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
-<dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_remove/3"><b class="pred">mng_remove</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_export/1"><b class="pred">mng_export</b><var class="arglist">(Arg1)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_index_create/2"><b class="pred">mng_index_create</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_remove/3"><b class="pred">mng_remove</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_distinct_values/4"><b class="pred">mng_distinct_values</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_db_name/1"><b class="pred">mng_db_name</b><var class="arglist">(Arg1)</var></a></dt>
 <dt class="undoc"><span style="float:right">&nbsp;</span><a name="mng_update/4"><b class="pred">mng_update</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4)</var></a></dt>

@@ -53,19 +53,6 @@ catkin_make</pre>
 You may further need to set the <b>SWI_HOME_DIR</b> environment variable to the installation location of <b>swipl</b>:</p>
 
 <pre class="code" ext="">
-export SWI_HOME_DIR=/usr/lib/swi-prolog</pre><pre class="code" ext="Bash">
-rosdep update
-cd ~/catkin_ws/src
-wstool merge https://raw.github.com/knowrob/knowrob/master/rosinstall/knowrob-base.rosinstall
-wstool update
-rosdep install --ignore-src --from-paths .
-cd ~/catkin_ws
-catkin_make</pre>
-
-<p>
-You may further need to set the <b>SWI_HOME_DIR</b> environment variable to the installation location of <b>swipl</b>:</p>
-
-<pre class="code" ext="">
 export SWI_HOME_DIR=/usr/lib/swi-prolog</pre>
 
 <h3 class="wiki">Launching</h3>
@@ -166,7 +153,7 @@ More complete information about reasoning in KnowRob can be found
 
 <ul>
 <li>Sourcecode documentation is available <a href="https://knowrob.github.io/knowrob/">here</a></li>
-<li>A blog and more wiki pages are avaiabale at: <a href="http://www.knowrob.org">http://www.knowrob.org</a></li>
+<li>A blog and more wiki pages are avaiabale at <a href="http://www.knowrob.org">knowrob.org</a></li>
 </ul>
 
 <h2 class="wiki subdirs">Sub directories</h2>
