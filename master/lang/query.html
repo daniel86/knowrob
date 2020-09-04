@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>query.pl -- Main interface predicates for querying the knowledge base.</title>
+
+<link rel="stylesheet" type="text/css" href="../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>query.pl -- Main interface predicates for querying the knowledge base.</h1>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Daniel Beßler</dd>
+<dt class="keyword-license">license</dt><dd class="keyword-license">- BSD</dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ask/1"><b class="pred">ask</b><var class="arglist">(+Statement)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Same as <a href="query.html#ask/2">ask/2</a> with wildcard scope.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Statement</var></td><td class="argdescr">- a statement term.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="ask/2"><b class="pred">ask</b><var class="arglist">(+Statement, +Scope)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True if <var>Statement</var> term holds within the requested scope.
+<var>Scope</var> is a term <code>[Options,QueryScope]-&gt;FactScope</code> where QueryScope
+is the scope requested, and FactScope the actual scope
+of the statement being true.
+<var>Statement</var> can also be a list of statements.
+
+<p>
+<a href="query.html#ask/2">ask/2</a> is a multifile predicate. Meaning that clauses may be
+decalared in multiple files.
+Specifically, declaring a rule using the ask operator <code>?&gt;</code>,
+or the ask-tell operator <code>?+&gt;</code> will generate a clause of the ask rule.</p>
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Statement</var></td><td class="argdescr">- a statement term.</td></tr>
+<tr><td><var>Scope</var></td><td class="argdescr">- the scope of the statement.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="tell/1"><b class="pred">tell</b><var class="arglist">(+Statement)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Same as <a href="query.html#tell/2">tell/2</a> with universal scope.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Statement</var></td><td class="argdescr">- a statement term.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="multidef"><span style="float:right">&nbsp;</span><a name="tell/2"><b class="pred">tell</b><var class="arglist">(+Statement, +Scope)</var></a> is <b class="det">det</b><span class="anot" style="float:right">[multifile]</span></dt><dd class="defbody">Tell the knowledge base that some statement is true.
+<var>Scope</var> is a term <code>[Options,FactScope]</code> where FactScope
+the scope of the statement being true.
+<var>Statement</var> can also be a list of statements.
+
+<p>
+<a href="query.html#tell/2">tell/2</a> is a multifile predicate. Meaning that clauses may be
+decalared in multiple files.
+Specifically, declaring a rule using the tell operator <code>+&gt;</code>,
+or the ask-tell operator <code>?+&gt;</code> will generate a clause of the tell rule.</p>
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Statement</var></td><td class="argdescr">- a statement term.</td></tr>
+<tr><td><var>Scope</var></td><td class="argdescr">- the scope of the statement.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="update/1"><b class="pred">update</b><var class="arglist">(+Statement)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Same as <a class="builtin" href="http://www.swi-prolog.org/pldoc/man?predicate=tell/1">tell/1</a> but replaces existing overlapping values.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Statement</var></td><td class="argdescr">- a statement term.</td></tr>
+<tr><td><var>Scope</var></td><td class="argdescr">- the scope of the statement.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="update/2"><b class="pred">update</b><var class="arglist">(+Statement, +Scope)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Same as <a href="query.html#tell/2">tell/2</a> but replaces existing overlapping values.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Statement</var></td><td class="argdescr">- a statement term.</td></tr>
+<tr><td><var>Scope</var></td><td class="argdescr">- the scope of the statement.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+</dl>
+
+<h2 class="undoc">Undocumented predicates</h2>
+
+<p>
+The following predicates are exported, but not or incorrectly documented.</p>
+
+<dl class="undoc">
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="is_synchronized/1"><b class="pred">is_synchronized</b><var class="arglist">(Arg1)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="synchronize/1"><b class="pred">synchronize</b><var class="arglist">(Arg1)</var></a></dt>
+</dl>
+
+</body>
+</html>

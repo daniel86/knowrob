@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SOMA</title>
+
+<link rel="stylesheet" type="text/css" href="../../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="dir">SOMA</h1>
+
+<h2 class="wiki plfiles">Prolog files</h2>
+
+<table class="summary">
+<tr><th colspan="3" class="file"><span style="float:left"><a href="ACT.html">ACT.pl</a></span>&nbsp; -- Interface predicates for EASE-ACT model.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="ACT.html#action_active/1">action_active/1</a></td><td class="summary">Set the execution status of an action to 'active'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="ACT.html#action_cancelled/1">action_cancelled/1</a></td><td class="summary">Set the execution status of an action to 'cancelled'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="ACT.html#action_failed/1">action_failed/1</a></td><td class="summary">Set the execution status of an action to 'failed'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="ACT.html#action_paused/1">action_paused/1</a></td><td class="summary">Set the execution status of an action to 'paused'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="ACT.html#action_pending/1">action_pending/1</a></td><td class="summary">Set the execution status of an action to 'planning'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="ACT.html#action_status/2">action_status/2</a></td><td class="summary">Relates an action to its execution status.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="ACT.html#action_succeeded/1">action_succeeded/1</a></td><td class="summary">Set the execution status of an action to 'succeeded'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="ACT.html#has_subevent/2">has_subevent/2</a></td><td class="summary"></td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="ACT.html#is_manipulation_action/1">is_manipulation_action/1</a></td><td class="summary">True iff Entity is an instance of soma:'ManipulationAction'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="ACT.html#is_mental_action/1">is_mental_action/1</a></td><td class="summary">True iff Entity is an instance of soma:'MentalAction'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="ACT.html#is_mental_task/1">is_mental_task/1</a></td><td class="summary">True iff Entity is an instance of soma:'MentalTask'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="ACT.html#is_performed_by/2">is_performed_by/2</a></td><td class="summary">Relates an action to the agent that performs it.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="ACT.html#is_physical_task/1">is_physical_task/1</a></td><td class="summary">True iff Entity is an instance of soma:'PhysicalTask'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="ACT.html#task_effect/2">task_effect/2</a></td><td class="summary">Relates an action or task to roles that imply change, and that need to be taken by some object when the task is executed.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="EXT.html">EXT.pl</a></span><span style="float:right"></span></th></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="IO.html">IO.pl</a></span>&nbsp; -- ....<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="IO.html#is_computational_agent/1">is_computational_agent/1</a></td><td class="summary">True iff Entity is an instance of soma:'ComputationalAgent'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="IO.html#is_digital_object/1">is_digital_object/1</a></td><td class="summary">True iff Entity is an instance of soma:'DigitalObject'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="OBJ.html">OBJ.pl</a></span>&nbsp; -- Interface predicates for EASE-OBJ model.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="OBJ.html#disposition_trigger_type/2">disposition_trigger_type/2</a></td><td class="summary">Relates a disposition to the type of objects that can be the trigger of the disposition.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#has_disposition/2">has_disposition/2</a></td><td class="summary">Relates an object to its dispositions.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#is_affordance/1">is_affordance/1</a></td><td class="summary">True iff Entity is an instance of soma:'Affordance'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#is_destination/1">is_destination/1</a></td><td class="summary">True iff Entity is an instance of soma:'Destination'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#is_disposition/1">is_disposition/1</a></td><td class="summary">True iff Entity is an instance of soma:'Disposition'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#is_extrinsic/1">is_extrinsic/1</a></td><td class="summary">True iff Entity is an instance of soma:'Extrinsic'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#is_feature/1">is_feature/1</a></td><td class="summary">True iff Entity is an instance of soma:'Feature'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#is_instrument/1">is_instrument/1</a></td><td class="summary">True iff Entity is an instance of soma:'Instrument'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#is_intrinsic/1">is_intrinsic/1</a></td><td class="summary">True iff Entity is an instance of soma:'Intrinsic'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#is_location/1">is_location/1</a></td><td class="summary">True iff Entity is an instance of soma:'Location'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#is_origin/1">is_origin/1</a></td><td class="summary">True iff Entity is an instance of soma:'Origin'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#is_patient/1">is_patient/1</a></td><td class="summary">True iff Entity is an instance of soma:'Patient'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#is_physical_quality/1">is_physical_quality/1</a></td><td class="summary">True iff Entity is an instance of soma:'PhysicalQuality'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#is_social_quality/1">is_social_quality/1</a></td><td class="summary">True iff Entity is an instance of soma:'SocialQuality'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#object_color_rgb/2">object_color_rgb/2</a></td><td class="summary">True if Col is the main color of Obj.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#object_dimensions/4">object_dimensions/4</a></td><td class="summary">True if Depth x Width x Height are (exactly) the extends of the bounding box of Obj.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#object_feature/2">object_feature/2</a></td><td class="summary">Associates an object resource to features it hosts.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#object_localization/2">object_localization/2</a></td><td class="summary">Relates an object to its localization quality.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#object_mesh_path/2">object_mesh_path/2</a></td><td class="summary">True if FilePath is a path to a mesh file (stl or dae) for Obj.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#object_shape/3">object_shape/3</a></td><td class="summary">Relates objects to shapes and their origin (usually a pose relative to the object).</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="OBJ.html#object_shape_type/2">object_shape_type/2</a></td><td class="summary">Relates an object to the type of its <code>shape(s)</code>.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="PROC.html">PROC.pl</a></span>&nbsp; -- Interface predicates for EASE-PROC model.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="PROC.html#is_chemical_process/1">is_chemical_process/1</a></td><td class="summary">True iff Entity is an instance of soma:'ChemicalProcess'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="PROC.html#is_force_interaction/1">is_force_interaction/1</a></td><td class="summary">True iff Entity is an instance of soma:'ForceInteraction'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="PROC.html#is_motion/1">is_motion/1</a></td><td class="summary">True iff Entity is an instance of soma:'Motion'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="PROC.html#is_physical_process/1">is_physical_process/1</a></td><td class="summary">True iff Entity is an instance of soma:'PhysicalProcess'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="PROC.html#is_process_flow/1">is_process_flow/1</a></td><td class="summary">True iff Entity is an instance of soma:'ProcessFlow'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="PROC.html#is_process_type/1">is_process_type/1</a></td><td class="summary">True iff Entity is an instance of soma:'ProcessType'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="PROC.html#is_progression/1">is_progression/1</a></td><td class="summary">True iff Entity is an instance of soma:'Progression'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="STATE.html">STATE.pl</a></span>&nbsp; -- Interface predicates for EASE-STATE model.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="STATE.html#is_configuration/1">is_configuration/1</a></td><td class="summary">True iff Entity is an instance of soma:'Configuration'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="STATE.html#is_physical_state/1">is_physical_state/1</a></td><td class="summary">True iff Entity is an instance of soma:'PhysicalState'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="STATE.html#is_social_state/1">is_social_state/1</a></td><td class="summary">True iff Entity is an instance of soma:'SocialState'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="STATE.html#is_state/1">is_state/1</a></td><td class="summary">True iff Entity is an instance of soma:'State'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="STATE.html#is_state_type/1">is_state_type/1</a></td><td class="summary">True iff Entity is an instance of soma:'StateType'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="WF.html">WF.pl</a></span>&nbsp; -- Interface predicates for EASE-WF model.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="WF.html#is_binding/1">is_binding/1</a></td><td class="summary">True iff Entity is an instance of soma:'Binding'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="WF.html#is_succeedence/1">is_succeedence/1</a></td><td class="summary">True iff Entity is an instance of soma:'Succeedence'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="WF.html#plan_defines_task/2">plan_defines_task/2</a></td><td class="summary">Relates a plan to the task it defines.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="WF.html#workflow_constituent/2">workflow_constituent/2</a></td><td class="summary"></td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="WF.html#workflow_first_step/2">workflow_first_step/2</a></td><td class="summary">Relates a workflow to the dedicated first step of it.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="WF.html#workflow_role_range/3">workflow_role_range/3</a></td><td class="summary">Relates a workflow to roles of objects defined by the tasks of the workflow, and also infers the required type for fillers of the role.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="__init__.html">__init__.pl</a></span><span style="float:right"></span></th></tr>
+</table>
+
+</body>
+</html>

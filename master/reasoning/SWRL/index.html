@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SWRL</title>
+
+<link rel="stylesheet" type="text/css" href="../../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="wiki">swrlprolog</h1>
+
+<p>
+Implementation of a Semantic Web Rule Language (SWRL) reasoner in a set of Prolog rules.
+SWRL rules are either described in RDF concrete syntax, or using a custom file
+format.</p>
+
+<h2 class="wiki plfiles">Prolog files</h2>
+
+<table class="summary">
+<tr><th colspan="3" class="file"><span style="float:left"><a href="__init__.html">__init__.pl</a></span><span style="float:right"></span></th></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="parser.html">parser.pl</a></span>&nbsp; -- Prolog-based SWRL representation.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="parser.html#swrl_file_parse/3">swrl_file_parse/3</a></td><td class="summary">Parses a SWRL file.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="parser.html#swrl_phrase_assert/2">swrl_phrase_assert/2</a></td><td class="summary">Assert SWRL rule in human readable Syntax as native Prolog <code>rule(s)</code>.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="parser.html#swrl_file_load/1">swrl_file_load/1</a></td><td class="summary">Loads all or one <code>rule(s)</code> from a SWRL file.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="parser.html#swrl_file_unload/1">swrl_file_unload/1</a></td><td class="summary">Unload previously loaded SWRL file, retracting all the rules that have been asserted so far.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="swrl.html">swrl.pl</a></span>&nbsp; -- Prolog-based SWRL representation.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="swrl.html#swrl_assert/1">swrl_assert/1</a></td><td class="summary">Assert SWRL rule in the Prolog KB.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+</table>
+
+</body>
+</html>

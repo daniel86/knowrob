@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>temporal.pl -- Temporally scoped statements.</title>
+
+<link rel="stylesheet" type="text/css" href="../../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>temporal.pl -- Temporally scoped statements.</h1>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Daniel Beßler</dd>
+<dt class="keyword-license">license</dt><dd class="keyword-license">- BSD</dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="time_scope_data/2"><b class="pred">time_scope_data</b><var class="arglist">(+Scope, ?IntervalData)</var></a> is <b class="det">det</b></dt><dd class="defbody">Read since/until pair of temporal scope.
+Note that vars are used in case since or until
+not known.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Scope</var></td><td class="argdescr">- A scope dict.</td></tr>
+<tr><td><var>IntervalData</var></td><td class="argdescr">- A list [Since,Until].</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="time_scope_universal/1"><b class="pred">time_scope_universal</b><var class="arglist">(-Scope)</var></a> is <b class="det">det</b></dt><dd class="defbody">From begin of time until its end.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Scope</var></td><td class="argdescr">- A scope dict.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="time_scope_now/1"><b class="pred">time_scope_now</b><var class="arglist">(-Scope)</var></a> is <b class="det">det</b></dt><dd class="defbody">A scope that matches the current time.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Scope</var></td><td class="argdescr">- A scope dict.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="time_subscope_of/2"><b class="pred">time_subscope_of</b><var class="arglist">(+A, +B)</var></a> is <b class="det">semidet</b></dt><dd class="defbody">All statements in <var>A</var> are also included in <var>B</var>.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>A</var></td><td class="argdescr">- <var>A</var> scope dict.</td></tr>
+<tr><td><var>B</var></td><td class="argdescr">- <var>A</var> scope dict.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="time_scope_merge/3"><b class="pred">time_scope_merge</b><var class="arglist">(+A, +B, -Merged)</var></a> is <b class="det">semidet</b></dt><dd class="defbody"><var>Merged</var> is the scope containing all statements from
+scope <var>A</var> and scope <var>B</var>, where <var>A</var> and <var>B</var> overlap
+(merge not possible if disjoint).
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>A</var></td><td class="argdescr">- <var>A</var> scope dict.</td></tr>
+<tr><td><var>B</var></td><td class="argdescr">- <var>A</var> scope dict.</td></tr>
+<tr><td><var>Merged</var></td><td class="argdescr">- <var>A</var> scope dict.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="time_scope_merge/3"><b class="pred">time_scope_merge</b><var class="arglist">(+A, +B, -Intersection)</var></a> is <b class="det">semidet</b></dt><dd class="defbody">Modify <var>A</var> such that it only contains time instants
+that are also contained in <var>B</var>.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>A</var></td><td class="argdescr">- <var>A</var> scope dict.</td></tr>
+<tr><td><var>B</var></td><td class="argdescr">- <var>A</var> scope dict.</td></tr>
+<tr><td><var>Intersection</var></td><td class="argdescr">- <var>A</var> scope dict.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="time_scope/3"><b class="pred">time_scope</b><var class="arglist">(+Since, +Until, -Scope)</var></a> is <b class="det">det</b></dt><dd class="defbody"></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="time_scope/5"><b class="pred">time_scope</b><var class="arglist">(+Since, +Op1, +Until, +Op2, -Scope)</var></a> is <b class="det">det</b></dt><dd class="defbody">Create a new scope dcitionary from given arguments.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Since</var></td><td class="argdescr">- The since time.</td></tr>
+<tr><td><var>Op1</var></td><td class="argdescr">- The operator for since time.</td></tr>
+<tr><td><var>Until</var></td><td class="argdescr">- The until time.</td></tr>
+<tr><td><var>Op2</var></td><td class="argdescr">- The operator for until time.</td></tr>
+<tr><td><var>Scope</var></td><td class="argdescr">- A scope dict.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+</dl>
+
+<h2 class="undoc">Undocumented predicates</h2>
+
+<p>
+The following predicates are exported, but not or incorrectly documented.</p>
+
+<dl class="undoc">
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="time_scope_intersect/3"><b class="pred">time_scope_intersect</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+</dl>
+
+</body>
+</html>

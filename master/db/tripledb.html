@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>tripledb.pl -- Interface for loading, storing, and retrieving triple data.</title>
+
+<link rel="stylesheet" type="text/css" href="../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>tripledb.pl -- Interface for loading, storing, and retrieving triple data.</h1>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Daniel Beßler</dd>
+<dt class="keyword-license">license</dt><dd class="keyword-license">- BSD</dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="tripledb_load/1"><b class="pred">tripledb_load</b><var class="arglist">(+URL)</var></a> is <b class="det">det</b></dt><dd class="defbody">Same as <a href="tripledb.html#tripledb_load/2">tripledb_load/2</a> with empty Options list.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>URL</var></td><td class="argdescr">- <var>URL</var> of a RDF file.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="tripledb_load/2"><b class="pred">tripledb_load</b><var class="arglist">(+URL, +Options)</var></a> is <b class="det">semidet</b></dt><dd class="defbody">Same as <a href="tripledb.html#tripledb_load/3">tripledb_load/3</a> with universal scope,
+and graph name argument as given in the options list
+or "user" if none is given.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>URL</var></td><td class="argdescr">- <var>URL</var> of a RDF file.</td></tr>
+<tr><td><var>Options</var></td><td class="argdescr">- List of options.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="tripledb_load/3"><b class="pred">tripledb_load</b><var class="arglist">(+URL, +Scope, +Graph)</var></a> is <b class="det">semidet</b></dt><dd class="defbody">Load RDF data from file, and assert it into
+the triple DB using the scope provided, and
+into the graph with the name provided.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>URL</var></td><td class="argdescr">- <var>URL</var> of a RDF file.</td></tr>
+<tr><td><var>Scope</var></td><td class="argdescr">- The subject of a triple.</td></tr>
+<tr><td><var>Graph</var></td><td class="argdescr">- The graph name.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="tripledb_tell/4"><b class="pred">tripledb_tell</b><var class="arglist">(?S, ?P, ?O, +Scope)</var></a> is <b class="det">semidet</b></dt><dd class="defbody">Same as <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=tripledb_tell/5">tripledb_tell/5</a> but uses universal
+scope, and an empty options list.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>S</var></td><td class="argdescr">- The subject of a triple.</td></tr>
+<tr><td><var>P</var></td><td class="argdescr">- The predicate of a triple.</td></tr>
+<tr><td><var>O</var></td><td class="argdescr">- The object or data value of a triple.</td></tr>
+<tr><td><var>Scope</var></td><td class="argdescr">- The scope of the new triple.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="tripledb_tell/3"><b class="pred">tripledb_tell</b><var class="arglist">(?S, ?P, ?O)</var></a> is <b class="det">semidet</b></dt><dd class="defbody">Same as <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=tripledb_tell/5">tripledb_tell/5</a> but uses universal
+scope, and an empty options list.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>S</var></td><td class="argdescr">- The subject of a triple.</td></tr>
+<tr><td><var>P</var></td><td class="argdescr">- The predicate of a triple.</td></tr>
+<tr><td><var>O</var></td><td class="argdescr">- The object or data value of a triple.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="tripledb_forget/4"><b class="pred">tripledb_forget</b><var class="arglist">(?S, ?P, ?O, +Scope)</var></a> is <b class="det">semidet</b></dt><dd class="defbody">Same as <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=tripledb_forget/5">tripledb_forget/5</a> but uses an empty options list.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>S</var></td><td class="argdescr">- The subject of a triple.</td></tr>
+<tr><td><var>P</var></td><td class="argdescr">- The predicate of a triple.</td></tr>
+<tr><td><var>O</var></td><td class="argdescr">- The object or data value of a triple.</td></tr>
+<tr><td><var>Scope</var></td><td class="argdescr">- The scope of considered triples.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="tripledb_forget/3"><b class="pred">tripledb_forget</b><var class="arglist">(?S, ?P, ?O)</var></a> is <b class="det">semidet</b></dt><dd class="defbody">Same as <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=tripledb_forget/5">tripledb_forget/5</a> but uses wildcard
+scope, and an empty options list.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>S</var></td><td class="argdescr">- The subject of a triple.</td></tr>
+<tr><td><var>P</var></td><td class="argdescr">- The predicate of a triple.</td></tr>
+<tr><td><var>O</var></td><td class="argdescr">- The object or data value of a triple.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="tripledb_ask/5"><b class="pred">tripledb_ask</b><var class="arglist">(?S, ?P, ?O, +QScope, -FScope)</var></a> is <b class="det">semidet</b></dt><dd class="defbody">Same as <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=tripledb_ask/6">tripledb_ask/6</a> but uses an empty options list.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>S</var></td><td class="argdescr">- The subject of a triple.</td></tr>
+<tr><td><var>P</var></td><td class="argdescr">- The predicate of a triple.</td></tr>
+<tr><td><var>O</var></td><td class="argdescr">- The object or data value of a triple.</td></tr>
+<tr><td><var>QScope</var></td><td class="argdescr">- The scope of requested triples.</td></tr>
+<tr><td><var>FScope</var></td><td class="argdescr">- The scope of the retrieved triple.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="tripledb_ask/3"><b class="pred">tripledb_ask</b><var class="arglist">(?S, ?P, ?O)</var></a> is <b class="det">semidet</b></dt><dd class="defbody">Same as <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=tripledb_ask/6">tripledb_ask/6</a> but uses wildcard
+scope, and an empty options list.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>S</var></td><td class="argdescr">- The subject of a triple.</td></tr>
+<tr><td><var>P</var></td><td class="argdescr">- The predicate of a triple.</td></tr>
+<tr><td><var>O</var></td><td class="argdescr">- The object or data value of a triple.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+</dl>
+
+<h2 class="undoc">Undocumented predicates</h2>
+
+<p>
+The following predicates are exported, but not or incorrectly documented.</p>
+
+<dl class="undoc">
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="tripledb_import/1"><b class="pred">tripledb_import</b><var class="arglist">(Arg1)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="tripledb_export/1"><b class="pred">tripledb_export</b><var class="arglist">(Arg1)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="tripledb_drop/0"><b class="pred">tripledb_drop</b></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="tripledb_cache_invalidate/1"><b class="pred">tripledb_cache_invalidate</b><var class="arglist">(Arg1)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="tripledb_init/0"><b class="pred">tripledb_init</b></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="tripledb_cache_add/3"><b class="pred">tripledb_cache_add</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="tripledb_cache_get/3"><b class="pred">tripledb_cache_get</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="tripledb_bulk_tell/3"><b class="pred">tripledb_bulk_tell</b><var class="arglist">(Arg1, Arg2, Arg3)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="tripledb_tell/5"><b class="pred">tripledb_tell</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4, Arg5)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="tripledb_forget/5"><b class="pred">tripledb_forget</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4, Arg5)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="tripledb_ask/6"><b class="pred">tripledb_ask</b><var class="arglist">(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6)</var></a></dt>
+</dl>
+
+</body>
+</html>

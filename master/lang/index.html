@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>lang</title>
+
+<link rel="stylesheet" type="text/css" href="../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="wiki">KnowRob Language</h1>
+
+<p>
+The KnowRob language is mainly made of two predicates: <code>ask/2</code> and <code>tell/2</code>.
+Their first argument is a language term (such as <code>holds/3</code>),
+and their second argument is a contextual parameter used
+to handle scoped statements and questions.</p>
+
+<h3 class="wiki">Language terms</h3>
+
+<p>
+The binary operators
+<code>?&gt;</code> (ask operator) and
+<code>+&gt;</code> (tell operator) are used to declare language terms, and
+how they are hooked into the ask and tell predicates respectively.
+Syntactically, these declarations are similar to regular Prolog rules,
+which, instead, use the operator <code>:-</code>.
+When such a declaration appears in a module, the code is
+expanded into additional clauses of the ask and tell predicates.
+A regular Prolog rule is also generated, but the body of the rule
+is replaced with a call of the ask or tell predicate with the respective
+term as argument.</p>
+
+<p>
+Each call within the body of such a rule is expanded to a call of
+the ask or tell predicate instead where the language term argument
+is instantiated to the term called in the original body of the rule.
+So if we write, for example, <code>is_object(OBJ)</code> on the right-hand side
+of an ask rule, it is internally expanded to <code>ask(is_object(OBJ),Context)</code>.
+In the case of a tell rule, above expression would expand to
+<code>tell(is_object(OBJ),Context)</code>, which is also meaningful.
+In such a case, where ask and tell rules can be declared identical
+within the ask and tell operators, one can also use the ask-tell operator
+<code>?+&gt;</code> which expands into both cases to avoid code redundancy.</p>
+
+<p>
+KnowRob pre-defines some general language terms that are used to relate entities
+in the knowledge base to each other,
+or to assign data properties to them.
+These are:</p>
+
+<table class="wiki">
+<tr><td>Term</td><td>Description</td></tr>
+<tr><td><code>triple/3</code></td><td>Triple data in the triple store</td></tr>
+<tr><td><code>holds/3</code></td><td>A relation between entities, or a data property of an entitiy</td></tr>
+<tr><td><code>is_a/2</code></td><td>A taxonomical relation between entities and classes</td></tr>
+<tr><td><code>instance_of/2</code></td><td>The type-of relationship between entities and classes</td></tr>
+<tr><td><code>subclass_of/2</code></td><td>The subclass-of relationship</td></tr>
+<tr><td><code>subproperty_of/2</code></td><td>The subproperty-of relationship</td></tr>
+<tr><td><code>occurs/1</code></td><td>An event occurence</td></tr>
+<tr><td><code>is_at/2</code></td><td>A spatial relation between entities and locations</td></tr>
+<tr><td><code>transitive/1</code></td><td>A transitive relation between entities</td></tr>
+</table>
+
+<h3 class="wiki">Scoped questions and statements</h3>
+
+<p>
+Another aspect of these operators is that they hide the contextual
+argument from the declaration (above: the <var>Context</var> argument of predicates).
+This is handy for declaring context-invariant rules.
+However, rules may be written that retrieve or update the context hidden
+in the operator.
+This is possible through a DSL that is designed to interact
+with the hidden context argument.</p>
+
+<p>
+Within tell rules, context is a tuple of
+fact scope (also called statement scope), and configuration.
+The scope of the statement restricts the context
+in which the statement is true, for example,
+that some statement is true after some event has happened.
+The scope must be instantiated before calling the tell predicate.
+Statements in tell rules expand into scoped assertions in the triple store.
+Within ask rules, on the other hand, context has an additional
+query scope (also called question scope).
+Question scopes are used to restrict the scope
+of considered statements to statements with overlapping
+scopes to the one provided.
+The ask rule instantiates the statement scope to some scope
+within which the given statement is true, if any.
+In case of the term expands into a conjunctive query,
+the statament scope is instantiated to the intersection
+of individual statement scopes (if the intersection is not empty).</p>
+
+<p>
+Special scoping language terms are used to restrict the scope
+within a nested term. Restrictions of the scope will allways be passed
+through to child terms, hence the scoping is done in the outer term such as
+in <code>since(holds(S,P,O),Time)</code>. As these terms are usually defined as operators,
+one can also write, for example, <code>holds(S,P,O) since Time</code>.
+Generally, scoping terms are nested terms where another language term is
+called with an updated scope.
+In the case of ask-rules, scoping predicates will modify the question scope,
+while, in the case of tell-rules, the statement scope is modified.</p>
+
+<p>
+KnowRob pre-defines a time scope, and the following time-scoping terms:</p>
+
+<table class="wiki">
+<tr><td>Term</td><td>Description</td></tr>
+<tr><td><code>during/2</code></td><td>The time frame in which a statement holds</td></tr>
+<tr><td><code>since/2</code></td><td>The begin time of a statement being true</td></tr>
+<tr><td><code>until/2</code></td><td>The end time of a statement being true</td></tr>
+</table>
+
+<h2 class="wiki subdirs">Sub directories</h2>
+
+<table class="subdirs">
+<tr><td><a class="subdir" href="scopes/index.html">[dir] scopes</a></td></tr>
+<tr><td><a class="subdir" href="terms/index.html">[dir] terms</a></td></tr>
+</table>
+
+<h2 class="wiki plfiles">Prolog files</h2>
+
+<table class="summary">
+<tr><th colspan="3" class="file"><span style="float:left"><a href="__init__.html">__init__.pl</a></span><span style="float:right"></span></th></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="computable.html">computable.pl</a></span>&nbsp; -- Loading of computable predicates used to compute relations and data values.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="computable.html#(computables)/1">computables/1</a></td><td class="summary">Register a list of comutable predicates.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="designator.html">designator.pl</a></span>&nbsp; -- Implementation of entity designators.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="designator.html#has_designator/2">has_designator/2</a></td><td class="summary">Find entities denoted by some designator.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="designator.html#is_designator/1">is_designator/1</a></td><td class="summary">True for instantiated designators.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="export.html">export.pl</a></span>&nbsp; -- Interface for dumping knowledge and restoring it.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="export.html#memorize/1">memorize/1</a></td><td class="summary">Store knowledge into given directory.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="export.html#remember/1">remember/1</a></td><td class="summary">Restore memory previously stored into given directory.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="query.html">query.pl</a></span>&nbsp; -- Main interface predicates for querying the knowledge base.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="query.html#ask/1">ask/1</a></td><td class="summary">Same as <a href="query.html#ask/2">ask/2</a> with wildcard scope.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="query.html#ask/2">ask/2</a></td><td class="summary">True if Statement term holds within the requested scope.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="query.html#tell/1">tell/1</a></td><td class="summary">Same as <a href="query.html#tell/2">tell/2</a> with universal scope.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="query.html#tell/2">tell/2</a></td><td class="summary">Tell the knowledge base that some statement is true.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="query.html#update/1">update/1</a></td><td class="summary">Same as <a class="builtin" href="http://www.swi-prolog.org/pldoc/man?predicate=tell/1">tell/1</a> but replaces existing overlapping values.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="query.html#update/2">update/2</a></td><td class="summary">Same as <a href="query.html#tell/2">tell/2</a> but replaces existing overlapping values.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+</table>
+
+</body>
+</html>

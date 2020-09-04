@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ros</title>
+
+<link rel="stylesheet" type="text/css" href="../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="wiki">knowrob_comm</h1>
+
+<p>
+Communication interfaces that are used to handle messages in the knowledge base.
+In particular, these are interfaces to the ROS ecosystem and an internal messaging system
+used to notify components of the knowledge base.</p>
+
+<h3 class="wiki">object_state_publisher.py</h3>
+
+<p>
+An additional script is provided that is used to publish
+object transforms on the ROS tf topic along with
+marker visualization messages.
+This is realized as a rosprolog client that
+initially loads all known objects, and
+provides a service to mark objects as "dirty" which causes
+the script to reload the dirty objects, and
+to republish tf and marker visualization messages.</p>
+
+<p>
+You can run the publisher with:</p>
+
+<pre class="code">
+rosrun knowrob object_state_publisher.py</pre>
+
+<h2 class="wiki subdirs">Sub directories</h2>
+
+<table class="subdirs">
+<tr><td><a class="subdir" href="urdf/index.html">[dir] urdf</a></td></tr>
+</table>
+
+<h2 class="wiki plfiles">Prolog files</h2>
+
+<table class="summary">
+<tr><th colspan="3" class="file"><span style="float:left"><a href="__init__.html">__init__.pl</a></span><span style="float:right"></span></th></tr>
+</table>
+
+</body>
+</html>
