@@ -106,9 +106,7 @@ marker_message(marker(add,ID,Term,Parameters),
 		[Action,ID0,Type,Pose,Scale,Color,Mesh,Text]) :-
 	%% get marker data
 	get_marker_scope(Parameters,Scope),
-	print_message(warning, '\n\n\nstart testing: marker plugin......................\n'),
 	marker_message1(Term,[[],Scope]->_,ID->ID0,Data0),
-	print_message(warning, 'marker messge successfull......................\n\n\n'),
 	%% overwrite parameters
 	merge_options(Parameters,Data0,Data),
 	%%
