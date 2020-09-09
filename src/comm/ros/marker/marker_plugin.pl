@@ -135,20 +135,15 @@ marker_message(marker(delete,ID,_,_),[Action,ID]) :-
 %%
 marker_message1(MarkerData,_,ID->ID,MarkerData) :-
 	is_list(MarkerData),
-	print_message(warning, is_list(MarkerData)),
 	!.
 
 marker_message1(Object,Scope,_->ID,MarkerData) :-
 	atom(Object),
-	print_message(warning, atom(Object)),
 	object_marker(Object,Scope,ID,MarkerData).
-%	print_message(warning, object_marker(Object,Scope,ID,MarkerData)).
 
 marker_message1(MarkerTerm,Scope,ID->ID,MarkerData) :-
 	compound(MarkerTerm),
-	print_message(warning, compound(MarkerTerm)),
 	marker_factory(MarkerTerm,Scope,MarkerData),
-	print_message(warning, marker_factory(MarkerTerm,Scope,MarkerData)),
 	!.
 
 %%
