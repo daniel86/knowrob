@@ -34,9 +34,9 @@ object_marker1(
 	  scale(Scale),
 	  color(RGBA)
 	]) :-
-	(  (file_name_extension(_, stl, MeshPath))
-	-> (object_marker_rgba(Obj,RGBA))
-	;  (RGBA=[0,0,0,0])
+	(  file_name_extension(_, stl, MeshPath)
+	-> object_marker_rgba(Obj,RGBA)
+	;  RGBA=[0,0,0,0]
 	).
 
 object_marker1(

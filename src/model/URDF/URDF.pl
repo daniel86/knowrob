@@ -296,7 +296,7 @@ has_parent_link(Joint,Link) ?+>
 % 
 object_shape(Obj,ShapeTerm,Origin) ?>
 	has_base_link_name(Obj,BaseName),
-	{ get_object_shape_(Obj,BaseName,ShapeTerm,Origin)}.
+	{ get_object_shape_(Obj,BaseName,ShapeTerm,Origin) }.
 
 %%
 get_object_shape_(Obj,BaseName,ShapeTerm,[Frame,Pos,Rot]) :-
