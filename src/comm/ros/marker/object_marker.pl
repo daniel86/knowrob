@@ -20,8 +20,12 @@ object_marker(Obj,Scope,
 	| MarkerData
 	]) :-
 	catch((
+	    print_message(warning, 'inside obj marker pl.............\n'),
+	    print_message(warning, object_shape(Obj,Shape,ShapeOrigin)),
 		ask(object_shape(Obj,Shape,ShapeOrigin),Scope),
 		ShapeOrigin=[MarkerID,_,_],
+		print_message(warning, 'before object marker 1.................'),
+		print_message(warning, object_marker1(Shape,Obj,MarkerData)),
 		object_marker1(Shape,Obj,MarkerData)),
 		Exc,
 		(log_error(Exc),fail)
@@ -34,9 +38,10 @@ object_marker1(
 	  scale(Scale),
 	  color(RGBA)
 	]) :-
-	(  file_name_extension(_, stl, MeshPath)
-	-> object_marker_rgba(Obj,RGBA)
-	;  RGBA=[0,0,0,0]
+	print_message(warning, 'inside object marker 1.................'),
+	(  (file_name_extension(_, stl, MeshPath), print_message(warning, file_name_extension(_, stl, MeshPath)))
+	-> (object_marker_rgba(Obj,RGBA), print_message(warning,  object_marker_rgba(Obj,RGBA)))
+	;  (RGBA=[0,0,0,0], print_message(warning, RGBA=[0,0,0,0]))
 	).
 
 object_marker1(

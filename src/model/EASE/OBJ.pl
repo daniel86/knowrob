@@ -164,6 +164,7 @@ object_color_rgb(Obj,[R,G,B]) +>
 % @ShapeOrigin The origin of the shape
 %
 object_shape(Obj,ShapeTerm,[Frame,Pos,Rot]) ?>
+    {print_message(warning, 'inside urdf pl.............\n')},
 	triple(Obj,soma:hasShape,Shape),
 	triple(Shape,dul:hasRegion,ShapeRegion),
 	rdf_split_url(_,Frame,Obj),

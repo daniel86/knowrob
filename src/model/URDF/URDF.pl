@@ -295,25 +295,37 @@ has_parent_link(Joint,Link) ?+>
 % TODO: reconsider this
 % 
 object_shape(Obj,ShapeTerm,Origin) ?>
+    {print_message(warning, 'inside urdf pl.............\n'),
+    print_message(warning, has_base_link_name(Obj,BaseName))},
 	has_base_link_name(Obj,BaseName),
-	{ get_object_shape_(Obj,BaseName,ShapeTerm,Origin) }.
+	{ get_object_shape_(Obj,BaseName,ShapeTerm,Origin)}.
 
 %%
 get_object_shape_(Obj,BaseName,ShapeTerm,[Frame,Pos,Rot]) :-
+    print_message(warning, 'inside get obj shape.............\n'),
+    print_message(warning, has_urdf(Obj,Root)),
 	has_urdf(Obj,Root),
-	(	has_urdf_prefix(Root,Prefix)
-	;	Prefix=''
+	(	has_urdf_prefix(Root,Prefix),
+	    print_message(warning, has_urdf_prefix(Root,Prefix))
+	;	Prefix='',
+	    print_message(warning, 'prefix = empty str')
 	),!,
+	print_message(warning, 'after empty str'),
 	setof(L,
 		(	has_end_link_name(Obj,EndName),
 			urdf_chain(Root,BaseName,EndName,L)
 		),
 		LinkNames
 	),
+	print_message(warning, member(LinkName,LinkNames)),
 	member(LinkName,LinkNames),
+    print_message(warning, LinkNames),
 	urdf_link_visual_shape(Root,LinkName,
 		ShapeTerm,[Name,Pos,Rot]),
-	atom_concat(Prefix,Name,Frame).
+    print_message(warning, urdf_link_visual_shape(Root,LinkName,
+		ShapeTerm,[Name,Pos,Rot])),
+	atom_concat(Prefix,Name,Frame),
+	print_message(warning, atom_concat(Prefix,Name,Frame)).
 
 /**************************************/
 /********** FOREIGN LIBRARY ***********/
