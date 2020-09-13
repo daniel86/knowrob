@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>utility</title>
+
+<link rel="stylesheet" type="text/css" href="../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="dir">utility</h1>
+
+<h2 class="wiki plfiles">Prolog files</h2>
+
+<table class="summary">
+<tr><th colspan="3" class="file"><span style="float:left"><a href="algebra.html">algebra.pl</a></span>&nbsp; -- Utilities for handling transforms in KnowRob.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="algebra.html#matrix/3">matrix/3</a></td><td class="summary">True if Matrix is the transformation matrix build from Translation and Quaternion.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="algebra.html#matrix_translate/3">matrix_translate/3</a></td><td class="summary">True if Out unifies with In translated by Offset.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="algebra.html#quaternion_multiply/3">quaternion_multiply/3</a></td><td class="summary">True if Multiplied is the result of multiplying Quaternion1 with Quaternion2.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="algebra.html#transform_between/3">transform_between/3</a></td><td class="summary">True if Relative is the relative transform between the target frame of Transform1 and Transform2.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="algebra.html#transform_close_to/3">transform_close_to/3</a></td><td class="summary">True if the squared distance between Transform1 and Transform2 is less then or equal to Delta.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="algebra.html#transform_invert/2">transform_invert/2</a></td><td class="summary">True if Inverted is the inverted transform of Transform (i.e., with inverted reference and source frame).</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="algebra.html#transform_multiply/3">transform_multiply/3</a></td><td class="summary">True if Product is Transform1 x Transform2.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="atoms.html">atoms.pl</a></span>&nbsp; -- Prolog/OWL utility predicates<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="atoms.html#atom_ensure_prefix/3">atom_ensure_prefix/3</a></td><td class="summary"></td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="atoms.html#atom_ensure_suffix/3">atom_ensure_suffix/3</a></td><td class="summary"></td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="atoms.html#atom_remove_prefix/3">atom_remove_prefix/3</a></td><td class="summary"></td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="atoms.html#camelcase/2">camelcase/2</a></td><td class="summary">For example, <code>camelcase(hello_world, 'HelloWorld')</code>.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="atoms.html#lower_camelcase/2">lower_camelcase/2</a></td><td class="summary">For example, <code>lower_camelcase(hello_world, helloWorld)</code>.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="atoms.html#lowercase/2">lowercase/2</a></td><td class="summary"></td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="filesystem.html">filesystem.pl</a></span>&nbsp; -- Filesystem utilities<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="filesystem.html#mkdir/1">mkdir/1</a></td><td class="summary">Create directory at Dir if it does not yet exist.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="filesystem.html#path_concat/3">path_concat/3</a></td><td class="summary">Concatenate path prefix with path suffix.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="filesystem.html#path_delimiter/1">path_delimiter/1</a></td><td class="summary">Delimiter for filesystem paths.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="filesystem.html#path_split/2">path_split/2</a></td><td class="summary">Splits Path at delimiter characters and unifies with splitted path elements PathList.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="functional.html">functional.pl</a></span>&nbsp; -- Prolog/OWL utility predicates<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="functional.html#range/3">range/3</a></td><td class="summary">Generate a list of integers in a given range.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="functional.html#reduce/4">reduce/4</a></td><td class="summary">The predicate is first called for the first element of the list, the start value and an intermediate result.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="functional.html#zip/3">zip/3</a></td><td class="summary">Zip the lists 1 and 2 together to get list3.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="functional.html#zipm/3">zipm/3</a></td><td class="summary">Zip the lists 1 and 2 together to get list3.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="logging.html">logging.pl</a></span><span style="float:right"></span></th></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="module.html">module.pl</a></span>&nbsp; -- TODO<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="module.html#interface/2">interface/2</a></td><td class="summary">Defines a new interface.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="notify.html">notify.pl</a></span>&nbsp; -- Broadcasting of notifications.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="notify.html#notify/1">notify/1</a></td><td class="summary">Broadcast a notification term.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="url.html">url.pl</a></span>&nbsp; -- TODO<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="url.html#ros_package_iri/2">ros_package_iri/2</a></td><td class="summary">Register an IRI for a ROS package.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+</table>
+
+</body>
+</html>

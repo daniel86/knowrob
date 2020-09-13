@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ACT.pl -- Interface predicates for EASE-ACT model.</title>
+
+<link rel="stylesheet" type="text/css" href="../../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>ACT.pl -- Interface predicates for EASE-ACT model.</h1>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Daniel Beßler</dd>
+<dt class="keyword-license">license</dt><dd class="keyword-license">- BSD</dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_manipulation_action/1"><b class="pred">is_manipulation_action</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of soma:'ManipulationAction'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_mental_action/1"><b class="pred">is_mental_action</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of soma:'MentalAction'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_physical_task/1"><b class="pred">is_physical_task</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of soma:'PhysicalTask'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_mental_task/1"><b class="pred">is_mental_task</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of soma:'MentalTask'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_performed_by/2"><b class="pred">is_performed_by</b><var class="arglist">(?Act, ?Agent)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Relates an action to the agent that performs it.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Act</var></td><td class="argdescr">- An individual of type dul:'Action'.</td></tr>
+<tr><td><var>Agent</var></td><td class="argdescr">- An individual of type dul:'<var>Agent</var>'.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="has_subevent/2"><b class="pred">has_subevent</b><var class="arglist">(+Event, ?Sub)</var></a> is <b class="det">nondet</b></dt><dd class="defbody"></dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="action_status/2"><b class="pred">action_status</b><var class="arglist">(?Act, ?Status)</var></a> is <b class="det">semidet</b></dt><dd class="defbody">Relates an action to its execution status.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Act</var></td><td class="argdescr">- An individual of type dul:'Action'.</td></tr>
+<tr><td><var>Status</var></td><td class="argdescr">- The execution status of <var>Act</var>.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="action_succeeded/1"><b class="pred">action_succeeded</b><var class="arglist">(?Act)</var></a> is <b class="det">det</b></dt><dd class="defbody">Set the execution status of an action to 'succeeded'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Act</var></td><td class="argdescr">- An individual of type dul:'Action'.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="action_failed/1"><b class="pred">action_failed</b><var class="arglist">(?Act)</var></a> is <b class="det">det</b></dt><dd class="defbody">Set the execution status of an action to 'failed'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Act</var></td><td class="argdescr">- An individual of type dul:'Action'.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="action_active/1"><b class="pred">action_active</b><var class="arglist">(?Act)</var></a> is <b class="det">det</b></dt><dd class="defbody">Set the execution status of an action to 'active'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Act</var></td><td class="argdescr">- An individual of type dul:'Action'.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="action_paused/1"><b class="pred">action_paused</b><var class="arglist">(?Act)</var></a> is <b class="det">det</b></dt><dd class="defbody">Set the execution status of an action to 'paused'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Act</var></td><td class="argdescr">- An individual of type dul:'Action'.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="action_pending/1"><b class="pred">action_pending</b><var class="arglist">(?Act)</var></a> is <b class="det">det</b></dt><dd class="defbody">Set the execution status of an action to 'planning'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Act</var></td><td class="argdescr">- An individual of type dul:'Action'.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="action_cancelled/1"><b class="pred">action_cancelled</b><var class="arglist">(?Act)</var></a> is <b class="det">det</b></dt><dd class="defbody">Set the execution status of an action to 'cancelled'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Act</var></td><td class="argdescr">- An individual of type dul:'Action'.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="task_effect/2"><b class="pred">task_effect</b><var class="arglist">(?EventType, ?Effect)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Relates an action or task to roles that imply change,
+and that need to be taken by some object when the task is executed.
+
+<table class="wiki">
+<tr><td><code>created(Type)</code></td><td>An object has been created.</td></tr>
+<tr><td><code>destroyed(Type)</code></td><td>An object has been destroyed.</td></tr>
+<tr><td><code>altered(Type,QualityType)</code></td><td>An object has been changed.</td></tr>
+<tr><td><code>linked(Type)</code></td><td>An object has been linked.</td></tr>
+<tr><td><code>deposited(Type)</code></td><td>An object has been deposited.</td></tr>
+<tr><td><code>commited(Type)</code></td><td>An object has been commited.</td></tr>
+<tr><td><code>included(Type)</code></td><td>An object has been included.</td></tr>
+<tr><td><code>extracted(Type)</code></td><td>An object has been extracted.</td></tr>
+</table>
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>ActOrTsk</var></td><td class="argdescr">- An individual of type dul:'Action' or dul:'Task', or a subclass of dul:'Task'.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+</dl>
+
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>scope.pl -- The scope of statements being true.</title>
+
+<link rel="stylesheet" type="text/css" href="../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>scope.pl -- The scope of statements being true.</h1>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Daniel Beßler</dd>
+<dt class="keyword-license">license</dt><dd class="keyword-license">- BSD</dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="universal_scope/1"><b class="pred">universal_scope</b><var class="arglist">(-Scope)</var></a> is <b class="det">det</b></dt><dd class="defbody">The scope of facts that are universally true.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Scope</var></td><td class="argdescr">- A scope dictionary.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="current_scope/1"><b class="pred">current_scope</b><var class="arglist">(-Scope)</var></a> is <b class="det">det</b></dt><dd class="defbody">The scope of facts that are currently true.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Scope</var></td><td class="argdescr">- A scope dictionary.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="wildcard_scope/1"><b class="pred">wildcard_scope</b><var class="arglist">(-Scope)</var></a> is <b class="det">det</b></dt><dd class="defbody">A scope that matches any fact.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Scope</var></td><td class="argdescr">- A scope dictionary.
+
+<p>
+<code class="nofile">TODO</code>: should we always specify full scope instead for seacrh indices to work?</p>
+<ul>
+<li>at least for tell it is slower to use search indices on the scope :/</li>
+</ul>
+</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="subscope_of/2"><b class="pred">subscope_of</b><var class="arglist">(+Sub, +Sup)</var></a> is <b class="det">det</b></dt><dd class="defbody">True if scope <var>Sup</var> contains all facts that are contained
+in scope <var>Sub</var>.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Sub</var></td><td class="argdescr">- a scope dict.</td></tr>
+<tr><td><var>Sup</var></td><td class="argdescr">- a scope dict.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="scope_merge/3"><b class="pred">scope_merge</b><var class="arglist">(+A, +B, -Merged)</var></a> is <b class="det">det</b></dt><dd class="defbody">Merge two scopes. The merged scope contains all
+facts that are contained in scope <var>A</var> or scope <var>B</var>.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>A</var></td><td class="argdescr">- a scope dict.</td></tr>
+<tr><td><var>B</var></td><td class="argdescr">- a scope dict.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="scope_intersect/3"><b class="pred">scope_intersect</b><var class="arglist">(+A, +B, -Merged)</var></a> is <b class="det">det</b></dt><dd class="defbody">Intersect two scopes. The intersected scope contains all
+facts that are contained in scope <var>A</var> and also in scope <var>B</var>.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>A</var></td><td class="argdescr">- a scope dict.</td></tr>
+<tr><td><var>B</var></td><td class="argdescr">- a scope dict.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="scope_overlaps_query/2"><b class="pred">scope_overlaps_query</b><var class="arglist">(+A, -B)</var></a> is <b class="det">semidet</b></dt><dd class="defbody"><var>B</var> is the scope of all facts whose scope overlaps with <var>A</var>.</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="scope_update/3"><b class="pred">scope_update</b><var class="arglist">(+Original, +Inserted, -Updated)</var></a> is <b class="det">det</b></dt><dd class="defbody">Update a scope with new values taken from another scope
+dictionary. In case keys appear in both scopes, only
+the value from <var>Inserted</var> is used in <var>Updated</var> scope.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Original</var></td><td class="argdescr">- a scope dictionary.</td></tr>
+<tr><td><var>Inserted</var></td><td class="argdescr">- a scope dictionary.</td></tr>
+<tr><td><var>Updated</var></td><td class="argdescr">- a scope dictionary.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="scope_remove/4"><b class="pred">scope_remove</b><var class="arglist">(+Original, +Key, -Value, -Updated)</var></a> is <b class="det">det</b></dt><dd class="defbody">Removes a key from a scope dictionary.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Original</var></td><td class="argdescr">- a scope dictionary.</td></tr>
+<tr><td><var>Key</var></td><td class="argdescr">- a key in the scope dictionary.</td></tr>
+<tr><td><var>Value</var></td><td class="argdescr">- the value popped out of the dictionary.</td></tr>
+<tr><td><var>Updated</var></td><td class="argdescr">- the scope dictionary without <var>Key</var>.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+</dl>
+
+</body>
+</html>

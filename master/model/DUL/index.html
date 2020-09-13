@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>DUL</title>
+
+<link rel="stylesheet" type="text/css" href="../../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="dir">DUL</h1>
+
+<h2 class="wiki plfiles">Prolog files</h2>
+
+<table class="summary">
+<tr><th colspan="3" class="file"><span style="float:left"><a href="Event.html">Event.pl</a></span>&nbsp; -- DUL notion of Event.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="Event.html#executes_task/2">executes_task/2</a></td><td class="summary">A relation between an action and a task, e.g.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Event.html#has_participant/3">has_participant/3</a></td><td class="summary">A relation between an object and a process, e.g.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Event.html#is_action/1">is_action/1</a></td><td class="summary">True iff Entity is an instance of dul:'Action'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Event.html#is_event/1">is_event/1</a></td><td class="summary">True iff Entity is an instance of dul:'Event'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Event.html#is_event_type/1">is_event_type/1</a></td><td class="summary">True iff Entity is an instance of dul:'EventType'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Event.html#is_process/1">is_process/1</a></td><td class="summary">True iff Entity is an instance of dul:'Process'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Event.html#is_task/1">is_task/1</a></td><td class="summary">True iff Entity is an instance of dul:'Task'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Event.html#task_role/2">task_role/2</a></td><td class="summary">A relation between roles and tasks, e.g.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Event.html#task_role_range/3">task_role_range/3</a></td><td class="summary">Same as <a href="Event.html#task_role/2">task_role/2</a> but in addition unifies the range of the parameter with the third argument.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Event.html#task_role_type/3">task_role_type/3</a></td><td class="summary">Same as <a href="Event.html#task_role/2">task_role/2</a> but in addition unifies the type of the parameter with the third argument.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="Object.html">Object.pl</a></span>&nbsp; -- DUL notion of Object.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="Object.html#has_location/2">has_location/2</a></td><td class="summary">A generic, relative spatial location, holding between any entities.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Object.html#has_object_type/2">has_object_type/2</a></td><td class="summary">Relates an entity to its types that are sub-classes of the Object concept.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Object.html#has_part/2">has_part/2</a></td><td class="summary">Relates an object to its parts.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Object.html#has_quality_type/2">has_quality_type/2</a></td><td class="summary">Relates an entity to its types that are sub-classes of the Quality concept.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Object.html#has_role/2">has_role/2</a></td><td class="summary">Relates an object to its roles.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Object.html#is_agent/1">is_agent/1</a></td><td class="summary">True iff Entity is an instance of dul:'Agent'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Object.html#is_concept/1">is_concept/1</a></td><td class="summary">True iff Entity is an instance of dul:'Concept'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Object.html#is_object/1">is_object/1</a></td><td class="summary">True iff Entity is an instance of dul:'Object'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Object.html#is_physical_object/1">is_physical_object/1</a></td><td class="summary">True iff Entity is an instance of dul:'PhysicalObject'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Object.html#is_quality/1">is_quality/1</a></td><td class="summary">True iff Entity is an instance of dul:'Quality'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Object.html#is_role/1">is_role/1</a></td><td class="summary">True iff Entity is an instance of dul:'Role'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Object.html#is_social_object/1">is_social_object/1</a></td><td class="summary">True iff Entity is an instance of dul:'SocialObject'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="Region.html">Region.pl</a></span>&nbsp; -- DUL notion of Region.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="Region.html#has_assignment/2">has_assignment/2</a></td><td class="summary">Associates a parameter to an assignment.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Region.html#has_data_value/2">has_data_value/2</a></td><td class="summary">A datatype property that encodes values from a datatype for an Entity.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Region.html#has_parameter/2">has_parameter/2</a></td><td class="summary">A Concept can have a Parameter that constrains the attributes that a classified Entity can have in a certain Situation, e.g.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Region.html#has_parameter/3">has_parameter/3</a></td><td class="summary">Same as <a href="Region.html#has_parameter/2">has_parameter/2</a> but in addition unifies the type of the parameter with the third argument.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Region.html#has_parameter_range/3">has_parameter_range/3</a></td><td class="summary">Same as <a href="Region.html#has_parameter/2">has_parameter/2</a> but in addition unifies the range of the parameter with the third argument.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Region.html#has_region/2">has_region/2</a></td><td class="summary">A relation between entities and regions, e.g.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Region.html#has_time_interval/2">has_time_interval/2</a></td><td class="summary"></td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Region.html#is_amount/1">is_amount/1</a></td><td class="summary">True iff Entity is an instance of dul:'Amount'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Region.html#is_parameter/1">is_parameter/1</a></td><td class="summary">True iff Entity is an instance of dul:'Parameter'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Region.html#is_physical_attribute/1">is_physical_attribute/1</a></td><td class="summary">True iff Entity is an instance of dul:'PhysicalAttribute'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Region.html#is_region/1">is_region/1</a></td><td class="summary">True iff Entity is an instance of dul:'Region'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Region.html#is_social_attribute/1">is_social_attribute/1</a></td><td class="summary">True iff Entity is an instance of dul:'SocialAttribute'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Region.html#is_space_region/1">is_space_region/1</a></td><td class="summary">True iff Entity is an instance of dul:'SpaceRegion'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Region.html#is_time_interval/1">is_time_interval/1</a></td><td class="summary">True iff Entity is an instance of dul:'TimeInterval'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="Situation.html">Situation.pl</a></span>&nbsp; -- DUL notion of Situation.<span style="float:right"></span></th></tr>
+<tr class="public"><td><a href="Situation.html#is_description/1">is_description/1</a></td><td class="summary">True iff Entity is an instance of dul:'Description'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Situation.html#is_design/1">is_design/1</a></td><td class="summary">True iff Entity is an instance of dul:'Design'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Situation.html#is_diagnosis/1">is_diagnosis/1</a></td><td class="summary">True iff Entity is an instance of dul:'Diagnosis'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Situation.html#is_goal/1">is_goal/1</a></td><td class="summary">True iff Entity is an instance of dul:'Goal'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Situation.html#is_norm/1">is_norm/1</a></td><td class="summary">True iff Entity is an instance of dul:'Norm'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Situation.html#is_plan/1">is_plan/1</a></td><td class="summary">True iff Entity is an instance of dul:'Plan'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Situation.html#is_plan_execution/1">is_plan_execution/1</a></td><td class="summary">True iff Entity is an instance of dul:'PlanExecution'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Situation.html#is_setting_for/2">is_setting_for/2</a></td><td class="summary">A relation between situations and entities, e.g.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Situation.html#is_situation/1">is_situation/1</a></td><td class="summary">True iff Entity is an instance of dul:'Situation'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Situation.html#is_transition/1">is_transition/1</a></td><td class="summary">True iff Entity is an instance of dul:'Transition'.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Situation.html#plan_has_goal/2">plan_has_goal/2</a></td><td class="summary">Relates a plan to its goal.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr class="public"><td><a href="Situation.html#satisfies/2">satisfies/2</a></td><td class="summary">A relation between a Situation and a Description, e.g.</td><td align="right"><span style="white-space: nowrap"></span></td></tr>
+<tr><th colspan="3" class="file"><span style="float:left"><a href="__init__.html">__init__.pl</a></span><span style="float:right"></span></th></tr>
+</table>
+
+</body>
+</html>

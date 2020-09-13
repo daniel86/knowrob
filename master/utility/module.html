@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>module.pl -- TODO</title>
+
+<link rel="stylesheet" type="text/css" href="../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>module.pl -- TODO</h1>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Daniel Beßler</dd>
+<dt class="keyword-license">license</dt><dd class="keyword-license">- BSD</dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="interface/2"><b class="pred">interface</b><var class="arglist">(+Name, +Exports)</var></a> is <b class="det">det</b></dt><dd class="defbody">Defines a new interface. The syntax is equal to the one used to define
+modules. Modules implementing the interface include a term
+<b><code>implements(InterfaceFile)</code></b> in the list of exported terms.
+
+<blockquote>
+file a:
+:- <code>interface(iface,
+[ test(r,r) -&gt; rdf:type
+])</code>.
+file b:
+:- <code>module(iface_impl,
+[ implements(iface),
+test2(t),
+test3/2
+])</code>.
+</blockquote>
+
+</dd>
+</dl>
+
+<h2 class="undoc">Undocumented predicates</h2>
+
+<p>
+The following predicates are exported, but not or incorrectly documented.</p>
+
+<dl class="undoc">
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="use_directory/1"><b class="pred">use_directory</b><var class="arglist">(Arg1)</var></a></dt>
+</dl>
+
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>transitive.pl -- Treat a query term as transitive relation.</title>
+
+<link rel="stylesheet" type="text/css" href="../../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>transitive.pl -- Treat a query term as transitive relation.</h1>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Daniel Beßler</dd>
+<dt class="keyword-license">license</dt><dd class="keyword-license">- BSD</dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="include_parents/1"><b class="pred">include_parents</b><var class="arglist">(+Query)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Calls a query but not only includes direct (specific) results
+but also more general ones in case of a taxonomical property
+(type, subClassOf, subPropertyOf) is used in the query.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>A</var></td><td class="argdescr">- query term.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="transitive/1"><b class="pred">transitive</b><var class="arglist">(+Query)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">Assumes transitivity of a 2-ary or 3-ary query term,
+meaning that if query holds for (A,B) and (B,C), then
+it also holds for (A,C).
+In the case of a 2-ary query term, the two arguments
+are assumed to be the subject and the object of the relation.
+In case of 3-ary queries, the object is the last argument,
+and the middle argument is a property.
+
+<p>
+Note that transitivity of subClassOf and subPropertyOf is
+already handled on the DB level such that no sequential
+querying is needed for these cases.</p>
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Query</var></td><td class="argdescr">- A query term.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+</dl>
+
+</body>
+</html>

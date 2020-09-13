@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>WF.pl -- Interface predicates for EASE-WF model.</title>
+
+<link rel="stylesheet" type="text/css" href="../../pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>WF.pl -- Interface predicates for EASE-WF model.</h1>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Daniel Beßler</dd>
+<dt class="keyword-license">license</dt><dd class="keyword-license">- BSD</dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_binding/1"><b class="pred">is_binding</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of soma:'Binding'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="is_succeedence/1"><b class="pred">is_succeedence</b><var class="arglist">(?Entity)</var></a> is <b class="det">nondet</b></dt><dd class="defbody">True iff <var>Entity</var> is an instance of soma:'Succeedence'.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Entity</var></td><td class="argdescr">- An entity IRI.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="plan_defines_task/2"><b class="pred">plan_defines_task</b><var class="arglist">(?Plan, ?Tsk)</var></a> is <b class="det">semidet</b></dt><dd class="defbody">Relates a plan to the task it defines.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>Plan</var></td><td class="argdescr">- An individual of type dul:'<var>Plan</var>'.</td></tr>
+<tr><td><var>Tsk</var></td><td class="argdescr">- An individual of type dul:'Task'.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="workflow_first_step/2"><b class="pred">workflow_first_step</b><var class="arglist">(?WF, ?Step)</var></a> is <b class="det">semidet</b></dt><dd class="defbody">Relates a workflow to the dedicated first step of it.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>WF</var></td><td class="argdescr">- An individual of type dul:'Workflow'.</td></tr>
+<tr><td><var>Step</var></td><td class="argdescr">- An individual of type dul:'Task'.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="workflow_constituent/2"><b class="pred">workflow_constituent</b><var class="arglist">(+WF, ?Constituent)</var></a> is <b class="det">semidet</b></dt><dd class="defbody">
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>WF</var></td><td class="argdescr">- A workflow.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="workflow_role_range/3"><b class="pred">workflow_role_range</b><var class="arglist">(?WF, ?Role, ?ObjectType)</var></a> is <b class="det">semidet</b></dt><dd class="defbody">Relates a workflow to roles of objects defined by the tasks
+of the workflow, and also infers the required type for fillers
+of the role.
+
+<dl class="tags">
+<dt class="tag">Arguments:</dt><dd>
+
+<table class="arglist">
+<tr><td><var>WF</var></td><td class="argdescr">- An individual of type dul:'Workflow'.</td></tr>
+<tr><td><var>Role</var></td><td class="argdescr">- An individual of type dul:'<var>Role</var>'.</td></tr>
+<tr><td><var>ObjectType</var></td><td class="argdescr">- A sub-class of dul:'Object'.</td></tr>
+</table>
+
+</dd>
+</dl>
+
+</dd>
+</dl>
+
+<h2 class="undoc">Undocumented predicates</h2>
+
+<p>
+The following predicates are exported, but not or incorrectly documented.</p>
+
+<dl class="undoc">
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="workflow_step/2"><b class="pred">workflow_step</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+</dl>
+
+</body>
+</html>
