@@ -13,6 +13,7 @@ The following predicates are supported:
 | atomic_list_concat/3  | +List, +Separator, ?Atom |
 | upcase_atom/2         | +AnyCase, ?UpperCase |
 | downcase_atom/2       | +AnyCase, ?LowerCase |
+| random_atom/2         | +Length, -Atom |
 
 @author Daniel Beßler
 @see https://www.swi-prolog.org/pldoc/man?section=manipatom
@@ -33,6 +34,7 @@ The following predicates are supported:
 % - atom parsing is a bit difficult
 % - $split can be used, but then e.g. string "7" would need to be mapped to number 7 somehow.
 %:- mongolog:add_command(term_to_atom).
+:- mongolog:add_command(random_atom).
 
 %% query compilation
 mongolog:step_compile(
@@ -183,6 +185,32 @@ mongolog:step_compile(
 		),
 		Pipeline).
 
+mongolog:step_compile(
+		random_atom(Length,Atom),
+		Ctx, [Set]) :-
+	mongolog:var_key(Atom,Ctx,AtomKey),
+	mongolog:var_key_or_val(Length,Ctx,Length0),
+	maplist([X,string(X)]>>true, [
+		'0','1','2','3','4','5','6','7','8','9',
+		'A','B','E','F','G','H','I','J','K','L',
+		'M','N','O','P','Q','R','S','T','U','V',
+		'W','X','Y'
+	], CharacterArray),
+	Set=[ '$set', [AtomKey, [ '$reduce', [
+		[ input, [ '$map', [
+			[ input, [ '$range', array([ integer(0), Length0 ]) ] ],
+			[ in, [ '$arrayElemAt', array([
+				array(CharacterArray),
+				[ '$ceil', [ '$multiply', array([
+					integer(32),
+					[ '$rand', [] ]
+				]) ] ]
+			]) ] ]
+		] ] ],
+		[ initialValue, string('') ],
+		[ in, [ '$concat', array([string('$$value'), string('$$this')]) ]]
+	] ] ] ].
+
 %%
 add_separator([], _, []) :- !.
 add_separator([X], _, [X]) :- !.
@@ -298,5 +326,14 @@ test('atomic_list_concat(+List,+Sep,-Atom)'):-
 		atomic_list_concat([X1, 'bar'], '-', Atom),
 		X1, 'foo'),
 	assert_equals(Atom, 'foo-bar').
+
+test('random_atom(+Length,-Atom)'):-
+	mongolog:test_call(random_atom(Length, Atom), Length, 5),
+	assert_true(atom(Atom)),
+	(	\+atom(Atom)->true
+	;	(
+		atom_length(Atom,AtomLength),
+		assert_equals(AtomLength,5)
+	)).
 
 :- end_tests('mongolog_atoms').
