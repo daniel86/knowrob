@@ -50,15 +50,16 @@ mongolog:step_compile(
 %% 
 query_annotation(Entity, Property, Annotation, Ctx, Pipeline, StepVars) :-
 	% throw instantiation_error if one of the arguments was not referred to before
-	mongolog:all_ground([Entity, Property], Ctx),
 	mongolog:step_vars([Entity,Property,Annotation], Ctx, StepVars),
 	% get the DB collection
 	mng_get_db(_DB, Coll, 'annotations'),
-	mongolog:var_key_or_val(Annotation,  Ctx, Annotation0),
-	mongolog:var_key_or_val1(Entity,     Ctx, Entity0),
-	mongolog:var_key_or_val1(Property,   Ctx, Property0),
+	mongolog:var_key_or_val(Annotation, Ctx, Annotation0),
 	% pass input document values to lookup
 	mongolog:lookup_let_doc(StepVars, LetDoc),
+	%
+	mongolog_database:match_predicate(
+		[[s,Entity,[]],[p,Property,[]]],
+		Ctx, Match),
 	% compute steps of the aggregate pipeline
 	findall(Step,
 		% look-up comments into 'next' field
@@ -66,10 +67,7 @@ query_annotation(Entity, Property, Annotation, Ctx, Pipeline, StepVars) :-
 				['from', string(Coll)],
 				['as', string('next')],
 				['let', LetDoc],
-				['pipeline', array([['$match', [
-					[s, Entity0],
-					[p, Property0]
-				]]])]
+				['pipeline', array([Match])]
 			]]
 		% unwind lookup results and assign variable
 		;	Step=['$unwind',string('$next')]
@@ -157,13 +155,13 @@ test('annotation(+,+,+)') :-
 	assert_true(kb_call(annotation(a,b,c))),
 	assert_false(kb_call(annotation(a,b,d))).
 
-test('annotation(-,+,+)', [throws(error(instantiation_error,_))]) :-
-	kb_call(annotation(_,b,c)).
+test('annotation(-,+,+)') :-
+	assert_true(kb_call(annotation(_,b,c))).
 
-test('annotation(+,-,+)', [throws(error(instantiation_error,_))]) :-
-	kb_call(annotation(a,_,c)).
+test('annotation(+,-,+)') :-
+	assert_true(kb_call(annotation(a,_,c))).
 
-test('annotation(-,+,-)', [throws(error(instantiation_error,_))]) :-
-	kb_call(annotation(_,b,_)).
+test('annotation(-,+,-)') :-
+	assert_true(kb_call(annotation(_,b,_))).
 
 :- end_tests('lang_annotation').
