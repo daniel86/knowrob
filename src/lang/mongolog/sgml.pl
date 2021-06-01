@@ -55,7 +55,10 @@ mongolog:step_compile(
 		% here we use the remainder after the last '#' as name.
 		% FIXME: this is not entirely accurate, see the documentation of iri_xml_namespace:
 		%			https://www.swi-prolog.org/pldoc/man?predicate=iri_xml_namespace/3
-		(	Step=['$set', ['t_name', ['$last', ['$split', array([IRI0, string('#')])]]]]
+		(	Step=['$set', ['t_name', ['$arrayElemAt', array([
+						['$split', array([IRI0, string('#')])],
+						int(-1)
+			])]]]
 		% next set field "t_ns" to remaining prefix of IRI
 		;	Step=['$set', ['t_ns',   ['$substr', array([IRI0, int(0),
 				['$subtract', array([
