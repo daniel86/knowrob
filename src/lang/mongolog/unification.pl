@@ -250,6 +250,7 @@ test_shape2(X)         ?> ( =(X,mesh(foo)) ; =(X,sphere(5.0)) ).
 test_shape3(X)         ?> ( test_shape1(X) ; =(X,mesh(bar)) ).
 
 test('test_shape1(mesh(foo))') :-
+	lang_query:flush_predicate(plunit_mongolog_unification),
 	assert_true(kb_call(test_shape1(mesh(foo)))).
 
 test('test_shape1(mesh(X))') :-
@@ -304,6 +305,7 @@ test_nested_rule1(A) ?> assign(A,3).
 test_nested_rule(B)  ?> test_nested_rule1(A), B is A + 2.
 
 test('test_nested_rule(-)') :-
+	lang_query:flush_predicate(plunit_mongolog_unification),
 	assert_true(kb_call(test_nested_rule(_))),
 	findall(X, kb_call(test_nested_rule(X)), Xs),
 	assert_equals(Xs, [4.0,5.0]).
