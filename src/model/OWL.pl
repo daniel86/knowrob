@@ -559,23 +559,23 @@ holds_description(S,P,Descr) ?>
 % Allow OWL descriptions in instance_of expressions.
 %
 model_RDFS:instance_of(S,Descr) ?>
-	pragma(is_owl_term(Descr)),
+	pragma(model_OWL:is_owl_term(Descr)),
 	instance_of_description(S,Descr).
 
 %%
 % Allow OWL descriptions in subclass_of expressions.
 %
 model_RDFS:subclass_of(Class, Descr) ?>
-	pragma(is_owl_term(Descr)),
+	pragma(model_OWL:is_owl_term(Descr)),
 	subclass_of_description(Class, Descr).
 
 %%
 % Allow OWL descriptions in holds expressions.
 %
 %lang_holds:holds(S,P,O) ?>
-%	pragma(\+ is_owl_term(O)),
+%	pragma(\+ model_OWL:sis_owl_term(O)),
 %	instance_of_description(S, value(P,O)).
 
 lang_holds:holds(S,P,Descr) ?>
-	pragma(is_owl_term(Descr)),
+	pragma(model_OWL:is_owl_term(Descr)),
 	holds_description(S,P,Descr).
