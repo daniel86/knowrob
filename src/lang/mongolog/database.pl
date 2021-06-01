@@ -32,9 +32,12 @@ The following predicates are supported:
 %
 %
 mongolog_predicate(Term, Fields, Options) :-
-	compound(Term),!,
-	Term =.. [Functor|_],
-	mongolog_predicate(Functor, Fields, Options).
+	compound(Term),
+	Term =.. [Functor|Args],
+	mongolog_predicate(Functor, Fields, Options),
+	length(Args,Arity),
+	length(Fields,Arity),
+	!.
 
 
 %% mongolog_add_predicate(+Functor, +Fields, +Options) is semidet.
@@ -55,8 +58,10 @@ mongolog_predicate(Term, Fields, Options) :-
 % @param Fields field names of predicate arguments
 % @param Options option list
 %
-mongolog_add_predicate(Functor, _, _) :-
-	mongolog_predicate(Functor, _, _),
+mongolog_add_predicate(Functor, Fields, _) :-
+	mongolog_predicate(Functor, Args, _),
+	length(Fields,Arity),
+	length(Args,Arity),
 	!,
 	throw(permission_error(modify,database_predicate,Functor)).
 
@@ -69,7 +74,9 @@ mongolog_add_predicate(Functor, Fields, Options) :-
 setup_predicate_collection(Functor, [FirstField|_], Options) :-
 	% TODO support fields marked with -/+ here
 	option(indices(Indices), Options, [[FirstField]]),
-	setup_collection(Functor, Indices).
+	(	Indices==[] -> true
+	;	setup_collection(Functor, Indices)
+	).
 
 
 %% mongolog_drop_predicate(+Functor) is det.
@@ -164,8 +171,10 @@ mongolog_predicate_assert(Term, Ctx, Pipeline, StepVars) :-
 mongolog_predicate_zip(Term, Ctx, Zipped, Ctx_zipped, ReadOrWrite) :-
 	% get predicate fields and options
 	mongolog_predicate(Term, ArgFields, Options),
+	length(ArgFields,Arity),
 	% get predicate functor and arguments
 	Term =.. [Functor|Args],
+	length(Args,Arity),
 	% get the database collection of the predicate
 	(	option(collection(Collection), Options)
 	;	mng_get_db(_DB, Collection, Functor)
