@@ -310,5 +310,20 @@ test('test_nested_rule(-)') :-
 	findall(X, kb_call(test_nested_rule(X)), Xs),
 	assert_equals(Xs, [4.0,5.0]).
 
+%
+%test_recursive_rule(Left,Right) ?>
+%	(	(Left=a,assign(X,b))
+%	;	(Left=b,assign(X,c))
+%	;	(Left=d,assign(X,c))
+%	),
+%	(	assign(Right,X)
+%	;	test_recursive_rule(X,Right)
+%	).
+%
+%test('test_recursive_rule(+,-)') :-
+%	lang_query:flush_predicate(plunit_mongolog_unification),
+%	findall(X, kb_call(test_recursive_rule(a,X)), Xs),
+%	assert_equals(Xs, [b,c]).
+
 :- end_tests('mongolog_unification').
 
