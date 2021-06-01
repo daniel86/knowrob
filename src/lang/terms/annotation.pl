@@ -49,7 +49,6 @@ mongolog:step_compile(
 
 %% 
 query_annotation(Entity, Property, Annotation, Ctx, Pipeline, StepVars) :-
-	% throw instantiation_error if one of the arguments was not referred to before
 	mongolog:step_vars([Entity,Property,Annotation], Ctx, StepVars),
 	% get the DB collection
 	mng_get_db(_DB, Coll, 'annotations'),
