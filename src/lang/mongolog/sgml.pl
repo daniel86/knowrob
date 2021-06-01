@@ -7,11 +7,6 @@ The following predicates are supported:
 | ---                  | ---       |
 | iri_xml_namespace/3  | +IRI, -Namespace, -Localname |
 
-In addition, a command new_iri/1 can be used to generate a unique
-name that is not used yet.
-A variant, new_iri/2, allows to provide a IRI prefix
-for the new IRI.
-
 @author Daniel Beßler
 @see https://www.swi-prolog.org/pldoc/man?section=xmlns
 @license BSD
@@ -25,23 +20,6 @@ for the new IRI.
 
 %% query commands
 :- mongolog:add_command(iri_xml_namespace).
-:- mongolog:add_command(new_iri).
-
-%%
-% projection queries can use new_iri/1 and new_iri/2 to generate
-% IRI's that have not been used so far.
-%
-% FIXME: it could happen that if in one compilation multiple new_iri's
-%         are generated that both have the same IRI. very unlikely, but still...
-%
-lang_query:step_expand(
-		new_iri(IRI),
-		pragma(get_unique_name(Type,IRI))) :-
-	rdf_global_term(rdf:'Resource', Type).
-
-lang_query:step_expand(
-		new_iri(IRI,Type),
-		pragma(get_unique_name(Type,IRI))).
 
 %% query compilation
 mongolog:step_compile(
@@ -82,12 +60,6 @@ mongolog:step_compile(
 		 *******************************/
 
 :- begin_tests('mongolog_sgml').
-
-test('new_iri(-IRI)'):-
-	mongolog:test_call(
-		(new_iri(IRI), atom_concat(IRI,Suffix,X)), Suffix, foo),
-	assert_true(atom(X)),
-	assert_true(atom_concat(_,foo,X)).
 
 test('iri_xml_namespace(+IRI,-NS,-Name)'):-
 	rdf_global_term(rdf:'Resource', Resource),
