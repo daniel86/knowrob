@@ -14,6 +14,7 @@
       mng_unwatch/1,
       mng_index_create/2,
       mng_index_create/3,
+      mng_view_create/4,
       mng_dump/2,
       mng_dump_collection/3,
       mng_restore/2,
@@ -131,6 +132,24 @@ mng_drop(DB,Collection) :-
 mng_collection(DB, Collection) :-
 	mng_collections(DB, Collections),
 	memberchk(Collection, Collections).
+
+%% mng_view_create(+DB, +Collection, +View, +Pipeline) is det.
+%
+% Destroys a query cursor.
+%
+% @param DB database name
+% @param Collection collection name
+% @param View view name
+% @param Pipeline aggregation pipeline
+%
+mng_view_create(DBName, CollectionName, ViewName, Pipeline) :-
+	% drop old collection
+	(	mng_collection(DBName,ViewName)
+	->	mng_drop(DBName,ViewName)
+	;	true
+	),
+	% and create new collection as a view
+	mng_view_create_internal(DBName, CollectionName, ViewName, Pipeline).
 
 %% mng_distinct_values(+DB, +Collection, +Key, -DistinctValues) is det
 %
