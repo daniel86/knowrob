@@ -8,7 +8,7 @@
       kb_unproject(t),        % +Goal
       kb_unproject(t,t),      % +Goal, +Scope
       kb_unproject(t,t,t),    % +Goal, +Scope, +Options
-      kb_add_rule(t,t),
+      kb_add_rule(+,t,t),
       kb_drop_rule(t),
       kb_expand(t,-),
       is_callable_with(?,t),  % ?Backend, :Goal
@@ -42,8 +42,9 @@ one step into the input queue of the next step.
 :- use_module('mongolog/mongolog').
 
 % Stores list of terminal terms for each clause. 
-:- dynamic kb_rule/3.
+:- dynamic kb_rule/4.
 :- dynamic kb_predicate/1.
+:- dynamic expanding_term/4.
 % optionally implemented by query commands.
 :- multifile step_expand/2.
 % interface implemented by query backends
@@ -568,7 +569,7 @@ is_callable_with(mongolog, Goal) :- is_mongolog_predicate(Goal).
 		 *	    TERM EXPANSION     		*
 		 *******************************/
 
-%% kb_add_rule(+Head, +Body) is semidet.
+%% kb_add_rule(+Module, +Head, +Body) is semidet.
 %
 % Register a rule that translates into an aggregation pipeline.
 % Any non-terminal predicate in Body must have a previously asserted
@@ -576,17 +577,21 @@ is_callable_with(mongolog, Goal) :- is_mongolog_predicate(Goal).
 % After being asserted, the Head predicate can be referred to in
 % calls of kb_call/1.
 %
+% @param Module module name
 % @param Head The head of a rule.
 % @param Body The body of a rule.
 %
-kb_add_rule(Head, Body) :-
+kb_add_rule(Module, Head, Body) :-
 	%% get the functor of the predicate
 	Head =.. [Functor|Args],
 	%% expand goals into terminal symbols
 	(	kb_expand(Body, Expanded) -> true
 	;	log_error_and_fail(lang(assertion_failed(Body), Functor))
 	),
-	assertz(kb_rule(Functor, Args, Expanded)).
+	% HACK: this is to make mongolog recognize the predicate symbol before
+	%        the rule has been added (after all clauses have been expanded)
+	mongolog:add_command(Functor),
+	assertz(kb_rule(Module, Functor, Args, Expanded)).
 
 
 %% kb_drop_rule(+Head) is semidet.
@@ -600,7 +605,7 @@ kb_add_rule(Head, Body) :-
 kb_drop_rule(Head) :-
 	compound(Head),
 	Head =.. [Functor|_],
-	retractall(kb_rule(Functor, _, _)).
+	retractall(kb_rule(_,Functor, _, _)).
 
 		 /*******************************
 		 *	    TERM EXPANSION     		*
@@ -694,14 +699,14 @@ expand_rule(Goal, Terminals) :-
 	% unwrap goal term into functor and arguments.
 	Goal =.. [Functor|Args],
 	% findall rules with matching functor and arguments
-	findall(X, kb_rule(Functor, Args, X), TerminalClauses),
+	findall(X, kb_rule(_,Functor, Args, X), TerminalClauses),
 	(	TerminalClauses \== []
 	->	Terminals = TerminalClauses
 	% if TerminalClauses==[] it means that either there is no such rule
 	% in which case expand_rule fails, or there is a matching rule, but
 	% the arguments cannot be unified with the ones provided in which
 	% case expand_rule succeeds with a pipeline [fail] that allways fails.
-	;	(	once(kb_rule(Functor,_,_)),
+	;	(	once(kb_rule(_,Functor,_,_)),
 			Terminals=[fail]
 		)
 	).
@@ -711,11 +716,11 @@ expand_rule(Goal, Terminals) :-
 	Goal =.. [Functor|Args],
 	% find all asserted rules matching the functor
 	findall([Args0,Terminals0],
-			(	kb_rule(Functor, Args0, Terminals0),
+			(	kb_rule(_, Functor, Args0, Terminals0),
 				unifiable(Args0, Args, _)
 			),
 			Clauses),
-	Clauses \= [],
+	Clauses \== [],
 	expand_rule(Args, Clauses, Terminals).
 
 % prepend pragma call that unifies "child" and "parent" arguments
@@ -764,6 +769,32 @@ take_until_cut([X|Xs],[X|Ys],Remaining) :-
 has_list_head([]) :- !.
 has_list_head([_|_]).
 
+%%
+flush_predicate1(Module, Functor, Arity) :-
+	% create list of fresh variables
+	length(Args,Arity),
+	Goal =.. [Functor|Args],
+	expand_rule(Goal, Clauses),
+	% wrap different clauses into ';'
+	semicolon_list(Zs, Clauses),
+	% TODO: allow asserting rules into other backends too
+	mongolog_rule_assert(Module, Functor, Args, Zs).
+
+flush_predicate(SrcModule, Functor, Arity) :-
+	expanding_term(Functor, Arity, SrcModule, DstModule),!,
+	retractall(expanding_term(Functor, Arity, SrcModule, DstModule)),
+	flush_predicate1(DstModule, Functor, Arity).
+
+flush_predicate(SrcModule) :-
+	forall(
+		expanding_term(Functor, Arity, SrcModule, _),
+		flush_predicate(SrcModule, Functor, Arity)
+	).
+
+% handle last rule in a file
+user:term_expansion(end_of_file, end_of_file) :-
+	prolog_load_context(module, SrcModule),
+	flush_predicate(SrcModule).
 
 %%
 % Term expansion for *querying* rules using the (?>) operator.
@@ -773,17 +804,26 @@ has_list_head([_|_]).
 user:term_expansion(
 		(?>(Head,Body)),
 		Export) :-
+	prolog_load_context(module, SrcModule),
 	% expand rdf terms Prefix:Local to IRI atom
 	rdf_global_term(Head, HeadGlobal),
 	rdf_global_term(Body, BodyGlobal),
-	strip_module_(HeadGlobal,Module,Term),
-	once((ground(Module);prolog_load_context(module, Module))),
+	strip_module_(HeadGlobal,DstModule,Term),
+	once((ground(DstModule);DstModule=SrcModule)),
 	% add the rule to the DB backend
-	kb_add_rule(Term, BodyGlobal),
+	kb_add_rule(DstModule, Term, BodyGlobal),
 	% expand into regular Prolog rule only once for all clauses
 	Term =.. [Functor|Args],
-	length(Args,NumArgs),
-	length(Args1,NumArgs),
+	length(Args,Arity),
+	% remember that Functor is being expanded from SrcModule into DstModule
+	(	expanding_term(Functor, Arity, SrcModule, _) -> true
+	;	(	% TODO: is it possible to detect that a last clause of some predicate has been loaded?
+			%flush_predicate(SrcModule),
+			assertz(expanding_term(Functor, Arity, SrcModule, DstModule))
+		)
+	),
+	%
+	length(Args1,Arity),
 	Term1 =.. [Functor|Args1],
 	(	kb_predicate(Term1)
 	->	Export=[]
@@ -804,7 +844,8 @@ user:term_expansion(
 	% expand rdf terms Prefix:Local to IRI atom
 	rdf_global_term(Head, HeadGlobal),
 	rdf_global_term(Body, BodyGlobal),
-	strip_module_(HeadGlobal,_Module,Term),
+	strip_module_(HeadGlobal,Module,Term),
+	once((ground(Module);prolog_load_context(module, Module))),
 	% rewrite functor
 	% TODO: it would be nicer to generate a lot
 	%        clauses for project/1.
@@ -812,7 +853,7 @@ user:term_expansion(
 	atom_concat('project_',Functor,Functor0),
 	Term0 =.. [Functor0|Args],
 	% add the rule to the DB backend
-	kb_add_rule(Term0, project(BodyGlobal)).
+	kb_add_rule(Module, Term0, project(BodyGlobal)).
 
 %%
 % Term expansion for *query+project* rules using the (?+>) operator.
