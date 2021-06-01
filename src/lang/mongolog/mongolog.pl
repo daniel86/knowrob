@@ -10,6 +10,10 @@
 @license BSD
 */
 
+% TODO: better support for recursion
+%		- cycles in views are not allowed
+%		- but graphLookup can be used for transitive relations
+
 :- use_module(library('semweb/rdf_db'),
 	    [ rdf_meta/1, rdf_global_term/2 ]).
 :- use_module(library('db/mongo/client')).
