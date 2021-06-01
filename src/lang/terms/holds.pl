@@ -30,7 +30,7 @@ arithmetic_operator(X,X).
 %
 strip_unit(Term, Operator, Multiplier, Offset, Value) :-
 	nonvar(Term),
-	% strip opearator if any
+	% strip operator if any
 	mng_strip_operator(Term, MngOperator, WithoutOperator),
 	compound(WithoutOperator),
 	% try to gather unit data
@@ -59,6 +59,9 @@ holds(Subject, Property, Value) ?>
 	% The idea is that we call triple/3 with a fresh variable for O,
 	% and then perform any arithmetic operations only after the value has
 	% been converted to the requested unit.
+	% FIXME: do not use pragma here as it won't work for creating views.
+	%        the view should just provide values wrapped in unit if the database
+	%        has stored unit information.
 	pragma(lang_holds:strip_unit(Value, Operator,
 		Multiplier, Offset, Stripped)),
 	% replace O with a new variable BaseUnitValue
@@ -94,6 +97,7 @@ holds(Subject, Property, Value) +>
 % @param Query the query term.
 %
 holds(Query) ?+>
+	pragma(compound(Query)),
 	pragma(Query =.. [P,S,O]),
 	holds(S,P,O).
 
