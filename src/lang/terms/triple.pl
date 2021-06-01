@@ -29,6 +29,7 @@ The following predicates are supported:
 		  mng_query_value/2,
 		  mng_typed_value/2 ]).
 :- use_module(library('lang/mongolog/mongolog')).
+:- use_module(library('lang/mongolog/control')).
 
 :- rdf_meta(taxonomical_property(r)).
 :- rdf_meta(must_propagate_assert(r)).
@@ -714,7 +715,22 @@ scope_intersect(VarKey, Since1, Until1, Options, Step) :-
 	;	Step=['$match', ['$expr',
 			['$lt', array([string(Since0), string(Until0)])]
 		]]
-	).	
+	).
+
+%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%
+
+%
+new_iri(Prefix,IRI) ?>
+	random_atom(6,Hash),
+	once((ground(Prefix);assign(Prefix,'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Entity'))),
+	atomic_list_concat([Prefix,Hash],'_',Candidate),
+	% FIXME: below if-then-else does not properly expand triple predicate for some reason!
+	%        well the IRI is returned so let's hope for now it is unique...
+	(	triple(Candidate,_,_)
+	->	new_iri(Prefix,IRI)
+	;	assign(IRI,Candidate)
+	).
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%% helper

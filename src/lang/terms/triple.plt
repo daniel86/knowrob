@@ -22,6 +22,11 @@
 		'http://knowrob.org/kb/datatype_test#',
 		[keep(true)]).
 
+test('new_iri(+,-)') :-
+	kb_call(new_iri(_,IRI)),
+	assert_true(atom(IRI)),
+	assert_false(triple(IRI,_,_)).
+
 test('project(assign(C,c), triple(a,b,C))') :-
 	assert_true(kb_project((
 		ask(assign(C,g)),
