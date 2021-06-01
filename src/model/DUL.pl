@@ -184,7 +184,7 @@ has_object_type(Entity,Type) ?>
 % @param Location named individual
 %
 has_location(Object, Location) ?+>
-	holds(Object, dul:hasLocation, Location).
+	triple(Object, dul:hasLocation, Location).
 
 %% has_role(?Entity,?Role) is nondet.
 %
@@ -194,7 +194,7 @@ has_location(Object, Location) ?+>
 % @param Role named individual
 %
 has_role(Entity,Role) ?+>
-	holds(Role, dul:classifies, Entity).
+	triple(Role, dul:classifies, Entity).
 
 %% has_part(?Entity,?Part) is nondet.
 %
@@ -206,7 +206,7 @@ has_role(Entity,Role) ?+>
 % TODO: not object related, probably best to add a module DUL.pl and add it there
 %
 has_part(Entity,Part) ?+>
-	holds(Entity, dul:hasPart, Part).
+	triple(Entity, dul:hasPart, Part).
 
 %% is_event(?Entity) is nondet.
 %
@@ -265,10 +265,10 @@ is_process(Entity) ?+>
 % @param Class The most specific type of Participant.
 %
 has_participant(Evt,Participant) ?+>
-	holds(Evt,dul:hasParticipant,Participant).
+	triple(Evt,dul:hasParticipant,Participant).
 
 has_participant(Evt,Participant,Class) ?>
-	holds(Evt,dul:hasParticipant,Participant),
+	triple(Evt,dul:hasParticipant,Participant),
 	has_object_type(Participant,Class).
 
 %% is_classified_by(+Evt, ?Tsk) is nondet
@@ -278,7 +278,7 @@ has_participant(Evt,Participant,Class) ?>
 % @param Evt The Event
 % @param Task The task that classifies the Event
 is_classified_by(Evt, Task) ?+>
-	holds(Evt,dul:isClassifiedBy,Task).
+	triple(Evt,dul:isClassifiedBy,Task).
 
 %% executes_task(?Act,?Tsk) is nondet.
 %
@@ -290,7 +290,7 @@ is_classified_by(Evt, Task) ?+>
 % @param Tsk An individual of type dul:'Task'.
 %
 executes_task(Act,Tsk) ?+>
-	holds(Act,dul:executesTask,Tsk).
+	triple(Act,dul:executesTask,Tsk).
 
 %% task_role(?Tsk,?Role) is nondet.
 %
@@ -302,7 +302,7 @@ executes_task(Act,Tsk) ?+>
 % @param Role An individual of type dul:'Role'.
 %
 task_role(Tsk,Role) ?+>
-	holds(Tsk, dul:isTaskOf ,Role).
+	triple(Tsk, dul:isTaskOf ,Role).
 
 has_task_role(Tsk,Role) ?+>
 	task_role(Tsk,Role).
@@ -317,7 +317,7 @@ has_task_role(Tsk,Role) ?+>
 % @param RoleType A sub-class of dul:'Role'.
 %
 task_role_type(Tsk,Role,RoleType) ?>
-	holds(Tsk, dul:isTaskOf, Role),
+	triple(Tsk, dul:isTaskOf, Role),
 	has_object_type(Role,RoleType).
 
 %% task_role_range(?Tsk,?Role,?Range) is nondet.
@@ -330,8 +330,8 @@ task_role_type(Tsk,Role,RoleType) ?>
 % @param Range A sub-class of dul:'Object'.
 %
 task_role_range(Tsk,Role,Range) ?>
-	holds(Tsk,dul:isTaskOf,Role),
-	holds(Role,dul:classifies,only(Range)).
+	triple(Tsk,dul:isTaskOf,Role),
+	triple(Role,dul:classifies,only(Range)).
 
 
 %% is_region(?Entity) is nondet.
@@ -408,7 +408,7 @@ is_time_interval(Entity) ?+>
 % @param Region An region IRI.
 %
 has_region(Entity,Region) ?+>
-	holds(Entity, dul:hasRegion, Region).
+	triple(Entity, dul:hasRegion, Region).
 
 %% has_parameter(?Entity,?Param) is nondet.
 %
@@ -421,7 +421,7 @@ has_region(Entity,Region) ?+>
 % @param Param An parameter IRI.
 %
 has_parameter(Entity,Param) ?+>
-	holds(Entity,dul:hasParameter,Param).
+	triple(Entity,dul:hasParameter,Param).
 
 %% has_parameter(?Entity,?Param,?ParamType) is nondet.
 %
@@ -433,7 +433,7 @@ has_parameter(Entity,Param) ?+>
 % @param Param parameter type IRI.
 %
 has_parameter(Entity,Param,ParamType) ?>
-	holds(Entity,dul:hasParameter,Param),
+	triple(Entity,dul:hasParameter,Param),
 	has_object_type(Param,ParamType).
 
 %% has_parameter_range(?Entity,?Param,?Range) is nondet.
@@ -446,8 +446,8 @@ has_parameter(Entity,Param,ParamType) ?>
 % @param Range parameter range IRI.
 %
 has_parameter_range(Entity,Param,Range) ?>
-	holds(Entity,dul:hasParameter,Param),
-	holds(Param,dul:classifies,only(Range)).
+	triple(Entity,dul:hasParameter,Param),
+	triple(Param,dul:classifies,only(Range)).
 
 %% has_assignment(?Param,?Region) is nondet.
 %
@@ -457,7 +457,7 @@ has_parameter_range(Entity,Param,Range) ?>
 % @param Region region IRI.
 %
 has_assignment(Param,Region) ?+>
-	holds(Param,dul:classifies,Region).
+	triple(Param,dul:classifies,Region).
 
 %% has_data_value(?Entity,?DataValue) is nondet.
 %
@@ -564,7 +564,7 @@ is_transition(Entity) ?+>
 % @param Goal An individual of type dul:'Description'.
 %
 plan_has_goal(Plan,Goal) ?+>
-	holds(Plan,dul:hasComponent,Goal),
+	triple(Plan,dul:hasComponent,Goal),
 	has_type(Goal,dul:'Goal').
 
 %% satisfies(?Sit,?Descr) is nondet.
@@ -576,7 +576,7 @@ plan_has_goal(Plan,Goal) ?+>
 % @param Descr An individual of type dul:'Description'.
 %
 satisfies(Sit,Descr) ?+>
-	holds(Sit,dul:satisfies,Descr).
+	triple(Sit,dul:satisfies,Descr).
 
 %% is_setting_for(+Sit,+Entity) is nondet.
 %

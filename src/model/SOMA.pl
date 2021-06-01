@@ -145,7 +145,7 @@ is_episode(Entity) ?+>
 % @param Agent An individual of type dul:'Agent'.
 %
 is_performed_by(Act,Agent) ?+>
-	holds(Act, soma:isPerformedBy, Agent).
+	triple(Act, soma:isPerformedBy, Agent).
 
 %% action_status(?Act,?Status) is semidet.
 %
@@ -155,7 +155,7 @@ is_performed_by(Act,Agent) ?+>
 % @param Status The execution status of Act.
 %
 action_status(Act,Status) ?+>
-	holds(Act, soma:hasExecutionState, Status).
+	triple(Act, soma:hasExecutionState, Status).
 
 %% action_succeeded(?Act) is det.
 %
@@ -417,7 +417,7 @@ is_progression(Entity) ?+>
 % @param Role An individual of type dul:'Role'.
 %
 has_process_role(Tsk,Role) ?+>
-	holds(Tsk, soma:isProcessTypeOf ,Role).
+	triple(Tsk, soma:isProcessTypeOf ,Role).
 
 %% is_state(?Entity) is nondet.
 %
@@ -469,15 +469,15 @@ is_state_type(Entity) ?+>
 %
 %
 has_subevent(Event,Sub) ?>
-	holds(Event,dul:hasConstituent,Sub).
+	triple(Event,dul:hasConstituent,Sub).
 
 has_subevent(Event,Sub) ?>
-	holds(Event,soma:hasPhase,Sub).
+	triple(Event,soma:hasPhase,Sub).
 
 has_subevent(Event,Sub) +>
-	(	is_action(Sub)  -> holds(Event,dul:hasConstituent,Sub)
-	;	is_process(Sub) -> holds(Event,soma:hasPhase,Sub)
-	;	is_state(Sub)   -> holds(Event,soma:hasPhase,Sub)
+	(	is_action(Sub)  -> triple(Event,dul:hasConstituent,Sub)
+	;	is_process(Sub) -> triple(Event,soma:hasPhase,Sub)
+	;	is_state(Sub)   -> triple(Event,soma:hasPhase,Sub)
 	;	fail
 	).
 
@@ -512,7 +512,7 @@ is_succeedence(Entity) ?+>
 % @param Tsk An individual of type dul:'Task'.
 %
 plan_defines_task(Plan,Tsk) ?+>
-	holds(Plan,soma:isPlanFor,Tsk).
+	triple(Plan,soma:isPlanFor,Tsk).
 
 %% plan_has_goal(?WF,?Step) is semidet.
 %
@@ -522,7 +522,7 @@ plan_defines_task(Plan,Tsk) ?+>
 % @param Step An individual of type dul:'Task'.
 %
 workflow_step(WF,Step) ?+>
-	holds(WF,soma:hasStep,Step).
+	triple(WF,soma:hasStep,Step).
 
 %% workflow_first_step(?WF,?Step) is semidet.
 %
@@ -532,7 +532,7 @@ workflow_step(WF,Step) ?+>
 % @param Step An individual of type dul:'Task'.
 %
 workflow_first_step(WF,Step) ?+>
-	holds(WF,soma:hasFirstStep,Step).
+	triple(WF,soma:hasFirstStep,Step).
 
 %% workflow_constituent(+WF, ?Constituent) is semidet.
 %
@@ -580,7 +580,7 @@ is_feature(Entity) ?+>
 % @param Feature  Feature resource
 %
 object_feature(Obj, Feature) ?+>
-	holds(Obj,soma:hasFeature,Feature).
+	triple(Obj,soma:hasFeature,Feature).
 
 %% object_feature(?Obj, ?Feature, ?FeatureType) is nondet.
 %
@@ -625,7 +625,7 @@ is_disposition(Entity) ?+>
 % @param Disposition  Disposition resource
 %
 has_disposition(Obj, Disposition) ?+>
-	holds(Obj,soma:hasDisposition,Disposition).
+	triple(Obj,soma:hasDisposition,Disposition).
 
 %% has_disposition(?Obj:iri, ?Disposition:iri, +DispositionType:iri) is nondet.
 %
@@ -637,7 +637,7 @@ has_disposition(Obj, Disposition) ?+>
 % @param DispositionType   Class resource
 %
 has_disposition_type(Obj, Disposition, DispositionType) ?>
-	holds(Obj,soma:hasDisposition,Disposition),
+	triple(Obj,soma:hasDisposition,Disposition),
 	has_quality_type(Disposition,DispositionType).
 
 %% disposition_trigger_type(?Disposition, ?TriggerType) is nondet.
@@ -649,7 +649,7 @@ has_disposition_type(Obj, Disposition, DispositionType) ?>
 % @param TriggerType  Class resource
 %
 disposition_trigger_type(Disposition,TriggerType) ?>
-	holds(Disposition, soma:affordsTrigger, only(TriggerRole)),
+	triple(Disposition, soma:affordsTrigger, only(TriggerRole)),
 	subclass_of(TriggerRole, only(dul:classifies,TriggerType)).
 
 		 /*******************************
@@ -798,7 +798,7 @@ is_interval_equal(TI1, TI2) ?>
 % @param Loc localization quality
 %
 object_localization(Obj,Loc) ?+>
-	holds(Obj,soma:hasLocalization,Loc).
+	triple(Obj,soma:hasLocalization,Loc).
 
 %% object_shape_type(?Obj, ?ShapeType) is nondet.
 %
@@ -810,8 +810,8 @@ object_localization(Obj,Loc) ?+>
 % @param ShapeType IRI of shape type
 %
 object_shape_type(Obj, ShapeType) ?>
-	holds(Obj,soma:hasShape,Shape),
-	holds(Shape,dul:hasRegion,ShapeRegion),
+	triple(Obj,soma:hasShape,Shape),
+	triple(Shape,dul:hasRegion,ShapeRegion),
 	has_type(ShapeRegion,ShapeType).
 
 %% object_mesh_path(?Obj, -FilePath) is nondet.
@@ -823,13 +823,13 @@ object_shape_type(Obj, ShapeType) ?>
 %
 object_mesh_path(Obj, FilePath) ?+>
 	% TODO: get_or_create SHA,REG in projection
-	holds(Obj, soma:hasShape, SHA),
-	holds(SHA, dul:hasRegion, REG),
-	holds(REG, soma:hasFilePath, FilePath),
+	triple(Obj, soma:hasShape, SHA),
+	triple(SHA, dul:hasRegion, REG),
+	triple(REG, soma:hasFilePath, FilePath),
 	!.
 
 object_mesh_path(Obj, FilePath) ?>
-	holds(Obj,soma:hasFilePath,FilePath ).
+	triple(Obj,soma:hasFilePath,FilePath ).
 
 %% object_color_rgb(?Obj, ?R, ?G, ?B) is nondet.
 %
@@ -841,19 +841,19 @@ object_mesh_path(Obj, FilePath) ?>
 % 
 object_color_rgb(OBJ, R, G, B) ?+>
 	% TODO: get_or_create COL,REG in projection
-	holds(OBJ, soma:hasColor, COL),
-	holds(COL, dul:hasRegion, REG),
-	holds(REG, soma:hasRGBValue, term([R,G,B])),
+	triple(OBJ, soma:hasColor, COL),
+	triple(COL, dul:hasRegion, REG),
+	triple(REG, soma:hasRGBValue, term([R,G,B])),
 	!.
 
 object_color_rgb(OBJ, R, G, B) ?>
-	holds(OBJ, soma:hasRGBValue, term([R,G,B])).
+	triple(OBJ, soma:hasRGBValue, term([R,G,B])).
 
 %%
 shape_bbox(ShapeRegion, Depth, Width, Height) ?+>
-	holds(ShapeRegion, soma:hasDepth, Depth),
-	holds(ShapeRegion, soma:hasWidth, Width),
-	holds(ShapeRegion, soma:hasHeight, Height),
+	triple(ShapeRegion, soma:hasDepth, Depth),
+	triple(ShapeRegion, soma:hasWidth, Width),
+	triple(ShapeRegion, soma:hasHeight, Height),
 	!.
 
 % TODO
@@ -875,8 +875,8 @@ shape_bbox(ShapeRegion, Depth, Width, Height) ?+>
 % 
 object_dimensions(Obj, Depth, Width, Height) ?+>
 	% TODO: get_or_create SHA,REG in projection
-	holds(Obj, soma:hasShape, SHA),
-	holds(SHA, dul:hasRegion, REG),
+	triple(Obj, soma:hasShape, SHA),
+	triple(SHA, dul:hasRegion, REG),
 	shape_bbox(REG, Depth, Width, Height),
 	!.
 
