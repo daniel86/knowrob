@@ -112,6 +112,14 @@ PREDICATE(mng_index_create_core, 3) {
 	return TRUE;
 }
 
+PREDICATE(mng_view_create_internal, 4) {
+	char* db_name   = (char*)PL_A1;
+	char* coll_name = (char*)PL_A2;
+	char* view_name = (char*)PL_A3;
+	MongoInterface::get().create_view(db_name,coll_name,view_name,PL_A4);
+	return TRUE;
+}
+
 PREDICATE(mng_cursor_create, 3) {
 	char* db_name   = (char*)PL_A1;
 	char* coll_name = (char*)PL_A2;
