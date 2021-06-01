@@ -675,7 +675,14 @@ expand_term_1(Goal, Expanded) :-
 	expand_term_0(Goal, Expanded).
 
 expand_term_1(Goal, Expanded) :-
-	once(is_callable_with(_,Goal)),
+	once((compound(Goal);atomic(Goal))),
+	Goal =.. [Functor|Args],
+	length(Args,Arity),
+	once((
+		expanding_term(Functor, Arity, _, _)
+	;	is_callable_with(_,Goal)
+	)),
+%	once(is_callable_with(_,Goal)),
 	% allow the goal to recursively expand
 	(	step_expand(Goal, Expanded) -> true
 	;	Expanded = Goal
@@ -794,7 +801,7 @@ flush_predicate(SrcModule) :-
 % handle last rule in a file
 user:term_expansion(end_of_file, end_of_file) :-
 	prolog_load_context(module, SrcModule),
-	flush_predicate(SrcModule).
+	ignore(flush_predicate(SrcModule)).
 
 %%
 % Term expansion for *querying* rules using the (?>) operator.
@@ -810,8 +817,6 @@ user:term_expansion(
 	rdf_global_term(Body, BodyGlobal),
 	strip_module_(HeadGlobal,DstModule,Term),
 	once((ground(DstModule);DstModule=SrcModule)),
-	% add the rule to the DB backend
-	kb_add_rule(DstModule, Term, BodyGlobal),
 	% expand into regular Prolog rule only once for all clauses
 	Term =.. [Functor|Args],
 	length(Args,Arity),
@@ -822,6 +827,8 @@ user:term_expansion(
 			assertz(expanding_term(Functor, Arity, SrcModule, DstModule))
 		)
 	),
+	% add the rule to the DB backend
+	kb_add_rule(DstModule, Term, BodyGlobal),
 	%
 	length(Args1,Arity),
 	Term1 =.. [Functor|Args1],
