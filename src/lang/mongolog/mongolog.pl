@@ -1,6 +1,7 @@
 :- module(mongolog,
 	[ mongolog_call(t),
 	  mongolog_call(t,+),
+	  mongolog_rule_assert(+,+,+,+),
 	  is_mongolog_predicate(+)
 	]).
 /** <module> Compiling goals into aggregation pipelines.
@@ -22,6 +23,41 @@
 :- rdf_meta(step_compile(t,t,t,-)).
 
 
+
+%% mongolog_rule_assert(+Module, +Functor, +Args, +Pipeline) is det.
+%
+mongolog_rule_assert(_Module, Functor, Args, Zs) :-
+	Goal =.. [Functor|Args],
+	length(Args, Arity),
+	atomic_list_concat([Functor, Arity], '_', ViewName),
+	% compile an aggregation pipeline
+	current_scope(QScope),
+	mongolog:mongolog_compile(Zs,
+		pipeline(Pipeline,Vars),
+		[ scope(QScope)
+		, prune_unreferenced(false)
+		]),
+	% lookup variable keys
+	findall(K,
+		(	member(Arg,Args),
+			once((
+				member([K,X],Vars),
+				X == Arg
+			))
+		),
+		Fields),
+	!,
+	% create a view for the head predicate
+	mng_one_db(DBName, CollectionName),
+	mng_view_create(DBName, CollectionName, ViewName, array(Pipeline)),
+	% add head as an IDB predicate in mongolog
+	(	mongolog_database:mongolog_predicate(Goal, _, _)
+	->	true
+	;	mongolog_add_predicate(Functor, Fields,
+			[collection(ViewName), indices([])])
+	).
+
+
 %% add_command(+Command) is det.
 %
 % register a command that can be used in KnowRob
@@ -32,8 +68,8 @@
 %
 % @param Command a command term.
 %
-add_command(Command) :-
-	assertz(step_command(Command)).
+add_command(Command) :- step_command(Command),!.
+add_command(Command) :- assertz(step_command(Command)).
 
 
 %% is_mongolog_predicate(+PredicateIndicator) is semidet.
