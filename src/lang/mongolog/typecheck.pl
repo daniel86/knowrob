@@ -38,6 +38,7 @@ mongolog:step_compile(ground(Arg), _Ctx, []) :-
 
 mongolog:step_compile(ground(Arg), Ctx, []) :-
 	% argument was not referred to before in query, thus cannot be ground
+	option(prune_unreferenced(true), Ctx, true),
 	term_variables(Arg,Vars),
 	member(Var,Vars),
 	\+ mongolog:is_referenced(Var,Ctx), !,
@@ -79,6 +80,7 @@ mongolog:step_compile(var(Arg), _Ctx, []) :-
 
 mongolog:step_compile(var(Arg), Ctx, []) :-
 	% argument was not referred to before in query, thus must be var
+	option(prune_unreferenced(true), Ctx, true),
 	\+ mongolog:is_referenced(Arg,Ctx), !.
 
 mongolog:step_compile(
@@ -114,6 +116,7 @@ mongolog:step_compile(number(Arg), _Ctx, []) :-
 
 mongolog:step_compile(number(Arg), Ctx, []) :-
 	% argument is var and was not referred to before in query, thus cannot be number
+	option(prune_unreferenced(true), Ctx, true),
 	\+ mongolog:is_referenced(Arg,Ctx), !,
 	fail.
 
@@ -130,6 +133,7 @@ mongolog:step_compile(atom(Arg), _Ctx, []) :-
 
 mongolog:step_compile(atom(Arg), Ctx, []) :-
 	% argument is var and was not referred to before in query, thus cannot be atom
+	option(prune_unreferenced(true), Ctx, true),
 	\+ mongolog:is_referenced(Arg,Ctx), !,
 	fail.
 
@@ -146,6 +150,7 @@ mongolog:step_compile(is_list(Arg), _Ctx, []) :-
 
 mongolog:step_compile(is_list(Arg), Ctx, []) :-
 	% argument is var and was not referred to before in query, thus cannot be list
+	option(prune_unreferenced(true), Ctx, true),
 	\+ mongolog:is_referenced(Arg,Ctx), !,
 	fail.
 
@@ -162,6 +167,7 @@ mongolog:step_compile(compound(Arg), _Ctx, []) :-
 
 mongolog:step_compile(compound(Arg), Ctx, []) :-
 	% argument was not referred to before in query, thus cannot be compound
+	option(prune_unreferenced(true), Ctx, true),
 	\+ mongolog:is_referenced(Arg,Ctx), !,
 	fail.
 
@@ -188,6 +194,7 @@ match_type_(Arg, Goal, _Type, _Ctx, []) :-
 
 match_type_(Arg, _, _Type, Ctx, []) :-
 	% argument was not referred to before in query, so cannot be ground
+	option(prune_unreferenced(true), Ctx, true),
 	\+ mongolog:is_referenced(Arg,Ctx), !,
 	fail.
 
