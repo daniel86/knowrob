@@ -287,6 +287,31 @@ void MongoInterface::update(
 	}
 }
 
+void MongoInterface::create_view(
+		const char *db_name,
+		const char *coll_name,
+		const char *view_name,
+		const PlTerm &query_term)
+{
+	MongoDatabase db_handle(pool_,db_name);
+	mongoc_collection_t *view;
+	bson_error_t err;
+	// create view options
+	bson_t view_opts = BSON_INITIALIZER;
+	BSON_APPEND_UTF8(&view_opts, "viewOn", coll_name);
+	//BSON_APPEND_DOCUMENT(&view_opts, "collation", NULL);
+	bsonpl_append(&view_opts, "pipeline", query_term, &err);
+	// create view collection
+	view = mongoc_database_create_collection(
+			db_handle(), view_name, &view_opts, &err);
+	if(!view) {
+		throw MongoException("database_error",err);
+	}
+	else {
+		mongoc_collection_destroy(view);
+	}
+}
+
 void MongoInterface::create_index(const char *db_name, const char *coll_name, const PlTerm &keys_pl)
 {
 	MongoDatabase db_handle(pool_,db_name);

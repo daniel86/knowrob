@@ -43,6 +43,8 @@ public:
 
 	void create_index(const char *db_name, const char *coll_name, const PlTerm &keys_term);
 	
+	void create_view(const char *db_name, const char *coll_name, const char *view_name, const PlTerm &query_term);
+
 	
 	static MongoCursor* cursor_create(const char *db_name, const char *coll_name);
 	
