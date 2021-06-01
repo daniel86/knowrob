@@ -1,5 +1,5 @@
 :- module(swrlx,
-		[ swrlx_make_individual/2
+		[ %swrlx_make_individual/2
 		]).
 /** <module> Support for the SWRL Extensions built-in library.
 
@@ -23,21 +23,21 @@
 %
 swrl:swrl_builtin(
 		makeOWLIndividual, [A|Args],
-		swrlx_make_individual(A_atom, [Label|Pattern]),
+		project(swrlx_make_individual(A_atom, [Label|Pattern])),
 		Vars) :-
 	% read the label of the rule the builtin is embedded in
 	memberchk(var('swrl:label',Label), Vars),
 	swrl:swrl_atoms([A|Args], [A_atom|Pattern], Vars).
 
 %
-swrlx_make_new_individual(Individual, Pattern) ?>
+swrlx_make_new_individual(Individual, Pattern) +>
 	% generate a unique IRI, use Type as prefix
-	new_iri(Individual, owl:'Thing'),
+	ask(new_iri(Individual, owl:'Thing')),
 	% assert facts about the new individual
-	project(is_individual(Individual)),
-	project(has_type(Individual, owl:'Thing')),
+	is_individual(Individual),
+	has_type(Individual, owl:'Thing'),
 	% assert mapping between pattern and individual
-	assert(swrlx_individual(Individual, Pattern)).
+	swrlx_individual(Individual, Pattern).
 
 %% swrlx_make_individual(?Individual, +Pattern) is det.
 %
@@ -50,14 +50,14 @@ swrlx_make_new_individual(Individual, Pattern) ?>
 % @param Individual IRI atom
 % @param Pattern List of atoms
 %
-swrlx_make_individual(Individual, Pattern) ?>
+swrlx_make_individual(Individual, Pattern) +>
 	ground(Pattern),
 	atomic_list_concat(Pattern, '::', PatternAtom),
 	once((
 		% succeed if individual is an atom already
 		atom(Individual)
 		% read indiviudal from cache
-	;	(var(Individual), swrlx_individual(Individual, PatternAtom))
+	;	(var(Individual), ask(swrlx_individual(Individual, PatternAtom)))
 		% cache miss: create a new individual
 	;	(var(Individual), swrlx_make_new_individual(Individual, PatternAtom))
 	)).
