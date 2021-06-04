@@ -17,6 +17,7 @@ The following predicates are supported:
 */
 
 :- use_module('mongolog').
+:- use_module('aggregation/lookup').
 
 
 %% Predicates that are stored in a mongo collection
@@ -92,37 +93,84 @@ mongolog_drop_predicate(Functor) :-
 
 %%
 lang_query:step_expand(project(Term), assert(Term)) :-
-	mongolog_predicate(Term, _, _),!.
+	mongolog_predicate(Term, _, Opts),
+	option(type(edb), Opts, edb),
+	!.
 
 %%
-mongolog:step_compile(assert(Term), Ctx, Pipeline, StepVars) :-
-	mongolog_predicate(Term, _, _),!,
+mongolog:step_compile1(assert(Term), Ctx,
+		[ document(Pipeline),
+		  variables(StepVars)
+		]) :-
+	mongolog_predicate(Term, _, Opts),
+	option(type(edb), Opts, edb),
+	!,
 	mongolog_predicate_assert(Term, Ctx, Pipeline, StepVars).
 
-mongolog:step_compile(retractall(Term), Ctx, Pipeline, StepVars) :-
-	mongolog_predicate(Term, _, _),!,
+mongolog:step_compile1(retractall(Term), Ctx,
+		[ document(Pipeline),
+		  variables(StepVars)
+		]) :-
+	mongolog_predicate(Term, _, Opts),
+	option(type(edb), Opts, edb),
+	!,
 	mongolog_predicate_retractall(Term, Ctx, Pipeline, StepVars).
 
-mongolog:step_compile(Term, Ctx, Pipeline, StepVars) :-
-	mongolog_predicate(Term, _, _),!,
-	mongolog_predicate_call(Term, Ctx, Pipeline, StepVars).
+mongolog:step_compile1(Term, Ctx,
+		[ document(Pipeline),
+		  variables(StepVars0),
+		  input_collection(Collection),
+		  input_keys(Fields)
+		]) :-
+	mongolog_predicate(Term, Fields, Opts),!,
+	mongolog_predicate_call(Term, Ctx, Pipeline, StepVars, Collection),
+	%
+	add_array_vars(Term, Opts, Ctx, StepVars, StepVars0).
+
+%
+add_array_vars(Term, Opts, Ctx, StepVars, StepVars0) :-
+	option(rdfs_fields(RDFSFields), Opts, []),
+	RDFSFields \== [],
+	bagof([K0,_],
+		(	mongolog:goal_var(Term, Ctx, [K,_]),
+			memberchk(K,RDFSFields),
+			atom_concat(K,'_s',K0)
+		),
+		ArrayVars),
+	!,
+	append(StepVars, ArrayVars, StepVars0).
+add_array_vars(_, _, _, StepVars, StepVars).
 
 %%
-mongolog_predicate_call(Term, Ctx, Pipeline, StepVars) :-
+mongolog_predicate_call(Term, Ctx, Pipeline, StepVars, Collection) :-
 	mongolog_predicate_zip(Term, Ctx, Zipped, Ctx_pred, read),
+	option(collection(Collection), Ctx_pred),
 	option(step_vars(StepVars), Ctx_pred),
-	%
 	unpack_compound(Zipped, Unpacked),
-	findall(InnerStep,
-		match_predicate(Unpacked, Ctx_pred, InnerStep),
-		InnerPipeline),
 	%
+	findall(InnerStep,
+		match_predicate(Unpacked, Ctx, Ctx_pred, InnerStep),
+		InnerPipeline),
+	mongolog_predicate_call1(Unpacked, InnerPipeline, Ctx_pred, Pipeline).
+
+%%
+mongolog_predicate_call1(Unpacked, Matches, Ctx, Pipeline) :-
+	% no need to perform a $lookup if input collection was assigned before
+	\+ option(input_assigned,Ctx),!,
+	findall(Step,
+		(	member(Step,Matches)
+		;	project_predicate1(Unpacked, Ctx, Step)
+		),
+		Pipeline).
+	
+mongolog_predicate_call1(Unpacked, InnerPipeline, Ctx, Pipeline) :-
+	% option(input_assigned,Ctx),!,
 	findall(Step,
 		% look-up documents into 't_pred' array field
-		(	lookup_predicate('t_pred', InnerPipeline, Ctx_pred, Step)
+		(	lookup_predicate('t_pred', InnerPipeline, Ctx, Step)
 		% unwind lookup results and assign variables
 		;	Step=['$unwind', string('$t_pred')]
-		;	project_predicate(Unpacked, Ctx_pred, Step)
+		;	project_predicate(Unpacked, Ctx, Step)
 		;	Step=['$unset', string('t_pred')]
 		),
 		Pipeline).
@@ -134,7 +182,7 @@ mongolog_predicate_retractall(Term, Ctx, Pipeline, StepVars) :-
 	option(step_vars(StepVars), Ctx_pred),
 	unpack_compound(Zipped, Unpacked),
 	findall(InnerStep,
-		(	match_predicate(Unpacked, Ctx_pred, InnerStep)
+		(	match_predicate(Unpacked, Ctx, Ctx_pred, InnerStep)
 		% retractall first performs match, then only projects the id of the document
 		;	project_retract(InnerStep)
 		),
@@ -176,10 +224,14 @@ mongolog_predicate_zip(Term, Ctx, Zipped, Ctx_zipped, ReadOrWrite) :-
 	Term =.. [Functor|Args],
 	length(Args,Arity),
 	% get the database collection of the predicate
-	(	option(collection(Collection), Options)
+	(	(option(collection(Collection), Options), ground(Collection))
 	;	mng_get_db(_DB, Collection, Functor)
 	),
 	!,
+	% try to re-use field name if a field in the document refers to a variable
+	% in Term
+%	predicate_vars(ArgFields, Args, PredVars),
+%	merge_options([step_vars(PredVars)], Ctx, Ctx_tmp),
 	% read variable in Term
 	mongolog:step_vars(Term, Ctx, StepVars0),
 	(	ReadOrWrite==read -> StepVars=StepVars0
@@ -193,6 +245,15 @@ mongolog_predicate_zip(Term, Ctx, Zipped, Ctx_zipped, ReadOrWrite) :-
 	merge_options(Ctx0, Options, Ctx_zipped),
 	% zip field names with predicate arguments
 	zip(ArgFields, Args, Zipped).
+
+%%
+predicate_vars([], [], []) :- !.
+predicate_vars([Key|Xs], [Arg|Ys], [[Key,Var]|Zs]) :-
+	mng_strip_variable(Arg, Arg0),
+	term_variables(Arg0, [Var]),!,
+	predicate_vars(Xs, Ys, Zs).
+predicate_vars([_|Xs], [_|Ys], Zs) :-
+	predicate_vars(Xs, Ys, Zs).
 
 %%
 unpack_compound([], []) :- !.
@@ -249,7 +310,7 @@ lookup_predicate(Field, InnerPipeline, Ctx, ['$lookup', [
 	]]) :-
 	option(collection(Collection), Ctx),
 	option(step_vars(StepVars), Ctx),
-	mongolog:lookup_let_doc(StepVars, LetDoc).
+	lookup_let_doc(StepVars, LetDoc).
 
 %% $set
 %
@@ -258,6 +319,15 @@ project_predicate(Unpacked, Ctx, Step) :-
 	mongolog:var_key(Var,Ctx,VarKey),
 	atomic_list_concat([FieldPath0|Is],'_',FieldPath),
 	atom_concat('$t_pred.', FieldPath, FieldQuery),
+	% FIXME: some unneeded set's here. can we skip if not one of the predicate variable fields?
+	Step=['$set', [VarKey, string(FieldQuery)]].
+
+project_predicate1(Unpacked, Ctx, Step) :-
+	member([FieldPath0,Var,Is], Unpacked),
+	mongolog:var_key(Var,Ctx,VarKey),
+	atomic_list_concat([FieldPath0|Is],'_',FieldPath),
+	atom_concat('$', FieldPath, FieldQuery),
+	% FIXME: some unneeded set's here. can we skip if not one of the predicate variable fields?
 	Step=['$set', [VarKey, string(FieldQuery)]].
 
 %%
@@ -268,11 +338,18 @@ project_retract(Step) :-
 
 %% $match
 %
-match_predicate(Unpacked, Ctx, Match) :-
+match_predicate(Unpacked, OuterCtx, Ctx, Match) :-
+	option(rdfs_fields(RDFSFields), Ctx, []),
 	findall(MatchQuery,
 		% first match what is grounded compile-time
+		% TODO: conditional match can be avoided in case we know the variable
+		%       is associated to a input document field!
 		(	(	findall([DocKey, ValueQuery],
-					(	member([DocKey,Value,[]], Unpacked),
+					(	member([DocKey0,Value,[]], Unpacked),
+						(	memberchk(DocKey0, RDFSFields)
+						->	atom_concat(DocKey0,'_s',DocKey)
+						;	DocKey=DocKey0
+						),
 						mng_query_value(Value, ValueQuery)
 					),
 					MatchQuery),
@@ -280,30 +357,30 @@ match_predicate(Unpacked, Ctx, Match) :-
 			)
 		% next match variables grounded in call context
 		;	(	member([DocKey,Var,[]], Unpacked),
-				match_conditional(DocKey, Var, Ctx, MatchQuery)
+				match_conditional(DocKey, Var, OuterCtx, Ctx, MatchQuery)
 			)
 		),
 		MatchQueries
 	),
+	MatchQueries \== [],
 	(	MatchQueries=[FirstMatch]
 	->	Match=['$match', FirstMatch]
 	;	Match=['$match', ['$and', array(MatchQueries)]]
 	).
 
-match_predicate(Unpacked, Ctx, Match) :-
+match_predicate(Unpacked, OuterCtx, Ctx, Match) :-
 	% compound arguments with free variables need to be handled
 	% separately because we cannot write path queries that
 	% access array elements.
 	set_nested_args(Unpacked,SetArgs),
-	match_nested(Unpacked, Ctx, MatchNested),
 	(	Match = SetArgs
-	;	Match = MatchNested
+	;	match_nested(Unpacked, OuterCtx, Ctx, Match)
 	).
 
 %%
-match_nested(Unpacked, Ctx, Match) :-
+match_nested(Unpacked, OuterCtx, Ctx, Match) :-
 	nested_args(Unpacked, NestedArgs),
-	match_predicate(NestedArgs, Ctx, Match).
+	match_predicate(NestedArgs, OuterCtx, Ctx, Match).
 
 %%
 nested_args([], []) :- !.
@@ -317,22 +394,37 @@ nested_args([_|Xs], Ys) :-
 	nested_args(Xs,Ys).
 
 %%
-match_conditional(FieldKey, Arg, Ctx, ['$expr', ['$or', array([
+match_conditional(FieldKey, Arg, OuterCtx, Ctx, ['$expr', ['$or', array([
 			% pass through if var is not grounded
 			['$eq',       array([string(ArgType),   string('var')])],
 			% else perform a match
-			[ArgOperator, array([string(FieldQuery), string(ArgValue)])]
+			[ArgOperator, array([string(ArgValue), string(FieldQuery)])]
 		])]]) :-
+	option(rdfs_fields(RDFSFields), Ctx, []),
 	% get the variable in Arg term
 	mng_strip_variable(Arg, Arg0),
 	term_variables(Arg0, [ArgVar]),!,
+	% do not perform conditional match if variable was not referred to before
+	mongolog:is_referenced(ArgVar, OuterCtx),
 	mongolog:var_key(ArgVar, Ctx, ArgKey),
+	% TODO: need to set let variables or use $ vs $$ conditional
+	(	option(input_assigned,Ctx)
+	->	atom_concat('$$',ArgKey,ArgValue)
+	;	atom_concat('$',ArgKey,ArgValue)
+	),
+	atom_concat(ArgValue,'.type',ArgType),
 	% get the operator
 	mng_strip_operator(Arg0, Operator1, _Arg1),
-	mng_operator(Operator1, ArgOperator),
-	atom_concat('$',FieldKey,FieldQuery),
-	atom_concat('$$',ArgKey,ArgValue),
-	atom_concat(ArgValue,'.type',ArgType).
+	atom_concat('$',FieldKey,FieldQuery0),
+	(	memberchk(FieldKey, RDFSFields)
+	->	(
+		% FIXME handle Operator1
+		ArgOperator='$in',
+		atom_concat(FieldQuery0,'_s',FieldQuery)
+	);(
+		mng_operator(Operator1, ArgOperator),
+		FieldQuery=FieldQuery0
+	)).
 
 		 /*******************************
 		 *    	  UNIT TESTING     		*
@@ -340,7 +432,7 @@ match_conditional(FieldKey, Arg, Ctx, ['$expr', ['$or', array([
 
 :- begin_tests('mongolog_database').
 
-test('add_database_predicate') :-
+test('add_predicate') :-
 	assert_true(mongolog_add_predicate(woman, [name], [[name]])),
 	assert_true(mongolog_add_predicate(loves, [a,b], [[a],[b],[a,b]])).
 
@@ -415,7 +507,16 @@ test('shape(+,sphere(-))') :-
 	assert_true(ground(Xs)),
 	assert_true(memberchk(1.0,Xs)).
 
+test('edb_rule') :-
+	lang_query:expand_ask_rule(loved_woman(A), (woman(A), loves(_,A)), _),
+	lang_query:flush_predicate(user),
+	%%
+	findall(X, mongolog_call(loved_woman(X)), Xs),
+	assert_equals(Xs, [mia]),
+	assert_true(mongolog_drop_predicate(loved_woman_1)).
+
 test('+Cond->assert(woman);assert(woman)') :-
+	% TODO: move into disjunction test
 	assert_false(mongolog_call(woman(bar))),
 	assert_true(mongolog:test_call(
 		(	Num > 5
@@ -425,6 +526,15 @@ test('+Cond->assert(woman);assert(woman)') :-
 		Num, 4.5)),
 	assert_true(mongolog_call(woman(bar))),
 	assert_false(mongolog_call(woman(foo))).
+
+test('findall_rule') :-
+	% TODO: move into findall test
+	lang_query:expand_ask_rule(findall_test(As), findall(A, woman(A), As), _),
+	lang_query:flush_predicate(user),
+	%%
+	findall(As, mongolog_call(findall_test(As)), X),
+	assert_equals(X, [[mia,bar]]),
+	assert_true(mongolog_drop_predicate(findall_test_1)).
 
 test('drop_database_predicate') :-
 	assert_true(mongolog_drop_predicate(shape)),

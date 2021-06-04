@@ -119,20 +119,37 @@ lang_query:step_expand(project(Term), assert(Term)) :-
 
 %%
 %
-mongolog:step_compile(assert(Term), Ctx, Pipeline, StepVars) :-
+mongolog:step_compile1(assert(Term), Ctx,
+		[ document(Pipeline),
+		  variables(StepVars)
+		]) :-
 	mongolog_fluent(Term, _, _, _),!,
 	mongolog_fluent_assert(Term, Ctx, Pipeline, StepVars).
 
-mongolog:step_compile(retractall(Term), Ctx, Pipeline, StepVars) :-
+mongolog:step_compile1(retractall(Term), Ctx,
+		[ document(Pipeline),
+		  variables(StepVars)
+		]) :-
 	mongolog_fluent(Term, _, _, _),!,
 	mongolog_fluent_retractall(Term, Ctx, Pipeline, StepVars).
 
-mongolog:step_compile(Term, Ctx, Pipeline, StepVars) :-
-	mongolog_fluent(Term, _, _, _),!,
+mongolog:step_compile1(Term, Ctx,
+		[ document(Pipeline),
+		  variables(StepVars),
+		  input_collection(one)
+		  %input_collection(Collection)
+		]) :-
+	mongolog_fluent(Term, _, _, Opts),!,
+	option(collection(Collection), Opts),
 	mongolog_fluent_call(Term, Ctx, Pipeline, StepVars).
 
 %%
 %
+mongolog_fluent_call(Term, Ctx, Pipeline, StepVars) :-
+	\+ option(input_assigned,Ctx),
+	writeln(fluent_input_assigned(Term)),
+	fail.
+	
 mongolog_fluent_call(Term, Ctx, Pipeline, StepVars) :-
 	fluent_zip(Term, Ctx,
 		ZippedKeyFields,
@@ -267,12 +284,12 @@ fluent_lookup(UnpackedKeys, UnpackedValues, TimeKey, Since, _, Ctx, Step) :-
 		(	mongolog_database:match_predicate([
 				[TimeKey,=<(time(Since)),[]]|
 				UnpackedKeys
-			], Ctx, InnerStep)
+			], Ctx, Ctx, InnerStep)
 		;	InnerStep=['$sort',[TimeKey,int(-1)]]
 		;	InnerStep=['$limit',int(1)]
 		% match fluent values given in the query
 		% NOTE: it is important this happens _after_ $sort and $limit
-		;	mongolog_database:match_predicate(UnpackedValues, Ctx, InnerStep)
+		;	mongolog_database:match_predicate(UnpackedValues, Ctx, Ctx, InnerStep)
 		;	( option(retract,Ctx), mongolog_database:project_retract(InnerStep) )
 		),
 		InnerPipeline),
@@ -287,7 +304,7 @@ fluent_lookup(UnpackedKeys, UnpackedValues, TimeKey, Since, Until, Ctx, Step) :-
 				[TimeKey,=<(time(Until)),[]],
 				[TimeKey,>(time(Since)),[]]|
 				Unpacked
-			], Ctx, InnerStep)
+			], Ctx, Ctx, InnerStep)
 		;	InnerStep=['$sort',[TimeKey,int(-1)]]
 		;	( option(retract,Ctx), mongolog_database:project_retract(InnerStep) )
 		),
@@ -324,12 +341,12 @@ fluent_lookup_next(ArrayField, UnpackedKeys, UnpackedValues, TimeKey, Ctx, Step)
 		(	mongolog_database:match_predicate([
 				[TimeKey,>(VarFluentTime),[]]|
 				UnpackedKeys
-			], Ctx_inner, InnerStep)
+			], Ctx, Ctx_inner, InnerStep)
 		;	InnerStep=['$sort',[TimeKey,int(1)]]
 		;	InnerStep=['$limit',int(1)]
 		% match fluent values given in the query
 		% NOTE: it is important this happens _after_ $sort and $limit
-		;	mongolog_database:match_predicate(UnpackedValues, Ctx, InnerStep)
+		;	mongolog_database:match_predicate(UnpackedValues, Ctx, Ctx, InnerStep)
 		% convert ISODate to unix timestamp
 		;	InnerStep=['$set', [TimeKey, ['$divide', array([
 				['$toDecimal', string(TimeKey0)],

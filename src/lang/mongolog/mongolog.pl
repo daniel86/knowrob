@@ -13,6 +13,20 @@
 % TODO: better support for recursion
 %		- cycles in views are not allowed
 %		- but graphLookup can be used for transitive relations
+%       - unwind can be used to iterate over a list
+
+% TODO: some clauses must be inline and cannot be views
+%		- findall: findall in views is problematic as the list content depends on instantiations
+%         of variables in Goal. findall can only be used in views if non of the variables
+%         in Goal are arguments of the rule head.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% - RDFS generalizations can only be used under some circumstances
+%    - e.g. same_as does not apply to super classes
+%    - so what is the criterion?
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 :- use_module(library('semweb/rdf_db'),
 	    [ rdf_meta/1, rdf_global_term/2 ]).
@@ -21,10 +35,10 @@
 %% set of registered query commands.
 :- dynamic step_command/1.
 %% implemented by query commands to compile query documents
-:- multifile step_compile/3, step_compile/4.
+:- multifile step_compile/3, step_compile1/3.
 
 :- rdf_meta(step_compile(t,t,t)).
-:- rdf_meta(step_compile(t,t,t,-)).
+:- rdf_meta(step_compile1(t,t,t)).
 
 
 
@@ -32,16 +46,25 @@
 %
 mongolog_rule_assert(_Module, Functor, Args, Zs) :-
 	Goal =.. [Functor|Args],
+%	writeln(compile_view(Goal)),
 	length(Args, Arity),
 	atomic_list_concat([Functor, Arity], '_', ViewName),
 	% compile an aggregation pipeline
 	current_scope(QScope),
+%once(( Functor==is_resource -> gtrace ; true )),
 	mongolog:mongolog_compile(Zs,
-		pipeline(Pipeline,Vars),
+		CompilerOutput,
+		Vars,
 		[ scope(QScope)
-		, prune_unreferenced(false)
+		%, prune_unreferenced(false)
+		, compile_mode(view)
 		]),
-	% lookup variable keys
+	memberchk(document(Pipeline), CompilerOutput),
+%	memberchk(variables(Vars), CompilerOutput),
+	option(input_collection(ViewOnCollection), CompilerOutput, _),
+	once((ground(ViewOnCollection);ViewOnCollection=one)),
+	% lookup variable keys used by the predicate and re-use
+	% the same keys.
 	findall(K,
 		(	member(Arg,Args),
 			once((
@@ -50,16 +73,48 @@ mongolog_rule_assert(_Module, Functor, Args, Zs) :-
 			))
 		),
 		Fields),
+	% lookup fields with rdfs values
+	findall(K,
+		(	member(K,Fields),
+			atom_concat(K,'_s',K0),
+			memberchk([K0,_],Vars)
+		),
+		RDFSFields),
 	!,
+	findall([K,Condition],
+		(	(	member(K,Fields), Condition=integer(1)	)
+		;	(	member(K0,RDFSFields),
+				atom_concat(K0,'_s',K),
+				atom_concat('$',K,Kv),
+				atom_concat(Kv,'.type',Kt),
+				Condition=['$cond',[
+					[if,   ['$eq', array([string(Kt), string('var')])]],
+					[then, string('$$REMOVE')],
+					[else, string(Kv)]
+				]]
+			)
+		;	(	K='v_scope', Condition=integer(1)	)
+		),
+		Projection),
+	append(Pipeline, [['$project',Projection]], Pipeline0),
 	% create a view for the head predicate
-	mng_one_db(DBName, CollectionName),
-	mng_view_create(DBName, CollectionName, ViewName, array(Pipeline)),
+%	mng_one_db(DBName, CollectionName),
+%	mng_view_create(DBName, CollectionName, ViewName, array(Pipeline0)),
+	mng_db_name(DBName),
+	mng_view_create(DBName, ViewOnCollection, ViewName, array(Pipeline0)),
 	% add head as an IDB predicate in mongolog
 	(	mongolog_database:mongolog_predicate(Goal, _, _)
 	->	true
 	;	mongolog_add_predicate(Functor, Fields,
-			[collection(ViewName), indices([])])
+			[ type(idb),
+			  collection(ViewName),
+			  indices([]),
+			  rdfs_fields(RDFSFields)
+			])
 	).
+
+mongolog_rule_assert(Module, Functor, Args, _Zs) :-
+	writeln(mongolog_rule_assert_failed(Module, Functor, Args)).
 
 
 %% add_command(+Command) is det.
@@ -112,7 +167,13 @@ mongolog_call(Goal) :-
 %
 mongolog_call(Goal, Context) :-
 	% get the pipeline document
-	mongolog_compile(Goal, pipeline(Doc,Vars), Context),
+	mongolog_compile(Goal, CompilerOutput, Vars, Context),
+	memberchk(document(Doc), CompilerOutput),
+	% get name of collection on which the aggregate operation
+	% should be performed. This is basically the first collection
+	% which is explicitely used in a step of the goal.
+	ignore(memberchk(input_collection(Coll), CompilerOutput)),
+	once((ground(Coll);Coll=one)),
 	%
 	option(user_vars(UserVars), Context, []),
 	option(global_vars(GlobalVars), Context, []),
@@ -120,12 +181,13 @@ mongolog_call(Goal, Context) :-
 	append(Vars1, GlobalVars, Vars2),
 	list_to_set(Vars2,Vars3),
 	% run the pipeline
-	query_1(Doc, Vars3).
+	query_1(Coll, Doc, Vars3).
 
-query_1(Pipeline, Vars) :-
+query_1(Coll, Pipeline, Vars) :-
 	% get DB for cursor creation. use collection with just a
 	% single document as starting point.
-	mng_one_db(DB, Coll),
+	%mng_one_db(DB, Coll),
+	mng_db_name(DB),
 	% run the query
 	setup_call_cleanup(
 		% setup: create a query cursor
@@ -310,7 +372,7 @@ atom_to_term_(Atom, _) :-
 	throw(error(conversion_error(atom_to_term(Atom)))).
 
 
-%% mongolog_compile(+Term, -Pipeline, +Context) is semidet.
+%% mongolog_compile(+Term, -CompilerOutput, -Variables, +Context) is semidet.
 %
 % Translate a goal into an aggregation pipeline.
 % Goal may be a compound term using the various predicates
@@ -327,67 +389,115 @@ atom_to_term_(Atom, _) :-
 % @param Pipeline a term pipeline(Document,Variables)
 % @param Context the query context
 %
-mongolog_compile(Terminals, pipeline(Doc, Vars), Context) :-
+mongolog_compile(Terminals, Output, Vars, Context) :-
 	catch(
-		query_compile1(Terminals, Doc, Vars, Context),
+		query_compile1(Terminals, Output, Vars, Context),
 		% catch error's, add context, and throw again
 		error(Formal),
 		throw(error(Formal,Terminals))
 	).
 
 %%
-query_compile1(Terminals, Doc, Vars, Context) :-
+query_compile1(Terminals, Output0, Vars, Context) :-
 	DocVars=[['g_assertions',_]],
-	compile_terms(Terminals, Doc0, DocVars->Vars, _StepVars, Context),
-	Doc=[['$set',['g_assertions',array([])]] | Doc0].
+	compile_terms(Terminals, DocVars->Vars, Output, Context),
+	memberchk(document(Doc0), Output),
+	%memberchk(variables(StepVars), Output),
+	Doc=[['$set',['g_assertions',array([])]] | Doc0],
+	merge_options([document(Doc)],Output,Output0).
 
 %%
-compile_terms(Goal, Pipeline, Vars, StepVars, Context) :-
+compile_terms(Goal, Vars, Output, Context) :-
 	\+ is_list(Goal), !,
-	compile_terms([Goal], Pipeline, Vars, StepVars, Context).
+	compile_terms([Goal], Vars, Output, Context).
 
-compile_terms([], [], V0->V0, [], _) :- !.
-compile_terms([X|Xs], Pipeline, V0->Vn, StepVars, Context) :-
-	compile_term(X,  Pipeline_x,  V0->V1, StepVars0, Context),
-	compile_terms(Xs, Pipeline_xs, V1->Vn, StepVars1, Context),
+% FIXME: redundant with compile_expanded_terms
+compile_terms([], V0->V0, [document([]),variables([])], _) :- !.
+compile_terms([X|Xs], V0->Vn, Output, Context) :-
+	%
+	compile_term(X,  V0->V1, Output0, Context),
+	memberchk(document(Pipeline_x), Output0),
+	memberchk(variables(StepVars0), Output0),
+	option(input_collection(InCollection0), Output0, _),
+	%
+	compile_terms(Xs, V1->Vn, Output1, Context),
+	memberchk(document(Pipeline_xs), Output1),
+	memberchk(variables(StepVars1), Output1),
+	%
 	append(Pipeline_x, Pipeline_xs, Pipeline),
-	append(StepVars0, StepVars1, StepVars).
+	append(StepVars0, StepVars1, StepVars),
+	(	ground(InCollection0) -> InCollection = InCollection0
+	;	ignore(option(input_collection(InCollection), Output1))
+	),
+	Output=[
+		document(Pipeline),
+		variables(StepVars),
+		input_collection(InCollection)
+	].
 
 %% Compile a single command (Term) into an aggregate pipeline (Doc).
-compile_term(Term, Doc, V0->V1, StepVars, Context) :-
+compile_term(Term, V0->V1, Output, Context) :-
 	% TODO: do not depend on lang_query
 	lang_query:kb_expand(Term, Expanded),
-	compile_expanded_terms(Expanded, Doc, V0->V1, StepVars, Context).
+	compile_expanded_terms(Expanded, V0->V1, Output, Context).
 
 %%
-compile_expanded_terms(Goal, Doc, Vars, StepVars, Context) :-
+compile_expanded_terms(Goal, Vars, Output, Context) :-
 	\+ is_list(Goal), !,
-	compile_expanded_terms([Goal], Doc, Vars, StepVars, Context).
+	compile_expanded_terms([Goal], Vars, Output, Context).
 
-compile_expanded_terms([], [], V0->V0, [], _) :- !.
-compile_expanded_terms([Expanded|Rest], Doc, V0->Vn, StepVars, Context) :-
-	compile_expanded_term(Expanded, Doc0, V0->V1, StepVars0, Context),
-	compile_expanded_terms(Rest, Doc1, V1->Vn, StepVars1, Context),
+compile_expanded_terms([], V0->V0, [document([]),variables([])], _) :- !.
+compile_expanded_terms([Expanded|Rest], V0->Vn, Output, Context) :-
+	compile_expanded_term(Expanded, V0->V1, Output0, Context),
+	memberchk(document(Doc0), Output0),
+	memberchk(variables(StepVars0), Output0),
+	ignore(option(input_collection(InCollection0), Output0)),
+	% toggle on input_assigned flag in compile context
+	(	(ground(InCollection0), \+ option(input_assigned,Context))
+	->	merge_options([input_assigned],Context,Context1)
+	;	Context1=Context
+	),
+	compile_expanded_terms(Rest, V1->Vn, Output1, Context1),
+	memberchk(document(Doc1), Output1),
+	memberchk(variables(StepVars1), Output1),
+	%
 	append(Doc0, Doc1, Doc),
-	append(StepVars0, StepVars1, StepVars).
+	append(StepVars0, StepVars1, StepVars),
+	(	ground(InCollection0) -> InCollection = InCollection0
+	;	ignore(option(input_collection(InCollection), Output1))
+	),
+	Output=[
+		document(Doc),
+		variables(StepVars),
+		input_collection(InCollection)
+	].
 	
-compile_expanded_term(List, Doc, Vars, StepVars, Context) :-
+compile_expanded_term(List, Vars, Output, Context) :-
 	is_list(List),!,
-	compile_expanded_terms(List, Doc, Vars, StepVars, Context).
+	compile_expanded_terms(List, Vars, Output, Context).
 	
-compile_expanded_term(Expanded, Pipeline, V0->V1, StepVars_unique, Context) :-
+compile_expanded_term(Expanded, V0->V1, Output0, Context) :-
 	% create inner context
 	merge_options([outer_vars(V0)], Context, InnerContext),
 	% and finall compile expanded terms
-	once(step_compile(Expanded, InnerContext, Doc, StepVars)),
+	once(step_compile1(Expanded, InnerContext, Output)),
+	memberchk(document(Doc), Output),
+	memberchk(variables(StepVars), Output),
+	%option(input_collection(InputCollection), Output, _),
 	% merge StepVars with variables in previous steps (V0)
 	list_to_set(StepVars, StepVars_unique),
 	append(V0, StepVars_unique, V11),
 	list_to_set(V11, V1),
 	% create a field for each variable that was not referred to before
+	(	option(input_assigned,Context) -> InputKeys=[]
+	;	option(input_keys(InputKeys), Output, [])
+	),
 	findall([VarKey,[['type',string('var')], ['value',string(VarKey)]]],
 		(	member([VarKey,_], StepVars_unique),
-			\+ member([VarKey,_], V0)
+			\+ member([VarKey,_], V0),
+			% also skip any keys marked as input as these are coming from the
+			% input collection
+			\+ member(VarKey, InputKeys)
 		),
 		VarDocs0
 	),
@@ -396,18 +506,25 @@ compile_expanded_term(Expanded, Pipeline, V0->V1, StepVars_unique, Context) :-
 	list_to_set(VarDocs0,VarDocs),
 	(	VarDocs=[] -> Pipeline=Doc
 	;	Pipeline=[['$set', VarDocs]|Doc]
-	).
+	),
+	merge_options(
+		[ document(Pipeline), variables(StepVars_unique) ],
+		Output, Output0).
 
 %%
-step_compile(Step, Ctx, Doc, StepVars) :-
-	step_compile(Step, Ctx, Doc),
-	step_vars(Step, Ctx, StepVars).
+step_compile1(Step, Ctx, [document(Doc), variables(StepVars)]) :-
+	% first compute stepvars and extend context.
+	% this is to avoid that different keys are assigned
+	% to the same variable
+	step_vars(Step, Ctx, StepVars),
+	merge_options([step_vars(StepVars)], Ctx, Ctx0),
+	step_compile(Step, Ctx0, Doc).
 
 %% ask(:Goal)
 % Call Goal in ask mode.
 %
-step_compile(ask(Goal), Ctx, Doc, StepVars) :-
-	mongolog:step_compile(call(Goal), Ctx, Doc, StepVars).
+step_compile1(ask(Goal), Ctx, Output) :-
+	mongolog:step_compile1(call(Goal), Ctx, Output).
 
 %%
 % pragma(Goal) is evaluated compile-time by calling
@@ -417,7 +534,7 @@ step_compile(ask(Goal), Ctx, Doc, StepVars) :-
 %step_compile(pragma(Goal), _, []) :-
 %	call(Goal).
 
-step_compile(pragma(Goal), _, [], StepVars) :-
+step_compile1(pragma(Goal), _, [document([]), variables(StepVars)]) :-
 	% ignore vars referred to in pragma as these are handled compile-time.
 	% only the ones also referred to in parts of the query are added to the document.
 	StepVars=[],
@@ -441,126 +558,6 @@ match_scope(['$match', ['$expr', ['$lt', array([
 				string('$v_scope.time.since'),
 				string('$v_scope.time.until')
 			])]]]).
-
-%%
-lookup_let_doc(InnerVars, LetDoc) :-
-	findall([Key,string(Value)],
-		(	member([Key,_], InnerVars),
-			atom_concat('$',Key,Value)
-		),
-		LetDoc0),
-	list_to_set(LetDoc0,LetDoc).
-
-%%
-lookup_set_vars(InnerVars, SetVars) :-
-	% NOTE: let doc above ensures all vars can be accessed.
-	%       this does also work if the let var was undefined.
-	%       then the set below is basically a no-op.
-	%       e.g. this runs through _without_ assigning "key" field:
-	%
-	%       db.one.aggregate([{'$lookup': {
-	%			from: "one",
-	%			as: "next",
-	%			let: { "test": "$test"},
-	%			pipeline: [{'$set': {"key": "$$test"}}]
-	%		}}])
-	%
-	findall([Y,string(Y0)],
-		(	member([Y,_], InnerVars),
-			atom_concat('$$',Y,Y0)
-		),
-		SetVars0),
-	list_to_set(SetVars0,SetVars).
-
-%%
-% find all records matching a query and store them
-% in an array.
-%
-lookup_array(ArrayKey, Terminals,
-		Prefix, Suffix,
-		Context, StepVars,
-		['$lookup', [
-			['from', string(Coll)],
-			['as', string(ArrayKey)],
-			['let', LetDoc],
-			['pipeline', array(Pipeline1)]
-		]]) :-
-	% get variables referred to in query
-	option(outer_vars(OuterVars), Context),
-	% within a disjunction VV provides mapping between
-	% original and copied variables (see control.pl)
-	option(orig_vars(VOs), Context, []),
-	option(copy_vars(VCs), Context, []),
-	% join collection with single document
-	mng_one_db(_DB, Coll),
-	% generate inner pipeline
-	compile_terms(Terminals, Pipeline,
-		OuterVars->_InnerVars,
-		StepVars0, Context),
-	% get list of variables whose copies have received a grounding
-	% in compile_terms, as these need some special handling
-	% to avoid that the original remains ungrounded.
-	% GroundVars0: key-original variable mapping
-	% GroundVars1: key-grounding mapping
-	grounded_vars(Context, [VOs,VCs], GroundVars0, GroundVars1),
-	% add variables that have received a grounding in compile_terms
-	% to StepVars
-	append(GroundVars0, StepVars0, StepVars1),
-	list_to_set(StepVars1, StepVars),
-	% finally also add user supplied variables to the list
-	(	option(additional_vars(AddVars), Context)
-	->	append(AddVars, StepVars, StepVars2)
-	;	StepVars2 = StepVars
-	),
-	% pass variables from outer goal to inner if they are referred to
-	% in the inner goal.
-	lookup_let_doc(StepVars2, LetDoc),
-	% set all let variables so that they can be accessed
-	% without aggregate operators in Pipeline
-	lookup_set_vars(StepVars2, SetVars),
-	% compose inner pipeline
-	(	SetVars=[] -> Prefix0=Prefix
-	;	Prefix0=[['$set', SetVars] | Prefix]
-	),
-	append(Prefix0,Pipeline,Pipeline0),
-	% $set compile-time grounded vars for later unification.
-	% this is needed because different branches cannot ground the same
-	% variable to different values compile-time.
-	% hence the values need to be assigned within the query.
-	(	GroundVars1=[] -> Suffix0=Suffix
-	;	Suffix0=[['$set', GroundVars1] | Suffix]
-	),
-	append(Pipeline0,Suffix0,Pipeline1).
-
-% yield list of variables whose copies have received a grounding
-% VO: original variable
-% VC: copied variable
-grounded_vars(Ctx,[VOs,VCs],Xs,Ys) :-
-	grounded_vars(Ctx,VOs,VCs,Xs,Ys).
-grounded_vars(_,[],[],[],[]) :- !.
-grounded_vars(Ctx,
-		[[Key,VO]|VOs],
-		[[Key,VC]|VCs],
-		[[Key,VO]|Xs],
-		[[Key,Val]|Ys]) :-
-	nonvar(VC),
-	\+ is_dict(VC),
-	!,
-	var_key_or_val(VC, Ctx, Val),
-	grounded_vars(Ctx,VOs,VCs,Xs,Ys).
-grounded_vars(Ctx,[_|VOs],[_|VCs],Xs,Ys) :-
-	grounded_vars(Ctx,VOs,VCs,Xs,Ys).
-
-%grounded_vars([],_,[],[]) :- !.
-%grounded_vars([VO-VC|VV],Ctx,[[Key,VO]|Xs],[[Key,Val]|Ys]) :-
-%	nonvar(VC),
-%	\+ is_dict(VC),
-%	!,
-%	var_key(VO, Ctx, Key),
-%	var_key_or_val(VC, Ctx, Val),
-%	grounded_vars(VV,Ctx,Xs,Ys).
-%grounded_vars([_|VV],Ctx,Xs,Ys) :-
-%	grounded_vars(VV,Ctx,Xs,Ys).
 
 %%
 % Move ground variables in "next" document to the
@@ -675,18 +672,19 @@ var_key(Var, Ctx, Key) :-
 	% TODO: can this be done better then iterating over all variables?
 	%		- i.e. by testing if some variable is element of a list
 	%		- member/2 cannot be used as it would unify each array element
-	(	option(global_vars(Vars), Ctx)
-	;	option(outer_vars(Vars), Ctx)
-	;	option(step_vars(Vars), Ctx)
-	;	option(disj_vars(Vars), Ctx)
+	(	option(global_vars(Vars), Ctx, [])
+	;	option(outer_vars(Vars), Ctx, [])
+	;	option(step_vars(Vars), Ctx, [])
+	;	option(disj_vars(Vars), Ctx, [])
 	),
 	member([Key,ReferredVar],Vars),
 	ReferredVar == Var,
 	!.
 var_key(Var, _Ctx, Key) :-
 	var(Var),
-	term_to_atom(Var,Atom),
-	atom_concat('v',Atom,Key).
+	%term_to_atom(Var,Atom),
+	%atom_concat('v',Atom,Key).
+	gensym('v_', Key).
 
 %%
 % yield either the key of a variable in mongo,
