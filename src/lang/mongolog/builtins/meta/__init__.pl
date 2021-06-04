@@ -1,6 +1,6 @@
 
 :- use_module(call).
-:- use_module(context).
+:- ensure_loaded(context).
 :- use_module(findall).
 :- use_module(ignore).
 :- use_module(limit).

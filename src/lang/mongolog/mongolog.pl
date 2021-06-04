@@ -479,33 +479,6 @@ get_constant(false, bool(false)).
 get_constant(Value, string(Value)) :- atom(Value).
 get_constant(Value, string(Value)) :- string(Value).
 
-%%
-% True iff Arg has been referred to in the query before.
-% That is, Arg has been added to the "outer variables"
-% of the compile context.
-%
-is_referenced(Arg, Ctx) :-
-	option(outer_vars(OuterVars),Ctx),
-	var_key(Arg, Ctx, Key),
-	memberchk([Key,_], OuterVars).
-
-%%
-all_ground(Args, Ctx) :-
-	forall(
-		member(Arg,Args),
-		(	is_instantiated(Arg, Ctx) -> true
-		;	throw(error(instantiation_error))
-		)
-	).
-
-is_instantiated(Arg, Ctx) :-
-	mng_strip_variable(Arg, Arg0),
-	term_variables(Arg0, Vars),
-	forall(
-		member(Var, Vars),
-		is_referenced(Var, Ctx)
-	).
-
 
 		 /*******************************
 		 *    	  UNIT TESTING     		*

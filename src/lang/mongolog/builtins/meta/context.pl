@@ -1,4 +1,8 @@
-:- module(mongolog_context, []).
+:- module(mongolog_context,
+	[ is_referenced/2,
+	  all_ground/2,
+	  is_instantiated/2
+	]).
 /** <module> Accessing compile-context in mongolog programs.
 
 The following predicates are supported:
@@ -71,3 +75,29 @@ resolve_scope1(In, Ctx, Out) :-
 	mongolog:var_key_or_val(Time1, Ctx, Time2),
 	mng_strip_operator(Out, Operator, Time2).
 
+%%
+% True iff Arg has been referred to in the query before.
+% That is, Arg has been added to the "outer variables"
+% of the compile context.
+%
+is_referenced(Arg, Ctx) :-
+	option(outer_vars(OuterVars),Ctx),
+	mongolog:var_key(Arg, Ctx, Key),
+	memberchk([Key,_], OuterVars).
+
+%%
+all_ground(Args, Ctx) :-
+	forall(
+		member(Arg,Args),
+		(	is_instantiated(Arg, Ctx) -> true
+		;	throw(error(instantiation_error))
+		)
+	).
+
+is_instantiated(Arg, Ctx) :-
+	mng_strip_variable(Arg, Arg0),
+	term_variables(Arg0, Vars),
+	forall(
+		member(Var, Vars),
+		is_referenced(Var, Ctx)
+	).

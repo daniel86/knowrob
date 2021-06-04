@@ -19,6 +19,7 @@ The following predicates are supported:
 :- use_module('mongolog').
 :- use_module('aggregation/lookup').
 :- use_module('stages/bulk_operation').
+:- use_module('builtins/meta/context', [ is_referenced/2 ]).
 
 
 %% Predicates that are stored in a mongo collection
@@ -406,7 +407,7 @@ match_conditional(FieldKey, Arg, OuterCtx, Ctx, ['$expr', ['$or', array([
 	mng_strip_variable(Arg, Arg0),
 	term_variables(Arg0, [ArgVar]),!,
 	% do not perform conditional match if variable was not referred to before
-	mongolog:is_referenced(ArgVar, OuterCtx),
+	is_referenced(ArgVar, OuterCtx),
 	mongolog:var_key(ArgVar, Ctx, ArgKey),
 	% TODO: need to set let variables or use $ vs $$ conditional
 	(	option(input_assigned,Ctx)
