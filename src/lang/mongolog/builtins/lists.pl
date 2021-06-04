@@ -22,6 +22,7 @@ The following predicates are supported:
 
 :- use_module('../mongolog').
 :- use_module('../aggregation/match').
+:- use_module('../aggregation/set').
 
 %% query commands
 :- mongolog:add_command(length).
@@ -164,10 +165,8 @@ mongolog:step_compile(
 	mongolog:var_key_or_val(Elem,Ctx,Elem0),
 	% compute steps of the aggregate pipeline
 	findall(Step,
-		(	mongolog:set_if_var(Elem,
-				['$arrayElemAt', array([List0,Index0])], Ctx, Step)
-		;	mongolog:set_if_var(Index,
-				['$indexOfArray', array([List0,Elem0])], Ctx, Step)
+		(	set_if_var(Elem,  ['$arrayElemAt', array([List0,Index0])], Ctx, Step)
+		;	set_if_var(Index, ['$indexOfArray', array([List0,Elem0])], Ctx, Step)
 		% unify terms
 		;	Step=['$set', ['t_term1', Elem0]]
 		;	Step=['$set', ['t_term2', ['$arrayElemAt', array([List0,Index0])]]]
@@ -194,7 +193,7 @@ compile_list_attribute(List, Attribute, Operator, Ctx, Pipeline) :-
 		% first compute the attribute
 		(	Step=['$set', ['t_val', [Operator, array([List0])]]]
 		% then assign the value to the attribute if it is a variable
-		;	mongolog:set_if_var(Attribute,    string('$t_val'), Ctx, Step)
+		;	set_if_var(Attribute,    string('$t_val'), Ctx, Step)
 		% then ensure that the attribute has the right value
 		;	match_equals(Attribute0, string('$t_val'), Step)
 		% finally remove temporary field again

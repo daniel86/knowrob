@@ -17,6 +17,7 @@ The following predicates are supported:
 
 :- use_module('../mongolog').
 :- use_module('../aggregation/match').
+:- use_module('../aggregation/set').
 
 %% query commands
 :- mongolog:add_command(functor).
@@ -35,7 +36,7 @@ mongolog:step_compile(functor(Term,Functor,Arity), Ctx, Pipeline) :-
 	mongolog:var_key_or_val(Functor,Ctx,Functor0),
 	mongolog:var_key_or_val(Arity,Ctx,Arity0),
 	findall(Step,
-		(	mongolog:set_if_var(Term, [
+		(	set_if_var(Term, [
 				['type', string('compound')],
 				['value', [
 					['functor', Functor0],
@@ -46,9 +47,9 @@ mongolog:step_compile(functor(Term,Functor,Arity), Ctx, Pipeline) :-
 				]]
 			], Ctx, Step)
 		;	Step=['$set', ['t_term', Term0]]
-		;	mongolog:set_if_var(Functor,    string('$t_term.value.functor'), Ctx, Step)
+		;	set_if_var(Functor,    string('$t_term.value.functor'), Ctx, Step)
 		;	match_equals(Functor0, string('$t_term.value.functor'), Step)
-		;	mongolog:set_if_var(Arity,    ['$size', string('$t_term.value.args')], Ctx, Step)
+		;	set_if_var(Arity,    ['$size', string('$t_term.value.args')], Ctx, Step)
 		;	match_equals(Arity0, ['$size', string('$t_term.value.args')], Step)
 		;	Step=['$unset', string('t_term')]
 		),
@@ -75,11 +76,11 @@ mongolog:step_compile(arg(Arg,Term,Value), Ctx, Pipeline) :-
 	mongolog:var_key_or_val(Value,Ctx,Value0),
 	findall(Step,
 		(	Step=['$set', ['t_term', Term0]]
-		;	mongolog:set_if_var(Arg, ['$add', array([
+		;	set_if_var(Arg, ['$add', array([
 					['$indexOfArray', array([ string('$t_term.value.args'), Value0 ])],
 					integer(1)
 			])], Ctx, Step)
-		;	mongolog:set_if_var(Value, ['$arrayElemAt', array([
+		;	set_if_var(Value, ['$arrayElemAt', array([
 					string('$t_term.value.args'),
 					['$subtract', array([Arg0, integer(1)])]	
 			])], Ctx, Step)
@@ -139,7 +140,7 @@ mongolog:step_compile(=..(Term,List), Ctx, Pipeline) :-
 	mongolog:var_key_or_val(Term,Ctx,Term0),
 	mongolog:var_key_or_val(List,Ctx,List0),
 	findall(Step,
-		(	mongolog:set_if_var(Term, [
+		(	set_if_var(Term, [
 				['type', string('compound')],
 				['value', [
 					['functor', ['$arrayElemAt', array([List0,integer(0)])]],
@@ -150,7 +151,7 @@ mongolog:step_compile(=..(Term,List), Ctx, Pipeline) :-
 				]]
 			], Ctx, Step)
 		;	Step=['$set', ['t_term', Term0]]
-		;	mongolog:set_if_var(List, ['$concatArrays', array([
+		;	set_if_var(List, ['$concatArrays', array([
 				array([string('$t_term.value.functor')]),
 				string('$t_term.value.args')
 			])], Ctx, Step)

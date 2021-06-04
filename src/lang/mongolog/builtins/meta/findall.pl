@@ -16,6 +16,7 @@ The following predicates are supported:
 :- use_module('../../mongolog').
 :- use_module('../../aggregation/lookup').
 :- use_module('../../aggregation/match').
+:- use_module('../../aggregation/set').
 
 %% register query commands
 :- mongolog:add_command(findall).
@@ -88,7 +89,7 @@ mongolog:step_compile1(
 		;	Step=['$set', ['t_list', ['$map',[
 				['input',string('$t_next')],
 				['in', Instantiation] ]]]]
-		;	mongolog:set_if_var(List, string('$t_list'), Ctx3, Step)
+		;	set_if_var(List, string('$t_list'), Ctx3, Step)
 		;	(
 				mongolog:var_key_or_val(List, Ctx3, List0),
 				match_equals(List0, string('$t_list'), Step)

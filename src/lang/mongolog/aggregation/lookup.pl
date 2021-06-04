@@ -4,6 +4,7 @@
 	  lookup_let_doc/2
 	]).
 
+:- use_module('set').
 
 %% FIXME: redundant with call foo
 lookup_call(Terminals, Suffix, Ctx, Pipeline, StepVars) :-
@@ -14,7 +15,7 @@ lookup_call(Terminals, Suffix, Ctx, Pipeline, StepVars) :-
 		% unwind "next" field
 		;	Step=['$unwind',string('$next')]
 		% set variables from "next" field
-		;	mongolog:set_next_vars(StepVars, Step)
+		;	set_next_vars(StepVars, Step)
 		% remove "next" field again
 		;	Step=['$unset',string('next')]
 		),

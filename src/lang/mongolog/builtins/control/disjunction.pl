@@ -14,6 +14,7 @@ The following predicates are supported:
 
 :- use_module('../../mongolog').
 :- use_module('../../aggregation/lookup').
+:- use_module('../../aggregation/set').
 
 %% query commands
 :- mongolog:add_command(;).
@@ -89,7 +90,7 @@ aggregate_disjunction(FindallStages, StepVars, Pipeline, StepVars) :-
 		% unwind all solutions from disjunction
 		;	Stage=['$unwind', string('$next')]
 		% finally project the result of a disjunction goal
-		;	mongolog:set_next_vars(StepVars, Stage)
+		;	set_next_vars(StepVars, Stage)
 		% and unset the next field
 		;	Stage=['$unset', string('next')]
 		),

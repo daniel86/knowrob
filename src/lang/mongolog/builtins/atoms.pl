@@ -22,6 +22,7 @@ The following predicates are supported:
 
 :- use_module('../mongolog').
 :- use_module('../aggregation/match').
+:- use_module('../aggregation/set').
 
 %% query commands
 :- mongolog:add_command(atom_number).
@@ -49,8 +50,8 @@ mongolog:step_compile(
 	mongolog:var_key_or_val(Atom,Ctx,Atom0),
 	mongolog:var_key_or_val(Number,Ctx,Number0),
 	findall(Step,
-		(	mongolog:set_if_var(Atom,    ['$toString', Number0], Ctx, Step)
-		;	mongolog:set_if_var(Number,  ['$toDouble', Atom0],   Ctx, Step)
+		(	set_if_var(Atom,    ['$toString', Number0], Ctx, Step)
+		;	set_if_var(Number,  ['$toDouble', Atom0],   Ctx, Step)
 		;	match_equals(Atom0, ['$toString', Number0], Step)
 		),
 		Pipeline).
@@ -65,7 +66,7 @@ mongolog:step_compile(
 	mongolog:var_key_or_val(Atom,Ctx,Atom0),
 	mongolog:var_key_or_val(Length,Ctx,Length0),
 	findall(Step,
-		(	mongolog:set_if_var(Length,    ['$strLenCP', Atom0], Ctx, Step)
+		(	set_if_var(Length,    ['$strLenCP', Atom0], Ctx, Step)
 		;	match_equals(Length0, ['$strLenCP', Atom0], Step)
 		),
 		Pipeline).
@@ -80,7 +81,7 @@ mongolog:step_compile(
 	mongolog:var_key_or_val(Atom,Ctx,Atom0),
 	mongolog:var_key_or_val(UpperCase,Ctx,UpperCase0),
 	findall(Step,
-		(	mongolog:set_if_var(UpperCase,    ['$toUpper', Atom0], Ctx, Step)
+		(	set_if_var(UpperCase,    ['$toUpper', Atom0], Ctx, Step)
 		;	match_equals(UpperCase0, ['$toUpper', Atom0], Step)
 		),
 		Pipeline).
@@ -95,7 +96,7 @@ mongolog:step_compile(
 	mongolog:var_key_or_val(Atom,Ctx,Atom0),
 	mongolog:var_key_or_val(LowerCase,Ctx,LowerCase0),
 	findall(Step,
-		(	mongolog:set_if_var(LowerCase,    ['$toLower', Atom0], Ctx, Step)
+		(	set_if_var(LowerCase,    ['$toLower', Atom0], Ctx, Step)
 		;	match_equals(LowerCase0, ['$toLower', Atom0], Step)
 		),
 		Pipeline).
@@ -132,15 +133,15 @@ mongolog:step_compile(
 	mongolog:var_key_or_val(Right,Ctx,Right0),
 	mongolog:var_key_or_val(Atom,Ctx,Atom0),
 	findall(Step,
-		(	mongolog:set_if_var(Left, ['$substr', array([Atom0,
+		(	set_if_var(Left, ['$substr', array([Atom0,
 				int(0),
 				['$subtract', array([ ['$strLenCP',Atom0], ['$strLenCP',Right0] ])]
 			])], Ctx, Step)
-		;	mongolog:set_if_var(Right, ['$substr', array([Atom0,
+		;	set_if_var(Right, ['$substr', array([Atom0,
 				['$strLenCP',Left0],
 				['$strLenCP',Atom0]
 			])], Ctx, Step)
-		;	mongolog:set_if_var(Atom,    ['$concat', array([Left0,Right0])], Ctx, Step)
+		;	set_if_var(Atom,    ['$concat', array([Left0,Right0])], Ctx, Step)
 		;	match_equals(Atom0, ['$concat', array([Left0,Right0])], Step)
 		),
 		Pipeline).
@@ -159,7 +160,7 @@ mongolog:step_compile(
 		List0),
 	mongolog:var_key_or_val(Atom,Ctx,Atom0),
 	findall(Step,
-		(	mongolog:set_if_var(Atom,    ['$concat', array(List0)], Ctx, Step)
+		(	set_if_var(Atom,    ['$concat', array(List0)], Ctx, Step)
 		;	match_equals(Atom0, ['$concat', array(List0)], Step)
 		),
 		Pipeline).
@@ -181,7 +182,7 @@ mongolog:step_compile(
 	mongolog:var_key_or_val(Atom, Ctx, Atom0),
 	add_separator(List0, Sep0, List1),
 	findall(Step,
-		(	mongolog:set_if_var(Atom,    ['$concat', array(List1)], Ctx, Step)
+		(	set_if_var(Atom,    ['$concat', array(List1)], Ctx, Step)
 		;	match_equals(Atom0, ['$concat', array(List1)], Step)
 		),
 		Pipeline).

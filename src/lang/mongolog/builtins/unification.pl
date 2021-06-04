@@ -16,6 +16,7 @@ The following predicates are supported:
 
 :- use_module('../mongolog').
 :- use_module('../aggregation/match').
+:- use_module('../aggregation/set').
 
 %% mongolog:add_command
 :- mongolog:add_command(=).
@@ -52,8 +53,8 @@ mongolog:step_compile(=(Term1, Term2), Ctx, Pipeline) :-
 	mongolog:var_key_or_val(Term2,Ctx,Term2_val),
 	% TODO: if var(Term1) then $set key(Term1) <- t_term1
 	findall(Step,
-		(	mongolog:set_if_var(Term1, Term2_val, Ctx, Step)
-		;	mongolog:set_if_var(Term2, Term1_val, Ctx, Step)
+		(	set_if_var(Term1, Term2_val, Ctx, Step)
+		;	set_if_var(Term2, Term1_val, Ctx, Step)
 		% make both terms accessible via fields
 		;	Step=['$set', ['t_term1', Term1_val]]
 		;	Step=['$set', ['t_term2', Term2_val]]
