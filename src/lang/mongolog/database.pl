@@ -18,6 +18,7 @@ The following predicates are supported:
 
 :- use_module('mongolog').
 :- use_module('aggregation/lookup').
+:- use_module('stages/bulk_operation').
 
 
 %% Predicates that are stored in a mongo collection
@@ -192,7 +193,7 @@ mongolog_predicate_retractall(Term, Ctx, Pipeline, StepVars) :-
 		% look-up documents into 't_pred' array field
 		(	lookup_predicate('t_pred', InnerPipeline, Ctx_pred, Step)
 		% add removed facts to assertions list
-		;	mongolog:add_assertions(string('$t_pred'), Collection, Step)
+		;	add_assertions(string('$t_pred'), Collection, Step)
 		;	Step=['$unset', string('t_pred')]
 		),
 		Pipeline
@@ -211,7 +212,7 @@ mongolog_predicate_assert(Term, Ctx, Pipeline, StepVars) :-
 		PredicateDoc),
 	% and add it to the list of asserted documents
 	findall(Step,
-		mongolog:add_assertion(PredicateDoc, Collection, Step),
+		add_assertion(PredicateDoc, Collection, Step),
 		Pipeline).
 
 %%
@@ -235,7 +236,7 @@ mongolog_predicate_zip(Term, Ctx, Zipped, Ctx_zipped, ReadOrWrite) :-
 	% read variable in Term
 	mongolog:step_vars(Term, Ctx, StepVars0),
 	(	ReadOrWrite==read -> StepVars=StepVars0
-	;	mongolog:add_assertion_var(StepVars0, StepVars)
+	;	add_assertion_var(StepVars0, StepVars)
 	),
 	% add predicate options to compile context
 	merge_options([

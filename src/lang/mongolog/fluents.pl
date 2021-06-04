@@ -24,6 +24,7 @@ filtering based on the fluent value.
 
 :- use_module('mongolog').
 :- use_module('aggregation/match').
+:- use_module('stages/bulk_operation').
 
 %% Predicates that are stored in a mongo collection
 :- dynamic mongolog_fluent/4.
@@ -212,7 +213,7 @@ mongolog_fluent_retractall(Term, Ctx, Pipeline, StepVars) :-
 		(	fluent_lookup(UnpackedKeys, UnpackedValues,
 				TimeField, Since, Until, [retract|Ctx_fluent], Step)
 		% finally push documents to deletion list
-		;	mongolog:add_assertions(string('$t_pred'), Collection, Step)
+		;	add_assertions(string('$t_pred'), Collection, Step)
 		;	Step=['$unset', string('t_pred')]
 		),
 		Pipeline).
@@ -244,7 +245,7 @@ mongolog_fluent_assert(Term, Ctx, Pipeline, StepVars) :-
 	mng_unflatten(PredicateDoc, NestedDoc),
 	% and add it to the list of asserted documents
 	findall(Step,
-		mongolog:add_assertion(NestedDoc, Collection, Step),
+		add_assertion(NestedDoc, Collection, Step),
 		Pipeline).
 
 %%
@@ -259,7 +260,7 @@ fluent_zip(Term, Ctx, ZippedKeys, ZippedValues, TimeKey, Ctx_zipped, ReadOrWrite
 	% read variable in Term
 	mongolog:step_vars(Term, Ctx, StepVars0),
 	(	ReadOrWrite==read -> StepVars=StepVars0
-	;	mongolog:add_assertion_var(StepVars0, StepVars)
+	;	add_assertion_var(StepVars0, StepVars)
 	),
 	% add predicate options to compile context
 	merge_options([
