@@ -329,24 +329,9 @@ step_compile1(Step, Ctx, [document(Doc), variables(StepVars)]) :-
 step_compile1(ask(Goal), Ctx, Output) :-
 	mongolog:step_compile1(call(Goal), Ctx, Output).
 
-%%
-% pragma(Goal) is evaluated compile-time by calling
-% the Goal. This is usually done to unify variables
-% used in the aggregation pipeline from the compile context.
-%
-%step_compile(pragma(Goal), _, []) :-
-%	call(Goal).
-
-step_compile1(pragma(Goal), _, [document([]), variables(StepVars)]) :-
-	% ignore vars referred to in pragma as these are handled compile-time.
-	% only the ones also referred to in parts of the query are added to the document.
-	StepVars=[],
-	call(Goal).
-
 step_compile(stepvars(_), _, []) :- true.
 
 step_command(ask).
-step_command(pragma).
 step_command(stepvars).
 
 %%%%%%%%%%%%%%%%%%%%%%%
