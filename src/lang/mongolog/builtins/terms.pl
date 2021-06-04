@@ -16,6 +16,7 @@ The following predicates are supported:
 */
 
 :- use_module('../mongolog').
+:- use_module('../aggregation/match').
 
 %% query commands
 :- mongolog:add_command(functor).
@@ -46,9 +47,9 @@ mongolog:step_compile(functor(Term,Functor,Arity), Ctx, Pipeline) :-
 			], Ctx, Step)
 		;	Step=['$set', ['t_term', Term0]]
 		;	mongolog:set_if_var(Functor,    string('$t_term.value.functor'), Ctx, Step)
-		;	mongolog:match_equals(Functor0, string('$t_term.value.functor'), Step)
+		;	match_equals(Functor0, string('$t_term.value.functor'), Step)
 		;	mongolog:set_if_var(Arity,    ['$size', string('$t_term.value.args')], Ctx, Step)
-		;	mongolog:match_equals(Arity0, ['$size', string('$t_term.value.args')], Step)
+		;	match_equals(Arity0, ['$size', string('$t_term.value.args')], Step)
 		;	Step=['$unset', string('t_term')]
 		),
 		Pipeline).
@@ -82,7 +83,7 @@ mongolog:step_compile(arg(Arg,Term,Value), Ctx, Pipeline) :-
 					string('$t_term.value.args'),
 					['$subtract', array([Arg0, integer(1)])]	
 			])], Ctx, Step)
-		;	mongolog:match_equals(Value0, ['$arrayElemAt', array([
+		;	match_equals(Value0, ['$arrayElemAt', array([
 					string('$t_term.value.args'),
 					['$subtract', array([Arg0, integer(1)])]	
 			])], Step)
@@ -153,7 +154,7 @@ mongolog:step_compile(=..(Term,List), Ctx, Pipeline) :-
 				array([string('$t_term.value.functor')]),
 				string('$t_term.value.args')
 			])], Ctx, Step)
-		;	mongolog:match_equals(List0, ['$concatArrays', array([
+		;	match_equals(List0, ['$concatArrays', array([
 				array([string('$t_term.value.functor')]),
 				string('$t_term.value.args')
 			])], Step)

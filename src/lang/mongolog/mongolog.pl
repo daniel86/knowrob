@@ -551,15 +551,6 @@ step_command(stepvars).
 %%%%%%%%%%%%%%%%%%%%%%%
 
 %%
-match_equals(X, Exp, ['$match', ['$expr', ['$eq', array([X,Exp])]]]).
-
-%%
-match_scope(['$match', ['$expr', ['$lt', array([
-				string('$v_scope.time.since'),
-				string('$v_scope.time.until')
-			])]]]).
-
-%%
 % Move ground variables in "next" document to the
 % document root.
 % However, not all variables referred to in the goal may

@@ -21,6 +21,7 @@ The following predicates are supported:
 */
 
 :- use_module('../mongolog').
+:- use_module('../aggregation/match').
 
 %% query commands
 :- mongolog:add_command(length).
@@ -173,7 +174,7 @@ mongolog:step_compile(
 		% assign vars in term1 to values of arguments in term2
 		;	mongolog_unification:set_term_arguments('t_term1', 't_term2', Step)
 		% perform equality test
-		;	mongolog:match_equals(string('$t_term1'), string('$t_term2'), Step)
+		;	match_equals(string('$t_term1'), string('$t_term2'), Step)
 		% project new variable groundings
 		;	mongolog_unification:set_term_vars(Elem, 't_term1', Ctx, Step)
 		% and cleanup
@@ -195,7 +196,7 @@ compile_list_attribute(List, Attribute, Operator, Ctx, Pipeline) :-
 		% then assign the value to the attribute if it is a variable
 		;	mongolog:set_if_var(Attribute,    string('$t_val'), Ctx, Step)
 		% then ensure that the attribute has the right value
-		;	mongolog:match_equals(Attribute0, string('$t_val'), Step)
+		;	match_equals(Attribute0, string('$t_val'), Step)
 		% finally remove temporary field again
 		;	Step=['$unset', string('t_val')]
 		),

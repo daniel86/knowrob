@@ -20,6 +20,7 @@ The following set of basic and special purpose predicates are supported:
 */
 
 :- use_module('../mongolog').
+:- use_module('../aggregation/match').
 :- use_module(library('db/mongo/client'),
 		[ mng_strip_operator/3 ]).
 
@@ -61,7 +62,7 @@ mongolog:step_compile(
 			]]]
 		;	Step=['$unwind',string('$t_index')]
 		;	mongolog:set_if_var(Value, string('$t_index'), Ctx, Step)
-		;	mongolog:match_equals(Value0, string('$t_index'), Step)
+		;	match_equals(Value0, string('$t_index'), Step)
 		;	Step=['$unset', string('t_index')]
 		),
 		Pipeline).
@@ -77,7 +78,7 @@ assignment(Number, Exp, Ctx, Pipeline) :-
 	expression(Exp, Ctx, Doc),
 	findall(Step,
 		(	mongolog:set_if_var(Number, Doc, Ctx, Step)
-		;	mongolog:match_equals(Number0, Doc, Step)
+		;	match_equals(Number0, Doc, Step)
 		),
 		Pipeline).
 

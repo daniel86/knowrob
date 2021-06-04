@@ -15,6 +15,7 @@ The following predicates are supported:
 */
 
 :- use_module('../mongolog').
+:- use_module('../aggregation/match').
 
 %% mongolog:add_command
 :- mongolog:add_command(=).
@@ -61,7 +62,7 @@ mongolog:step_compile(=(Term1, Term2), Ctx, Pipeline) :-
 		% assign vars in term2 to values of arguments in term1
 		;	set_term_arguments(Term2, Term1, 't_term2', 't_term1', Step)
 		% perform equality test
-		;	mongolog:match_equals(string('$t_term1'), string('$t_term2'), Step)
+		;	match_equals(string('$t_term1'), string('$t_term2'), Step)
 		% project new variable groundings
 		;	set_term_vars(Term1, 't_term1', Ctx, Step)
 		;	set_term_vars(Term2, 't_term2', Ctx, Step)

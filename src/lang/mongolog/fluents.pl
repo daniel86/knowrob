@@ -23,6 +23,7 @@ filtering based on the fluent value.
 */
 
 :- use_module('mongolog').
+:- use_module('aggregation/match').
 
 %% Predicates that are stored in a mongo collection
 :- dynamic mongolog_fluent/4.
@@ -382,7 +383,7 @@ fluent_fact_scope(TimeKey, Step) :-
 			string('$v_scope.time.until')
 		])]]]
 	% make sure scope is non-empty
-	;	mongolog:match_scope(Step)
+	;	match_scope(Step)
 	).
 
 %%

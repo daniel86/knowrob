@@ -15,6 +15,7 @@ The following predicates are supported:
 :- use_module(library('db/mongo/client'), [ mng_one_db/2 ]).
 :- use_module('../../mongolog').
 :- use_module('../../aggregation/lookup').
+:- use_module('../../aggregation/match').
 
 %% register query commands
 :- mongolog:add_command(findall).
@@ -90,7 +91,7 @@ mongolog:step_compile1(
 		;	mongolog:set_if_var(List, string('$t_list'), Ctx3, Step)
 		;	(
 				mongolog:var_key_or_val(List, Ctx3, List0),
-				mongolog:match_equals(List0, string('$t_list'), Step)
+				match_equals(List0, string('$t_list'), Step)
 			)
 		% array at 'next' field not needed anymore
 		;	Step=['$unset', array([string('t_next'), string('t_list')])]

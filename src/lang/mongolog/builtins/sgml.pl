@@ -17,6 +17,7 @@ The following predicates are supported:
 :- use_module(library('lang/db'),
 		[ get_unique_name/2 ]).
 :- use_module('../mongolog').
+:- use_module('../aggregation/match').
 
 %% query commands
 :- mongolog:add_command(iri_xml_namespace).
@@ -48,7 +49,7 @@ mongolog:step_compile(
 		;	mongolog:set_if_var(NS,   string('$t_ns'),   Ctx, Step)
 		;	mongolog:set_if_var(Name, string('$t_name'), Ctx, Step)
 		% finally match using concat operator
-		;	mongolog:match_equals(IRI0, ['$concat', array([NS0,Name0])], Step)
+		;	match_equals(IRI0, ['$concat', array([NS0,Name0])], Step)
 		% cleanup
 		;	Step=['$unset', array([string('t_ns'),string('t_name')])]
 		),

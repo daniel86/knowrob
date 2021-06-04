@@ -21,6 +21,7 @@ The following predicates are supported:
 */
 
 :- use_module('../mongolog').
+:- use_module('../aggregation/match').
 
 %% query commands
 :- mongolog:add_command(atom_number).
@@ -50,7 +51,7 @@ mongolog:step_compile(
 	findall(Step,
 		(	mongolog:set_if_var(Atom,    ['$toString', Number0], Ctx, Step)
 		;	mongolog:set_if_var(Number,  ['$toDouble', Atom0],   Ctx, Step)
-		;	mongolog:match_equals(Atom0, ['$toString', Number0], Step)
+		;	match_equals(Atom0, ['$toString', Number0], Step)
 		),
 		Pipeline).
 
@@ -65,7 +66,7 @@ mongolog:step_compile(
 	mongolog:var_key_or_val(Length,Ctx,Length0),
 	findall(Step,
 		(	mongolog:set_if_var(Length,    ['$strLenCP', Atom0], Ctx, Step)
-		;	mongolog:match_equals(Length0, ['$strLenCP', Atom0], Step)
+		;	match_equals(Length0, ['$strLenCP', Atom0], Step)
 		),
 		Pipeline).
 
@@ -80,7 +81,7 @@ mongolog:step_compile(
 	mongolog:var_key_or_val(UpperCase,Ctx,UpperCase0),
 	findall(Step,
 		(	mongolog:set_if_var(UpperCase,    ['$toUpper', Atom0], Ctx, Step)
-		;	mongolog:match_equals(UpperCase0, ['$toUpper', Atom0], Step)
+		;	match_equals(UpperCase0, ['$toUpper', Atom0], Step)
 		),
 		Pipeline).
 
@@ -95,7 +96,7 @@ mongolog:step_compile(
 	mongolog:var_key_or_val(LowerCase,Ctx,LowerCase0),
 	findall(Step,
 		(	mongolog:set_if_var(LowerCase,    ['$toLower', Atom0], Ctx, Step)
-		;	mongolog:match_equals(LowerCase0, ['$toLower', Atom0], Step)
+		;	match_equals(LowerCase0, ['$toLower', Atom0], Step)
 		),
 		Pipeline).
 
@@ -109,7 +110,7 @@ mongolog:step_compile(
 	mongolog:var_key_or_val(Atom,Ctx,Atom0),
 	mongolog:var_key_or_val(Prefix,Ctx,Prefix0),
 	findall(Step,
-		mongolog:match_equals(Prefix0,
+		match_equals(Prefix0,
 			['$substr', array([
 				Atom0, int(0), ['$strLenCP', Prefix0]
 			])],
@@ -140,7 +141,7 @@ mongolog:step_compile(
 				['$strLenCP',Atom0]
 			])], Ctx, Step)
 		;	mongolog:set_if_var(Atom,    ['$concat', array([Left0,Right0])], Ctx, Step)
-		;	mongolog:match_equals(Atom0, ['$concat', array([Left0,Right0])], Step)
+		;	match_equals(Atom0, ['$concat', array([Left0,Right0])], Step)
 		),
 		Pipeline).
 
@@ -159,7 +160,7 @@ mongolog:step_compile(
 	mongolog:var_key_or_val(Atom,Ctx,Atom0),
 	findall(Step,
 		(	mongolog:set_if_var(Atom,    ['$concat', array(List0)], Ctx, Step)
-		;	mongolog:match_equals(Atom0, ['$concat', array(List0)], Step)
+		;	match_equals(Atom0, ['$concat', array(List0)], Step)
 		),
 		Pipeline).
 
@@ -181,7 +182,7 @@ mongolog:step_compile(
 	add_separator(List0, Sep0, List1),
 	findall(Step,
 		(	mongolog:set_if_var(Atom,    ['$concat', array(List1)], Ctx, Step)
-		;	mongolog:match_equals(Atom0, ['$concat', array(List1)], Step)
+		;	match_equals(Atom0, ['$concat', array(List1)], Step)
 		),
 		Pipeline).
 
