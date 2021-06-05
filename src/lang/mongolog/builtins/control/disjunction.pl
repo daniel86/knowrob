@@ -111,7 +111,6 @@ compile_disjunction(
 	option(outer_vars(OuterVarsOrig), Ctx),
 	option(orig_vars(_CopiedVars0), Ctx, []),
 	option(copy_vars(CopiedVars1), Ctx, []),
-	option(disj_vars(DisjVars), Ctx, []),
 	% ensure goal is a list
 	(	is_list(Goal) -> Goal0=Goal
 	;	comma_list(Goal, Goal0)
@@ -122,11 +121,10 @@ compile_disjunction(
 	% the workaround is to create a copy of the goal here,
 	% and make sure the different variables are accessed in mongo with a common key.
 	copy_term(Goal0, GoalCopy),
-	term_variables(Goal0,    VarsOrig),
+	term_variables(Goal0, VarsOrig),
 	term_variables(GoalCopy, VarsCopy),
 	%
-	copy_vars(OuterVarsOrig,  VarsOrig, VarsCopy, OuterVarsCopy),
-	copy_vars(DisjVars,       VarsOrig, VarsCopy, DisjVarsCopy),
+	copy_vars(OuterVarsOrig, VarsOrig, VarsCopy, OuterVarsCopy),
 	% remember the mapping between original and copy of the variables,
 	% This is important as the copies may receive groundings in the compilation
 	% process (when lookup_findall is called)
@@ -146,10 +144,9 @@ compile_disjunction(
 	% such that they will be accessible in lookup
 	append(OuterVarsCopy, CutVars, OuterVarsCopy0),
 	% FIXME: need a better interface for this
-	select_option(disj_vars(_), Ctx, Ctx0, _),
+	select_option(outer_vars(_), Ctx, Ctx0, _),
 	merge_options([
 		outer_vars(OuterVarsCopy0),
-		disj_vars(DisjVarsCopy),
 		orig_vars(VOs),
 		copy_vars(VCs),
 		additional_vars(CutVars)
@@ -164,16 +161,11 @@ compile_disjunction(
 	;	CutVars0=CutVars
 	),
 	copy_vars(StepVars_copy, VarsCopy, VarsOrig, StepVars_this),
-	append(StepVars_this, DisjVars, DisjVars0),
-	list_to_set(DisjVars0, DisjVars1),
+	append(StepVars_this, OuterVarsOrig, OuterVarsNext),
+	list_to_set(OuterVarsNext, OuterVarsNext1),
 	% compile remaining goals
-	% FIXME: merge_options DOES NOT REPLACE !!!!!
-	merge_options([
-		outer_vars(OuterVarsOrig),
-		disj_vars(DisjVars1)
-	], Ctx0, RestCtx),
 	compile_disjunction(RestGoals, RestVars, CutVars0,
-		RestCtx, Ys, StepVars_rest),
+		[outer_vars(OuterVarsNext1)|Ctx0], Ys, StepVars_rest),
 	%
 	%resolve_vars(StepVars_copy, OuterVarsOrig0, StepVars_this),
 	append(StepVars_this, StepVars_rest, StepVars0),

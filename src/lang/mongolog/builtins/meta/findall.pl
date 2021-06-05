@@ -57,21 +57,32 @@ mongolog:step_compile1(
 		  input_collection(OneColl)
 		]) :-
 	mng_one_db(_,OneColl),
-	% findall only exposes the List variable to the outside.
+	% get field key for list and variables in template
 	mongolog:step_vars(List, Ctx, StepVars),
-	% TODO: redundant, make an interface in query compiler
-	once((select(disj_vars(DisjVars), Ctx, Ctx0);(DisjVars=[],Ctx0=Ctx))),
+	mongolog:step_vars(Template, Ctx, TemplateVars),
 	% add template vars to compile context.
 	% this is important to enforce that vars in Template are referred
 	% to with a common key within findall.
 	% note that the vars should not be added to the "outer_vars"
 	% array as variables in template are _not_ exposed to the outside.
-	mongolog:step_vars(Template, Ctx, TemplateVars),
-	append(DisjVars, TemplateVars, DisjVars0),
-	list_to_set(DisjVars0,DisjVars1),
-	Ctx1=[disj_vars(DisjVars1)|Ctx0],
-	lookup_findall('t_next',Terminals,
-					[], [], Ctx1, InnerStepVars, Lookup),
+	% TODO: why we cannot add to outer_vars? it is only given to lookup afterall.
+	%        or are the vars included in InnerStepVars below for some reason?
+	select_option(step_vars(SV), Ctx, Ctx0, []),
+	append(TemplateVars, SV, SV0),
+	list_to_set(SV0,SV1),
+	Ctx1=[step_vars(SV1)|Ctx0],
+	% compile a $lookup query
+	lookup_findall(
+		% lookup collection
+		't_next',
+		% lookup goal
+		Terminals,
+		% prefix/suffix for inner pipeline
+		[],[],
+		% compile context
+		Ctx1, InnerStepVars,
+		% the $lookup query
+		Lookup),
 	% make sure to use a common key with the inner pipeline when instantiating
 	% the template.
 	merge_options([step_vars(InnerStepVars)],Ctx1,Ctx2),

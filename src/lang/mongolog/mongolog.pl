@@ -304,9 +304,7 @@ context_var(Ctx, [Key,ReferredVar]) :-
 	atom(Stripped),
 	atom_concat('$', Key, Stripped),
 	once((
-		(	option(outer_vars(Vars), Ctx)
-		;	option(disj_vars(Vars), Ctx)
-		),
+		option(outer_vars(Vars), Ctx),
 		member([Key,ReferredVar],Vars)
 	)).
 
@@ -327,7 +325,6 @@ var_key(Var, Ctx, Key) :-
 	%		- member/2 cannot be used as it would unify each array element
 	(	option(outer_vars(Vars), Ctx, [])
 	;	option(step_vars(Vars), Ctx, [])
-	;	option(disj_vars(Vars), Ctx, [])
 	),
 	member([Key,ReferredVar],Vars),
 	ReferredVar == Var,
