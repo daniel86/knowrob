@@ -109,7 +109,6 @@ compile_disjunction(
 		[[Stage,Key,Goal]|Ys],
 		StepVars) :-
 	option(outer_vars(OuterVarsOrig), Ctx),
-	option(global_vars(GlobalVarsOrig), Ctx, []),
 	option(orig_vars(_CopiedVars0), Ctx, []),
 	option(copy_vars(CopiedVars1), Ctx, []),
 	option(disj_vars(DisjVars), Ctx, []),
@@ -127,7 +126,6 @@ compile_disjunction(
 	term_variables(GoalCopy, VarsCopy),
 	%
 	copy_vars(OuterVarsOrig,  VarsOrig, VarsCopy, OuterVarsCopy),
-	copy_vars(GlobalVarsOrig, VarsOrig, VarsCopy, GlobalVarsCopy),
 	copy_vars(DisjVars,       VarsOrig, VarsCopy, DisjVarsCopy),
 	% remember the mapping between original and copy of the variables,
 	% This is important as the copies may receive groundings in the compilation
@@ -151,7 +149,6 @@ compile_disjunction(
 	select_option(disj_vars(_), Ctx, Ctx0, _),
 	merge_options([
 		outer_vars(OuterVarsCopy0),
-		global_vars(GlobalVarsCopy),
 		disj_vars(DisjVarsCopy),
 		orig_vars(VOs),
 		copy_vars(VCs),

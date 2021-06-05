@@ -86,15 +86,13 @@ mongolog_call(Goal, Context) :-
 	% which is explicitely used in a step of the goal.
 	ignore(memberchk(input_collection(Coll), CompilerOutput)),
 	once((ground(Coll);Coll=one)),
-	%
-	option(user_vars(UserVars), Context, []),
+	% TODO: below really needed?
 	option(global_vars(GlobalVars), Context, []),
-	append(Vars, UserVars, Vars1),
-	append(Vars1, GlobalVars, Vars2),
-	list_to_set(Vars2,Vars3),
+	append(Vars, GlobalVars, Vars1),
+	list_to_set(Vars1,Vars2),
 	% run the pipeline
 	% TODO: split goal at assert's such that they are available in the rest of the query
-	aggregate(Coll, Doc, Vars3, Result),
+	aggregate(Coll, Doc, Vars2, Result),
 	bulk_operation(Result).
 
 
@@ -125,7 +123,11 @@ mongolog_compile(Terminals, Output, Vars, Context) :-
 
 %%
 query_compile1(Terminals, Output0, Vars, Context) :-
-	DocVars=[['g_assertions',_]],
+	% get global variables supplied by the call context and add it
+	% to the compile context
+	option(global_vars(GlobalVars), Context, []),
+	%
+	DocVars=[['g_assertions',_]|GlobalVars],
 	compile_terms(Terminals, DocVars->Vars, Output, Context),
 	memberchk(document(Doc0), Output),
 	%memberchk(variables(StepVars), Output),
@@ -215,15 +217,16 @@ compile_expanded_term(Expanded, V0->V1, Output0, Context) :-
 	append(V0, StepVars_unique, V11),
 	list_to_set(V11, V1),
 	% create a field for each variable that was not referred to before
+	% TODO: do not do this if the variable is assigned anyway
 	(	option(input_assigned,Context) -> InputKeys=[]
 	;	option(input_keys(InputKeys), Output, [])
 	),
 	findall([VarKey,[['type',string('var')], ['value',string(VarKey)]]],
 		(	member([VarKey,_], StepVars_unique),
-			\+ member([VarKey,_], V0),
+			\+ memberchk([VarKey,_], V0),
 			% also skip any keys marked as input as these are coming from the
 			% input collection
-			\+ member(VarKey, InputKeys)
+			\+ memberchk(VarKey, InputKeys)
 		),
 		VarDocs0
 	),
@@ -322,8 +325,7 @@ var_key(Var, Ctx, Key) :-
 	% TODO: can this be done better then iterating over all variables?
 	%		- i.e. by testing if some variable is element of a list
 	%		- member/2 cannot be used as it would unify each array element
-	(	option(global_vars(Vars), Ctx, [])
-	;	option(outer_vars(Vars), Ctx, [])
+	(	option(outer_vars(Vars), Ctx, [])
 	;	option(step_vars(Vars), Ctx, [])
 	;	option(disj_vars(Vars), Ctx, [])
 	),

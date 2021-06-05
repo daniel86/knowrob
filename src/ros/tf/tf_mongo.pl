@@ -89,7 +89,7 @@ tf_mng_lookup(
 	mongolog_call(
 		tf(ObjFrame, PoseData),
 		[ scope(QueryScope),
-		  user_vars([['v_scope',FactScope]])
+		  global_vars([['v_scope',FactScope]])
 		]),
 	% read values from FactScope
 	time_scope(double(Fact_Since), double(Fact_Until), FactScope).

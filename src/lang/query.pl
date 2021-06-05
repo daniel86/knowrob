@@ -123,11 +123,11 @@ kb_call1(Goal, QScope, FScope, Options) :-
 	option(fields(Fields), Options, []),
 	% add all toplevel variables to context
 	term_keys_variables_(Goal, GlobalVars),
+	append([['v_scope',FScope]|Fields], GlobalVars, GlobalVars0),
 	%
 	merge_options(
 		[ scope(QScope),
-		  user_vars([['v_scope',FScope]|Fields]),
-		  global_vars(GlobalVars)
+		  global_vars(GlobalVars0)
 		],
 		Options, Options1),
 	% expand query, e.g. replace rule heads with bodies etc.
