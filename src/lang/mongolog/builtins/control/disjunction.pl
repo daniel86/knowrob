@@ -13,6 +13,7 @@ The following predicates are supported:
 */
 
 :- use_module('../../mongolog').
+:- use_module('../../compiler').
 :- use_module('../../aggregation/lookup').
 :- use_module('../../aggregation/set').
 
@@ -36,8 +37,8 @@ lang_query:step_expand(';'(A0,A1), ';'(B0,B1)) :-
 %
 % TODO: the $facet command would be another option to implement disjunction.
 %       but it has some limitations that make it less attractive, especially
-%       that it _cannot_ use indices withing facet pipelines. So match must be
-%       done outside, which cannot always be done (e.g. if both facets use input documents
+%       that it _cannot_ use indices within facet pipelines. So match must be
+%       done outside, which cannot always be done (e.g. if both goals use input documents
 %       from different collections).
 %       It can also not be nested directly, however, it appears to be ok to create
 %       nested views with facetting (which is nowhere documented)!
@@ -62,6 +63,81 @@ mongolog:step_compile1(';'(A,B), Ctx,
 	compile_disjunction(Goals, FindallVars, [], Ctx0, FindallStages, StepVars0),
 	FindallStages \== [],
 	aggregate_disjunction(FindallStages, StepVars0, Pipeline, StepVars).
+
+%%
+% each goal in a disjunction compiles into a lookup expression.
+%
+compile_disjunction([], [], _, _, [], []) :- !.
+
+compile_disjunction(
+		[Goal|RestGoals],
+		[FindallVar|RestVars],
+		CutVars, Ctx,
+		[[Stage,Key,Goal]|Ys],
+		StepVars) :-
+	select_option(outer_vars(OuterVarsOrig), Ctx, Ctx0, []),
+	select_option(copy_vars(CopiedVars1), Ctx0, Ctx1, []),
+	% ensure goal is a list
+	(	is_list(Goal)
+	->	GoalOrig=Goal
+	;	comma_list(Goal, GoalOrig)
+	),
+	% compile-time grounding of variables can be done in goals of a disjunction.
+	% however, a variable referred to in different goals of a disjunction cannot
+	% be instantiated to the same value compile-time.
+	% the workaround is to create a copy of the goal here,
+	% and make sure the different variables are accessed in mongo with a common key
+	% this is done by copy_vars/4.
+	copy_term(GoalOrig, GoalCopy),
+	term_variables(GoalOrig, VarsOrig),
+	term_variables(GoalCopy, VarsCopy),
+	copy_vars(OuterVarsOrig, VarsOrig, VarsCopy, OuterVarsCopy),
+	% remember the mapping between original and copy of the variables,
+	% This is important as the copies may receive groundings in the compilation
+	% process (when lookup_findall is called)
+	pairs_keys_values(VV, VarsOrig, VarsCopy),
+	copy_vars(CopiedVars1, VarsOrig, VarsCopy, CopiedVars2),
+	get_varkeys(Ctx, CopiedVars2, VV, VOs, VCs),
+	% add match command checking for all previous goals with cut having
+	% no solutions (size=0)
+	% TODO: could this be done also when embedded into limit?
+	findall([CutVarKey, ['$size', int(0)]],
+		member([CutVarKey, _],CutVars),
+		CutMatches0),
+	(	CutMatches0=[] -> CutMatches=[]
+	;	CutMatches=[['$match', CutMatches0]]
+	),
+	% since step_var does not list CutVars, we need to add them here to context
+	% such that they will be accessible in lookup
+	merge_substitutions(CutVars, OuterVarsCopy, CutOuterVarsCopy),
+	% compile the step
+	merge_options([
+		outer_vars(CutOuterVarsCopy),
+		orig_vars(VOs),
+		copy_vars(VCs)
+	], Ctx1, InnerCtx),
+	mongolog:var_key(FindallVar, Ctx, Key),
+	lookup_findall(Key, GoalCopy, CutMatches, [],
+		InnerCtx, StepVars_copy, Stage),
+	!,
+	% check if this goal has a cut, if so extend CutVars list
+	(	has_cut(Goal)
+	->	CutVars0=[[Key,FindallVar]|CutVars]
+	;	CutVars0=CutVars
+	),
+	% map copied step-vars back to original
+	copy_vars(StepVars_copy, VarsCopy, VarsOrig, StepVars_this),
+	% then merge step-vars into outer vars of next step such that variables have a common key
+	merge_substitutions(StepVars_this, OuterVarsOrig, OuterVarsNext1),
+	% compile remaining goals
+	compile_disjunction(RestGoals, RestVars, CutVars0,
+		[outer_vars(OuterVarsNext1)|Ctx0], Ys, StepVars_rest),
+	merge_substitutions(StepVars_this, StepVars_rest, StepVars).
+
+compile_disjunction([_|Goals], [_|Vars], CutVars, Ctx, Pipelines, StepVars) :-
+	% skip goal if compilation was "surpressed" above
+	compile_disjunction(Goals, Vars, CutVars, Ctx, Pipelines, StepVars).
+
 
 %%
 %aggregate_disjunction([[_,_,SingleGoal]], StepVars, Pipeline, StepVars) :-
@@ -96,83 +172,6 @@ aggregate_disjunction(FindallStages, StepVars, Pipeline, StepVars) :-
 		),
 		Pipeline
 	).
-
-%%
-% each goal in a disjunction compiles into a lookup expression.
-%
-compile_disjunction([], [], _, _, [], []) :- !.
-
-compile_disjunction(
-		[Goal|RestGoals],
-		[Var|RestVars],
-		CutVars, Ctx,
-		[[Stage,Key,Goal]|Ys],
-		StepVars) :-
-	option(outer_vars(OuterVarsOrig), Ctx),
-	option(orig_vars(_CopiedVars0), Ctx, []),
-	option(copy_vars(CopiedVars1), Ctx, []),
-	% ensure goal is a list
-	(	is_list(Goal) -> Goal0=Goal
-	;	comma_list(Goal, Goal0)
-	),
-	% compile-time grounding of variables can be done in goals of a disjunction.
-	% however, a variable referred to in different goals of a disjunction cannot
-	% be instantiated to the same value compile-time.
-	% the workaround is to create a copy of the goal here,
-	% and make sure the different variables are accessed in mongo with a common key.
-	copy_term(Goal0, GoalCopy),
-	term_variables(Goal0, VarsOrig),
-	term_variables(GoalCopy, VarsCopy),
-	%
-	copy_vars(OuterVarsOrig, VarsOrig, VarsCopy, OuterVarsCopy),
-	% remember the mapping between original and copy of the variables,
-	% This is important as the copies may receive groundings in the compilation
-	% process (when lookup_findall is called)
-	pairs_keys_values(VV, VarsOrig, VarsCopy),
-	copy_vars(CopiedVars1, VarsOrig, VarsCopy, CopiedVars2),
-	%
-	get_varkeys(Ctx, CopiedVars2, VV, VOs, VCs),
-	% add match command checking for all previous goals with cut having
-	% no solutions (size=0)
-	findall([CutVarKey, ['$size', int(0)]],
-		member([CutVarKey, _],CutVars),
-		CutMatches0),
-	(	CutMatches0=[] -> CutMatches=[]
-	;	CutMatches=[['$match', CutMatches0]]
-	),
-	% since step_var does not list CutVars, we need to add them here to context
-	% such that they will be accessible in lookup
-	append(OuterVarsCopy, CutVars, OuterVarsCopy0),
-	% FIXME: need a better interface for this
-	select_option(outer_vars(_), Ctx, Ctx0, _),
-	merge_options([
-		outer_vars(OuterVarsCopy0),
-		orig_vars(VOs),
-		copy_vars(VCs)
-	], Ctx0, InnerCtx),
-	% compile the step
-	mongolog:var_key(Var, Ctx, Key),
-	lookup_findall(Key, GoalCopy, CutMatches, [],
-		InnerCtx, StepVars_copy, Stage),
-	!,
-	% check if this goal has a cut, if so extend CutVars list
-	(	has_cut(Goal) -> CutVars0=[[Key,Var]|CutVars]
-	;	CutVars0=CutVars
-	),
-	copy_vars(StepVars_copy, VarsCopy, VarsOrig, StepVars_this),
-	append(StepVars_this, OuterVarsOrig, OuterVarsNext),
-	list_to_set(OuterVarsNext, OuterVarsNext1),
-	% compile remaining goals
-	compile_disjunction(RestGoals, RestVars, CutVars0,
-		[outer_vars(OuterVarsNext1)|Ctx0], Ys, StepVars_rest),
-	%
-	%resolve_vars(StepVars_copy, OuterVarsOrig0, StepVars_this),
-	append(StepVars_this, StepVars_rest, StepVars0),
-	list_to_set(StepVars0, StepVars).
-
-compile_disjunction([_|Goals], [_|Vars], CutVars, Ctx, Pipelines, StepVars) :-
-	% skip goal if compilation was "surpressed" above
-	compile_disjunction(Goals, Vars, CutVars, Ctx, Pipelines, StepVars).
 
 %%
 % Create a copy of a variable map with fresh variables in the copy

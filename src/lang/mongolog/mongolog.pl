@@ -20,6 +20,7 @@
 
 :- use_module('stages/aggregation', [ aggregate/4 ]).
 :- use_module('stages/bulk_operation', [ bulk_operation/1 ]).
+:- use_module('compiler').
 
 %% set of registered query commands.
 :- dynamic step_command/1.
@@ -211,18 +212,17 @@ compile_expanded_term(Expanded, V0->V1, Output0, Context) :-
 	once(step_compile1(Expanded, InnerContext, Output)),
 	memberchk(document(Doc), Output),
 	memberchk(variables(StepVars), Output),
-	%option(input_collection(InputCollection), Output, _),
-	% merge StepVars with variables in previous steps (V0)
 	list_to_set(StepVars, StepVars_unique),
-	append(V0, StepVars_unique, V11),
-	list_to_set(V11, V1),
+	% merge StepVars with variables in previous steps (V0)
+	merge_substitutions(StepVars_unique, V0, V1),
 	% create a field for each variable that was not referred to before
 	% TODO: do not do this if the variable is assigned anyway
-	(	option(input_assigned,Context) -> InputKeys=[]
-	;	option(input_keys(InputKeys), Output, [])
-	),
 	findall([VarKey,[['type',string('var')], ['value',string(VarKey)]]],
-		(	member([VarKey,_], StepVars_unique),
+		(	(	option(input_assigned,Context)
+			->	InputKeys=[]
+			;	option(input_keys(InputKeys), Output, [])
+			),
+			member([VarKey,_], StepVars_unique),
 			\+ memberchk([VarKey,_], V0),
 			% also skip any keys marked as input as these are coming from the
 			% input collection
@@ -233,11 +233,14 @@ compile_expanded_term(Expanded, V0->V1, Output0, Context) :-
 	% make sure there are no duplicate entries as these would cause
 	% compilation failure in a single $set!
 	list_to_set(VarDocs0,VarDocs),
-	(	VarDocs=[] -> Pipeline=Doc
+	(	VarDocs==[]
+	->	Pipeline=Doc
 	;	Pipeline=[['$set', VarDocs]|Doc]
 	),
 	merge_options(
-		[ document(Pipeline), variables(StepVars_unique) ],
+		[ document(Pipeline),
+		  variables(StepVars_unique)
+		],
 		Output, Output0).
 
 %%
