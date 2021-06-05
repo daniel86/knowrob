@@ -1,7 +1,8 @@
 :- module(mongolog_edb,
 		[ is_edb_predicate/1,
 		  edb_create/3,
-		  edb_drop/1
+		  edb_drop/1,
+		  edb_assert/1
 		]).
 
 :- use_module('../mongolog').
@@ -31,6 +32,21 @@ edb_create(Functor, Fields, Opts) :-
 %
 edb_drop(Indicator) :-
 	db_predicate_drop(Indicator).
+
+%% edb_assert(+Fact) is semidet.
+%
+%
+edb_assert(Fact) :-
+	db_predicate(Fact, Fields, _Opts),
+	db_predicate_collection(Fact, DB, Collection),
+	%
+	Fact =.. [_Functor|Args],
+	maplist([X,Y]>>(
+		mng_strip_type(X,Type,Stripped),
+		mng_strip_type(Y,Type,Stripped)
+	), Args, TypedArgs),
+	zip(Fields,TypedArgs,ValuedFields),
+	mng_store(DB, Collection, ValuedFields).
 
 %%
 mongolog:step_compile1(Term, Ctx, Output) :-

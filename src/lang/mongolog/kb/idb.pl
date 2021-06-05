@@ -112,3 +112,22 @@ idb_assert(Module, Functor, Args, _Zs) :-
 mongolog:step_compile1(Term, Ctx, Output) :-
 	is_idb_predicate(Term),!,
 	db_predicate_compile(Term, Ctx, Output).
+
+		 /*******************************
+		 *    	  UNIT TESTING     		*
+		 *******************************/
+
+:- use_module('../mongolog_tests').
+
+:- begin_mongolog_tests('mongolog_idb',
+		[ woman(mia),
+		  woman(jola)
+		]).
+
+test('woman(+)') :-
+	assert_true(mongolog_call(woman(mia))),
+	assert_true(mongolog_call(woman(jola))),
+	assert_false(mongolog_call(woman(vincent))).
+
+:- end_mongolog_tests('mongolog_idb').
+
