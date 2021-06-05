@@ -66,20 +66,16 @@ gen_edb_idb1(Literal, [Functor,Fields,[]]) :-
 	), Fields).
 
 %%
-setup([EDBPredicates,Facts], [IDBPredicates,Clauses]) :-
+setup([EDBPredicates,Facts], [_,Clauses]) :-
 	% create predicates
 	forall(
 		member([Functor,Fields,Options],EDBPredicates),
 		edb_create(Functor, Fields, Options)
 	),
-	forall(
-		member([Functor,Fields,Options],IDBPredicates),
-		idb_create(Functor, Fields, Options)
-	),
 	% assert facts
 	forall(member(Fact,Facts), edb_assert(Fact)),
 	% assert clauses
-	forall(member((':-'(Head,Body)),Clauses), 
+	forall(member((':-'(Head,Body)),Clauses),
 		lang_query:expand_ask_rule(Head, Body, _)),
 	lang_query:flush_predicate(user).
 

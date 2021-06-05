@@ -120,14 +120,23 @@ mongolog:step_compile1(Term, Ctx, Output) :-
 :- use_module('../mongolog_tests').
 
 :- begin_mongolog_tests('mongolog_idb',
-		[ woman(mia),
-		  woman(jola)
+		[ % EDB facts
+		  woman(mia),
+		  woman(jola),
+		  loves(fred,mia),
+		  loves(jola,fred),
+		  % IDB clauses
+		  ( findall_test(X1) :- findall(Y1, woman(Y1), X1) ),
+		  ( loved_woman(X2)  :- woman(X2), loves(_,X2) )
 		]).
 
-test('woman(+)') :-
-	assert_true(mongolog_call(woman(mia))),
-	assert_true(mongolog_call(woman(jola))),
-	assert_false(mongolog_call(woman(vincent))).
+test('idb:-edb,edb') :-
+	findall(X, mongolog_call(loved_woman(X)), Xs),
+	assert_equals(Xs, [mia]).
+
+test('idb:-findall(edb)') :-
+	findall(As, mongolog_call(findall_test(As)), X),
+	assert_equals(X, [[mia,jola]]).
 
 :- end_mongolog_tests('mongolog_idb').
 

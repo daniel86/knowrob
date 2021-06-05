@@ -103,7 +103,9 @@ setup_predicate_collection(Functor, [FirstField|_], Options) :-
 %
 db_predicate_drop(Predicate) :-
 	db_predicate_collection(Predicate, DB, Collection),
-	mng_drop(DB, Collection).
+	mng_drop(DB, Collection),
+	db_predicate(Predicate, Functor, Fields, _),
+	retractall(db_predicate(Functor, Fields, _)).
 
 %%
 db_predicate_compile(Term, Ctx,

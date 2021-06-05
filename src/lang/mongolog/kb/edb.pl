@@ -37,15 +37,17 @@ edb_drop(Indicator) :-
 %
 %
 edb_assert(Fact) :-
+	% get predicate info
 	db_predicate(Fact, Fields, _Opts),
 	db_predicate_collection(Fact, DB, Collection),
-	%
+	% generate a document
 	Fact =.. [_Functor|Args],
 	maplist([X,Y]>>(
 		mng_strip_type(X,Type,Stripped),
 		mng_strip_type(Y,Type,Stripped)
 	), Args, TypedArgs),
 	zip(Fields,TypedArgs,ValuedFields),
+	% insert the document
 	mng_store(DB, Collection, ValuedFields).
 
 %%
@@ -134,14 +136,6 @@ test('shape(+,sphere(-))') :-
 	assert_true(ground(Xs)),
 	assert_true(memberchk(1.0,Xs)).
 
-test('edb_rule') :-
-	lang_query:expand_ask_rule(loved_woman(A), (woman(A), loves(_,A)), _),
-	lang_query:flush_predicate(user),
-	%%
-	findall(X, mongolog_call(loved_woman(X)), Xs),
-	assert_equals(Xs, [mia]),
-	assert_true(idb_drop(loved_woman/1)).
-
 test('+Cond->assert(woman);assert(woman)') :-
 	% TODO: move into disjunction test
 	assert_false(mongolog_call(woman(bar))),
@@ -153,15 +147,6 @@ test('+Cond->assert(woman);assert(woman)') :-
 		Num, 4.5)),
 	assert_true(mongolog_call(woman(bar))),
 	assert_false(mongolog_call(woman(foo))).
-
-test('findall_rule') :-
-	% TODO: move into findall test
-	lang_query:expand_ask_rule(findall_test(As), findall(A, woman(A), As), _),
-	lang_query:flush_predicate(user),
-	%%
-	findall(As, mongolog_call(findall_test(As)), X),
-	assert_equals(X, [[mia,bar]]),
-	assert_true(idb_drop(findall_test/1)).
 
 test('drop_database_predicate') :-
 	assert_true(edb_drop(shape/2)),
