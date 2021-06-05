@@ -60,7 +60,11 @@ lookup_findall(ArrayKey, Terminals,
 	% to avoid that the original remains ungrounded.
 	% GroundVars0: key-original variable mapping
 	% GroundVars1: key-grounding mapping
-	grounded_vars(Context, [VOs,VCs], GroundVars0, GroundVars1),
+	select_option(outer_vars(OuterVars), Context, Context_x0, []),
+	append(StepVars0,OuterVars,OuterVars_x0),
+	grounded_vars(
+		[outer_vars(OuterVars_x0)|Context_x0],
+		[VOs,VCs], GroundVars0, GroundVars1),
 	% add variables that have received a grounding in compile_terms
 	% to StepVars
 	append(GroundVars0, StepVars0, StepVars1),

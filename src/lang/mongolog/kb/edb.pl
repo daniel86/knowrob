@@ -42,13 +42,28 @@ edb_assert(Fact) :-
 	db_predicate_collection(Fact, DB, Collection),
 	% generate a document
 	Fact =.. [_Functor|Args],
-	maplist([X,Y]>>(
-		mng_strip_type(X,Type,Stripped),
-		mng_strip_type(Y,Type,Stripped)
-	), Args, TypedArgs),
+	maplist(mongo_typed, Args, TypedArgs),
 	zip(Fields,TypedArgs,ValuedFields),
 	% insert the document
 	mng_store(DB, Collection, ValuedFields).
+
+%%
+% TODO: move into some module
+mongo_typed(X, Typed) :-
+	mng_strip_type(X,Type,Stripped),
+	mng_strip_type(Y,Type,Stripped),
+	mongo_term(Y,Typed).
+	
+mongo_term(term(Literal), [
+		['type', string('compound')],
+		['value', [
+			['functor', string(Functor)],
+			['args', array(ArgsTyped)]
+		]]
+	]) :-
+	!, Literal =.. [Functor|Args],
+	maplist(mongo_typed, Args, ArgsTyped).
+mongo_term(X,X).
 
 %%
 mongolog:step_compile1(Term, Ctx, Output) :-

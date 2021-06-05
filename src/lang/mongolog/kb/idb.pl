@@ -121,22 +121,97 @@ mongolog:step_compile1(Term, Ctx, Output) :-
 
 :- begin_mongolog_tests('mongolog_idb',
 		[ % EDB facts
-		  woman(mia),
-		  woman(jola),
-		  loves(fred,mia),
-		  loves(jola,fred),
+		  woman(mia), woman(jola),
+		  loves(fred,mia), loves(jola,fred),
 		  % IDB clauses
 		  ( findall_test(X1) :- findall(Y1, woman(Y1), X1) ),
-		  ( loved_woman(X2)  :- woman(X2), loves(_,X2) )
+		  ( loved_woman(X2)  :- woman(X2), loves(_,X2) ),
+		  ( test_nested_rule1(X3) :- assign(X3,2) ),
+		  ( test_nested_rule1(X4) :- assign(X4,3) ),
+		  ( test_nested_rule(X5)  :- test_nested_rule1(Y5), X5 is Y5 + 2 ),
+		  % ask-rule with partially instantiated arg and multiple clauses
+		  ( test_shape1(mesh(X))   :- =(X,foo) ),
+		  ( test_shape1(sphere(X)) :- =(X,5.0) ),
+		  ( test_shape2(X)         :- ( =(X,mesh(foo)) ; =(X,sphere(5.0)) ) ),
+		  ( test_shape3(X)         :- ( test_shape1(X) ; =(X,mesh(bar)) ) )
 		]).
 
-test('idb:-edb,edb') :-
+test('edb-conjunction') :-
 	findall(X, mongolog_call(loved_woman(X)), Xs),
 	assert_equals(Xs, [mia]).
 
-test('idb:-findall(edb)') :-
+test('findall(edb)') :-
 	findall(As, mongolog_call(findall_test(As)), X),
 	assert_equals(X, [[mia,jola]]).
+
+test('idb-body') :-
+	findall(X, mongolog_call(test_nested_rule(X)), Xs),
+	assert_equals(Xs, [4.0,5.0]).
+
+test('test_shape1(mesh(foo))') :-
+	assert_true(mongolog_call(test_shape1(mesh(foo)))).
+
+test('test_shape1(mesh(X))') :-
+	findall(X, mongolog_call(test_shape1(mesh(X))), Xs),
+	assert_true(length(Xs,1)),
+	assert_true(ground(Xs)),
+	assert_true(memberchk(foo, Xs)).
+
+test('test_shape1(X)') :-
+	findall(X, mongolog_call(test_shape1(X)), Xs),
+	assert_true(length(Xs,2)),
+	assert_true(ground(Xs)),
+	assert_true(memberchk(mesh(foo), Xs)),
+	assert_true(memberchk(sphere(5.0), Xs)).
+
+test('test_shape2(mesh(foo))') :-
+	assert_true(mongolog_call(test_shape2(mesh(foo)))).
+
+test('test_shape2(mesh(X))') :-
+	findall(X, mongolog_call(test_shape2(mesh(X))), Xs),
+	assert_true(length(Xs,1)),
+	assert_true(ground(Xs)),
+	assert_true(memberchk(foo, Xs)).
+
+test('test_shape2(X)') :-
+	findall(X, mongolog_call(test_shape2(X)), Xs),
+	assert_true(length(Xs,2)),
+	assert_true(ground(Xs)),
+	assert_true(memberchk(mesh(foo), Xs)),
+	assert_true(memberchk(sphere(5.0), Xs)).
+
+test('test_shape3(mesh(foo))') :-
+	assert_true(mongolog_call(test_shape3(mesh(foo)))).
+
+test('test_shape3(mesh(X))') :-
+	findall(X, mongolog_call(test_shape3(mesh(X))), Xs),
+	assert_true(length(Xs,2)),
+	assert_true(ground(Xs)),
+	assert_true(memberchk(foo, Xs)),
+	assert_true(memberchk(bar, Xs)).
+
+test('test_shape3(X)') :-
+	findall(X, mongolog_call(test_shape3(X)), Xs),
+	assert_true(length(Xs,3)),
+	assert_true(ground(Xs)),
+	assert_true(memberchk(mesh(bar), Xs)),
+	assert_true(memberchk(mesh(foo), Xs)),
+	assert_true(memberchk(sphere(5.0), Xs)).
+
+%
+%test_recursive_rule(Left,Right) ?>
+%	(	(Left=a,assign(X,b))
+%	;	(Left=b,assign(X,c))
+%	;	(Left=d,assign(X,c))
+%	),
+%	(	assign(Right,X)
+%	;	test_recursive_rule(X,Right)
+%	).
+%
+%test('test_recursive_rule(+,-)') :-
+%	lang_query:flush_predicate(mongolog_unification),
+%	findall(X, kb_call(test_recursive_rule(a,X)), Xs),
+%	assert_equals(Xs, [b,c]).
 
 :- end_mongolog_tests('mongolog_idb').
 
