@@ -5,6 +5,7 @@
 	]).
 
 :- use_module('set').
+:- use_module('../compiler').
 
 %% FIXME: redundant with call foo
 lookup_call(Terminals, Suffix, Ctx, Pipeline, StepVars) :-
@@ -39,7 +40,7 @@ lookup_findall(ArrayKey, Terminals,
 			['pipeline', array(Pipeline1)]
 		]]) :-
 	% get variables referred to in query
-	option(outer_vars(OuterVars), Context),
+	select_option(outer_vars(OuterVars), Context, Context_x0, []),
 	% within a disjunction VV provides mapping between
 	% original and copied variables (see control.pl)
 	option(orig_vars(VOs), Context, []),
@@ -60,20 +61,15 @@ lookup_findall(ArrayKey, Terminals,
 	% to avoid that the original remains ungrounded.
 	% GroundVars0: key-original variable mapping
 	% GroundVars1: key-grounding mapping
-	select_option(outer_vars(OuterVars), Context, Context_x0, []),
-	append(StepVars0,OuterVars,OuterVars_x0),
+	merge_substitutions(StepVars0, OuterVars, OuterVars_x0),
 	grounded_vars(
 		[outer_vars(OuterVars_x0)|Context_x0],
 		[VOs,VCs], GroundVars0, GroundVars1),
-	% add variables that have received a grounding in compile_terms
-	% to StepVars
-	append(GroundVars0, StepVars0, StepVars1),
-	list_to_set(StepVars1, StepVars),
-	% pass variables from outer goal to inner if they are referred to
-	% in the inner goal.
+	% add variables that have received a grounding in compile_terms to StepVars
+	merge_substitutions(GroundVars0, StepVars0, StepVars),
+	% pass variables from outer goal to inner if they are referred to in the inner goal.
 	lookup_let_doc(OuterVars, LetDoc),
-	% set all let variables so that they can be accessed
-	% without aggregate operators in Pipeline
+	% set all let variables so that they can be accessed without aggregate operators in Pipeline
 	lookup_set_vars(OuterVars, SetVars),
 	% compose inner pipeline
 	(	SetVars=[] -> Prefix0=Prefix
