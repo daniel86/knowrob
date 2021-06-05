@@ -2,12 +2,13 @@
 :- use_directory(control).
 :- use_directory(meta).
 
-:- use_module(arithmetic).
-:- use_module(atoms).
-:- use_module(comparison).
-:- use_module(constants).
-:- use_module(lists).
-:- use_module(sgml).
-:- use_module(terms).
-:- use_module(typecheck).
-:- use_module(unification).
+:- ensure_loaded(arithmetic).
+:- ensure_loaded(atoms).
+:- ensure_loaded(comparison).
+:- ensure_loaded(database).
+:- ensure_loaded(constants).
+:- ensure_loaded(lists).
+:- ensure_loaded(sgml).
+:- ensure_loaded(terms).
+:- ensure_loaded(typecheck).
+:- ensure_loaded(unification).

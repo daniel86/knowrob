@@ -77,7 +77,7 @@ swrl_fire1(HeadAtom :- Body, Label) :-
 
 %%
 swrl_fact(model_RDFS:instance_of(X,Y), has_type(X,Y)) :- !.
-swrl_fact(lang_holds:holds(X,Y,Z),     holds(X,Y,Z)) :- !.
+swrl_fact(lang_holds:holds(X,Y,Z),     triple(X,Y,Z)) :- !.
 
 %% swrl_assert(+Rule).
 %

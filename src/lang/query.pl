@@ -562,7 +562,7 @@ call_with(mongolog, Goal, Options) :- mongolog_call(Goal, Options).
 %
 % True if Backend is a querying backend that can handle Goal.
 %
-is_callable_with(mongolog, Goal) :- is_mongolog_predicate(Goal).
+is_callable_with(mongolog, Goal) :- mongolog:is_mongolog_term(Goal).
 
 
 		 /*******************************
@@ -590,7 +590,10 @@ kb_add_rule(Module, Head, Body) :-
 	),
 	% HACK: this is to make mongolog recognize the predicate symbol before
 	%        the rule has been added (after all clauses have been expanded)
-	mongolog:add_command(Functor),
+	once((
+		atom_concat('project_',_,Functor)
+	;	mongolog:add_command(Functor)
+	)),
 	assertz(kb_rule(Module, Functor, Args, Expanded)).
 
 
@@ -785,7 +788,7 @@ flush_predicate1(Module, Functor, Arity) :-
 	% wrap different clauses into ';'
 	semicolon_list(Zs, Clauses),
 	% TODO: allow asserting rules into other backends too
-	mongolog_rule_assert(Module, Functor, Args, Zs).
+	mongolog_idb:idb_assert(Module, Functor, Args, Zs).
 
 flush_predicate(SrcModule, Functor, Arity) :-
 	expanding_term(Functor, Arity, SrcModule, DstModule),!,
@@ -808,9 +811,7 @@ user:term_expansion(end_of_file, end_of_file) :-
 % The body is rewritten such that mng_ask is called instead
 % with body as argument.
 %
-user:term_expansion(
-		(?>(Head,Body)),
-		Export) :-
+expand_ask_rule(Head, Body, Export) :-
 	prolog_load_context(module, SrcModule),
 	% expand rdf terms Prefix:Local to IRI atom
 	rdf_global_term(Head, HeadGlobal),
@@ -839,6 +840,9 @@ user:term_expansion(
 		current_scope(QScope),
 		Export=[(:-(Term1, lang_query:kb_call(Term1, QScope, _FScope, [])))]
 	)).
+
+user:term_expansion((?>(Head,Body)), Export) :-
+	expand_ask_rule(Head,Body,Export).
 
 %%
 % Term expansion for *project* rules using the (+>) operator.

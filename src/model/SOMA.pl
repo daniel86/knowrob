@@ -225,7 +225,7 @@ event_interval(EV, Since, Until) ?>
 	triple(TI, soma:hasIntervalEnd, Until).
 
 event_interval(EV, Since, Until) +>
-	new_iri(TI, dul:'TimeInterval'),
+	new_iri(TI),%, dul:'TimeInterval'),
 	has_type(TI, dul:'TimeInterval'),
 	triple(EV, dul:hasTimeInterval, TI),
 	triple(TI, soma:hasIntervalBegin, Since),
@@ -326,8 +326,8 @@ is_kino_dynamic_data(IO) ?+>
 % @param Format File format identifier string (i.e. the file extension).
 %
 has_kinematics_file(Obj,Identifier,Format) +>
-	new_iri(IO,soma:'KinoDynamicData'),
-	new_iri(IR,io:'DigitalResource'),
+	new_iri(IO),%,soma:'KinoDynamicData'),
+	new_iri(IR),%,io:'DigitalResource'),
 	has_type(IO,soma:'KinoDynamicData'),
 	has_type(IR,io:'DigitalResource'),
 	triple(IO, dul:isAbout, Obj),

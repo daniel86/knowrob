@@ -57,25 +57,26 @@ occurs(Evt) +>
 	).
 
 %%
-lang_temporal:during(Query, Event) ?+>
-	atom(Event),
-	pragma(time_scope(=<(Since), >=(Until), Scope)),
-	ask(event_interval(Event, Since, Until)),
-	call_with_context(Query, [scope(Scope)]).
-
-lang_temporal:since(Query, Event) ?+>
-	atom(Event),
-	ask(event_interval(Event, Time, _)),
-	call_with_context(Query, [scope(dict{
-		time: dict{ since: =<(Time) }
-	})]).
-
-lang_temporal:until(Query, Event) ?+>
-	atom(Event),
-	ask(event_interval(Event, Time, _)),
-	call_with_context(Query, [scope(dict{
-		time: dict{ until: >=(Time) }
-	})]).
+% TODO
+%lang_temporal:during(Query, Event) ?+>
+%	atom(Event),
+%	pragma(time_scope(=<(Since), >=(Until), Scope)),
+%	ask(event_interval(Event, Since, Until)),
+%	call_with_context(Query, [scope(Scope)]).
+%
+%lang_temporal:since(Query, Event) ?+>
+%	atom(Event),
+%	ask(event_interval(Event, Time, _)),
+%	call_with_context(Query, [scope(dict{
+%		time: dict{ since: =<(Time) }
+%	})]).
+%
+%lang_temporal:until(Query, Event) ?+>
+%	atom(Event),
+%	ask(event_interval(Event, Time, _)),
+%	call_with_context(Query, [scope(dict{
+%		time: dict{ until: >=(Time) }
+%	})]).
 
 %% is_a(+Resource,?Type) is nondet.
 %

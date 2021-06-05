@@ -29,7 +29,10 @@ The following predicates are supported:
 		  mng_query_value/2,
 		  mng_typed_value/2 ]).
 :- use_module(library('lang/mongolog/mongolog')).
-:- use_module(library('lang/mongolog/control')).
+%:- use_module(library('lang/mongolog/builtins/control')).
+:- use_module(library('lang/mongolog/aggregation/lookup')).
+:- use_module(library('lang/mongolog/stages/bulk_operation')).
+:- use_module(library('lang/mongolog/builtins/meta/context'), [ is_referenced/2, all_ground/2 ]).
 
 :- rdf_meta(taxonomical_property(r)).
 :- rdf_meta(must_propagate_assert(r)).
@@ -56,36 +59,59 @@ lang_query:step_expand(
 	!.
 
 %%
-mongolog:step_compile(assert(triple(S,P,term(O))), Ctx, Pipeline, StepVars) :-
+mongolog:step_compile1(assert(triple(S,P,term(O))), Ctx, Output) :-
 	% HACK: convert term(A) argument to string.
 	%       it would be better to store lists/terms directly without conversion.
 	ground(O),!,
 	( atom(O) -> Atom=O ; term_to_atom(O, Atom) ),
-	mongolog:step_compile(assert(triple(S,P,string(Atom))), Ctx, Pipeline, StepVars).
+	mongolog:step_compile(assert(triple(S,P,string(Atom))), Ctx, Output).
 
-mongolog:step_compile(triple(S,P,term(O)), Ctx, Pipeline, StepVars) :-
+mongolog:step_compile1(triple(S,P,term(O)), Ctx, Output) :-
 	% HACK: convert term(A) argument to string.
 	%       it would be better to store lists/terms directly without conversion.
 	ground(O),!,
 	( atom(O) -> Atom=O ; term_to_atom(O, Atom) ),
-	mongolog:step_compile(triple(S,P,string(Atom)), Ctx, Pipeline, StepVars).
+	mongolog:step_compile(triple(S,P,string(Atom)), Ctx, Output).
 
 %%
-mongolog:step_compile(assert(triple(S,P,O)), Ctx, Pipeline, StepVars) :-
+mongolog:step_compile(assert(triple(S,P,O)), Ctx,
+		[ document(Pipeline), variables(StepVars) ]) :-
 	% add step variables to compile context
 	triple_step_vars(triple(S,P,O), Ctx, StepVars0),
-	mongolog:add_assertion_var(StepVars0, StepVars),
+	add_assertion_var(StepVars0, StepVars),
 	merge_options([step_vars(StepVars)], Ctx, Ctx0),
 	% create pipeline
 	compile_assert(triple(S,P,O), Ctx0, Pipeline).
 
 %%
-mongolog:step_compile(triple(S,P,O), Ctx, Pipeline, StepVars) :-
+mongolog:step_compile1(triple(S,P,O), Ctx,
+		[ document(Pipeline),
+		  variables(StepVars0),
+		  input_collection(one)
+		  %input_collection(Collection)
+		]) :-
 	% add step variables to compile context
 	triple_step_vars(triple(S,P,O), Ctx, StepVars),
 	merge_options([step_vars(StepVars)], Ctx, Ctx0),
+	% get the collection name
+%	(	option(collection(Collection), Ctx)
+%	;	mng_get_db(_DB, Collection, 'triples')
+%	),
 	% create pipeline
-	compile_ask(triple(S,P,O), Ctx0, Pipeline).
+	compile_ask(triple(S,P,O), Ctx0, Pipeline),
+	%
+	add_array_vars(triple(S,P,O), Ctx0, StepVars, StepVars0).
+
+%
+add_array_vars(triple(_,P,O), Ctx, StepVars, StepVars0) :-
+	bagof([K0,_],
+		(	mongolog:goal_var([P,O], Ctx, [K,_]),
+			atom_concat(K,'_s',K0)
+		),
+		ArrayVars),
+	!,
+	append(StepVars, ArrayVars, StepVars0).
+add_array_vars(_, _, StepVars, StepVars).
 
 %%
 triple_step_vars(triple(S,P,O), Ctx, StepVars) :-
@@ -108,6 +134,12 @@ triple_step_vars(triple(S,P,O), Ctx, StepVars) :-
 % ask(triple(S,P,O)) uses $lookup to join input documents with
 % the ones matching the triple pattern provided.
 %
+compile_ask(_, Ctx, _) :-
+	\+ option(input_assigned,Ctx),
+	% TODO
+%	writeln(triple_input_assigned(triple(S,P,O))),
+	fail.
+
 compile_ask(triple(S,P,O), Ctx, Pipeline) :-
 	% add additional options to the compile context
 	extend_context(triple(S,P,O), P1, Ctx, Ctx0),
@@ -150,7 +182,7 @@ compile_assert(triple(S,P,O), Ctx, Pipeline) :-
 	option(scope(Scope), Ctx0),
 	time_scope_values(Scope, SinceTyped, UntilTyped),
 	% throw instantiation_error if one of the arguments was not referred to before
-	mongolog:all_ground([S,O], Ctx),
+	all_ground([S,O], Ctx),
 	% resolve arguments
 	mongolog:var_key_or_val(S, Ctx, S_query),
 	mongolog:var_key_or_val(O, Ctx, V_query),
@@ -193,9 +225,9 @@ compile_assert(triple(S,P,O), Ctx, Pipeline) :-
 		;	reduce_num_array(string('$next'), UntilOp,
 				'scope.time.until', 'v_scope.time.until', Step)
 		% add triples to triples array that have been queued to be removed
-		;	mongolog:add_assertions(string('$next'), Collection, Step)
+		;	add_assertions(string('$next'), Collection, Step)
 		% add merged triple document to triples array
-		;	mongolog:add_assertion(TripleDoc, Collection, Step)
+		;	add_assertion(TripleDoc, Collection, Step)
 		;	(	once(must_propagate_assert(P)),
 				propagate_assert(S, Ctx0, Step)
 			)
@@ -273,7 +305,7 @@ lookup_triple(triple(S,P,V), Ctx, Step) :-
 		InnerPipeline
 	),
 	% pass input document values to lookup
-	mongolog:lookup_let_doc(StepVars, LetDoc),
+	lookup_let_doc(StepVars, LetDoc),
 	% lookup matching documents and store in 'next' field
     (	Step=['$lookup', [
 			['from',string(Coll)],
@@ -371,7 +403,7 @@ has_value(X, _Ctx) :-
 has_value(X, Ctx) :-
 	term_variables(X,Vars),
 	member(Var,Vars),
-	mongolog:is_referenced(Var, Ctx).
+	is_referenced(Var, Ctx).
 
 %%
 reflexivity(StartValue, Ctx, Step) :-
@@ -519,7 +551,7 @@ propagate_assert(S, Context, Step) :-
 			['pipeline',array(Inner)]
 		]]
 	% second, add each document to triples array
-	;	mongolog:add_assertions(string('$next'), Collection, Step)
+	;	add_assertions(string('$next'), Collection, Step)
 	).
 
 %% the properties for which assertions must be propagated
@@ -721,16 +753,21 @@ scope_intersect(VarKey, Since1, Until1, Options, Step) :-
 %%%%%%%%%%%%%%%%%%%%%%%
 
 %
-new_iri(Prefix,IRI) ?>
+new_iri(IRI,Prefix) ?>
 	random_atom(6,Hash),
-	once((ground(Prefix);assign(Prefix,'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Entity'))),
 	atomic_list_concat([Prefix,Hash],'_',Candidate),
 	% FIXME: below if-then-else does not properly expand triple predicate for some reason!
 	%        well the IRI is returned so let's hope for now it is unique...
-	(	triple(Candidate,_,_)
-	->	new_iri(Prefix,IRI)
-	;	assign(IRI,Candidate)
-	).
+	assign(IRI,Candidate).
+%	(	triple(Candidate,_,_)
+%	->	new_iri(Prefix,IRI)
+%	;	assign(IRI,Candidate)
+%	).
+
+%
+new_iri(IRI) ?>
+	random_atom(6,Hash),
+	atom_concat('http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Entity_',Hash,IRI).
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%% helper
@@ -769,8 +806,17 @@ get_triple_vars(S, P, O, Ctx, Vars) :-
 set_triple_vars(S, P, O, Ctx, ['$set', ProjectDoc]) :-
 	get_triple_vars(S,P,O,Ctx,TripleVars),
 	findall([Key, string(NextValue)],
-		(	member([Key, Field], TripleVars),
-			atom_concat('$next.', Field, NextValue)
+		(	(	member([Key, Field], TripleVars),
+				atom_concat('$next.', Field, NextValue)
+			)
+		;	(	option(compile_mode(view), Ctx),
+				% also include o*/p* in output document if compiling a view
+				member([Key0, Field0], TripleVars),
+				once((Field0==o ; Field0==p)),
+				atom_concat(Field0,'*',Field),
+				atom_concat(Key0,'_s',Key),
+				atom_concat('$next.', Field, NextValue)
+			)
 		),
 		ProjectDoc),
 	ProjectDoc \= [].

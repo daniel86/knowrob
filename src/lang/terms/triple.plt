@@ -22,8 +22,8 @@
 		'http://knowrob.org/kb/datatype_test#',
 		[keep(true)]).
 
-test('new_iri(+,-)') :-
-	kb_call(new_iri(_,IRI)),
+test('new_iri(-)') :-
+	kb_call(new_iri(IRI)),
 	assert_true(atom(IRI)),
 	assert_false(triple(IRI,_,_)).
 

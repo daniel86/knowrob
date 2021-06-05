@@ -22,9 +22,9 @@ filtering based on the fluent value.
 @license BSD
 */
 
-:- use_module('mongolog').
-:- use_module('aggregation/match').
-:- use_module('stages/bulk_operation').
+:- use_module('../mongolog').
+:- use_module('../aggregation/match').
+:- use_module('../stages/bulk_operation').
 
 %% Predicates that are stored in a mongo collection
 :- dynamic mongolog_fluent/4.
@@ -44,7 +44,7 @@ mongolog_fluent(Term, TimeField, ArgFields, Options) :-
 % a n-elemental list of keys associated to the different
 % arguments of the predicate.
 % TimeKey is the document field where the time is stored.
-% Options may have the same options as accepted by mongolog_add_predicate/3.
+% Options may have the same options as accepted by db_predicate_create/3.
 %
 % Current limitation: there cannot be predicates with the same functor,
 % but different arity.
@@ -283,7 +283,7 @@ fluent_zip(Term, Ctx, ZippedKeys, ZippedValues, TimeKey, Ctx_zipped, ReadOrWrite
 fluent_lookup(UnpackedKeys, UnpackedValues, TimeKey, Since, _, Ctx, Step) :-
 	% lookup the latest document before Since
 	findall(InnerStep,
-		(	mongolog_database:match_predicate([
+		(	mongolog_db_predicate:match_predicate([
 				[TimeKey,=<(time(Since)),[]]|
 				UnpackedKeys
 			], Ctx, Ctx, InnerStep)
@@ -291,18 +291,18 @@ fluent_lookup(UnpackedKeys, UnpackedValues, TimeKey, Since, _, Ctx, Step) :-
 		;	InnerStep=['$limit',int(1)]
 		% match fluent values given in the query
 		% NOTE: it is important this happens _after_ $sort and $limit
-		;	mongolog_database:match_predicate(UnpackedValues, Ctx, Ctx, InnerStep)
+		;	mongolog_db_predicate:match_predicate(UnpackedValues, Ctx, Ctx, InnerStep)
 		;	( option(retract,Ctx), mongolog_database:project_retract(InnerStep) )
 		),
 		InnerPipeline),
-	mongolog_database:lookup_predicate('t_pred', InnerPipeline, Ctx, Step).
+	mongolog_db_predicate:lookup_predicate('t_pred', InnerPipeline, Ctx, Step).
 
 fluent_lookup(UnpackedKeys, UnpackedValues, TimeKey, Since, Until, Ctx, Step) :-
 	% lookup all documents between Since and Until
 	Since \== Until,
 	append(UnpackedKeys, UnpackedValues, Unpacked),
 	findall(InnerStep,
-		(	mongolog_database:match_predicate([
+		(	mongolog_db_predicate:match_predicate([
 				[TimeKey,=<(time(Until)),[]],
 				[TimeKey,>(time(Since)),[]]|
 				Unpacked
@@ -311,7 +311,7 @@ fluent_lookup(UnpackedKeys, UnpackedValues, TimeKey, Since, Until, Ctx, Step) :-
 		;	( option(retract,Ctx), mongolog_database:project_retract(InnerStep) )
 		),
 		InnerPipeline),
-	mongolog_database:lookup_predicate('t_pred_1', InnerPipeline, Ctx, Step).
+	mongolog_db_predicate:lookup_predicate('t_pred_1', InnerPipeline, Ctx, Step).
 
 fluent_lookup(_, _, _, Since, Until, _,
 		['$set', ['t_pred', ['$concatArrays', array([
@@ -340,7 +340,7 @@ fluent_lookup_next(ArrayField, UnpackedKeys, UnpackedValues, TimeKey, Ctx, Step)
 	| Ctx_tmp1],
 	% lookup earliest document after Until
 	findall(InnerStep,
-		(	mongolog_database:match_predicate([
+		(	mongolog_db_predicate:match_predicate([
 				[TimeKey,>(VarFluentTime),[]]|
 				UnpackedKeys
 			], Ctx, Ctx_inner, InnerStep)
@@ -348,7 +348,7 @@ fluent_lookup_next(ArrayField, UnpackedKeys, UnpackedValues, TimeKey, Ctx, Step)
 		;	InnerStep=['$limit',int(1)]
 		% match fluent values given in the query
 		% NOTE: it is important this happens _after_ $sort and $limit
-		;	mongolog_database:match_predicate(UnpackedValues, Ctx, Ctx, InnerStep)
+		;	mongolog_db_predicate:match_predicate(UnpackedValues, Ctx, Ctx, InnerStep)
 		% convert ISODate to unix timestamp
 		;	InnerStep=['$set', [TimeKey, ['$divide', array([
 				['$toDecimal', string(TimeKey0)],
@@ -356,7 +356,7 @@ fluent_lookup_next(ArrayField, UnpackedKeys, UnpackedValues, TimeKey, Ctx, Step)
 			])]]]
 		),
 		InnerPipeline),
-	mongolog_database:lookup_predicate(ArrayField, InnerPipeline, Ctx_inner, Step).
+	mongolog_db_predicate:lookup_predicate(ArrayField, InnerPipeline, Ctx_inner, Step).
 
 %%
 fluent_fact_scope(TimeKey, Step) :-

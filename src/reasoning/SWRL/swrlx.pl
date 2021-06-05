@@ -8,15 +8,14 @@
 @see https://github.com/protegeproject/swrlapi/wiki/ExtensionsBuiltInLibrary
 */
 
-:- use_module(library('lang/mongolog/database'),
-		[ mongolog_add_predicate/3 ]).
+:- use_module(library('lang/mongolog/kb/edb'), [ edb_create/3 ]).
 :- use_module(swrl).
 
 % add a database predicate that stores a mapping between
 % individual IRI and a SWRL pattern of the rule that has
 % generated the individual.
 %
-:- mongolog_add_predicate(swrlx_individual, [individual,pattern], [[pattern]]).
+:- edb_create(swrlx_individual, [individual,pattern], [[pattern]]).
 
 % SWRL Extensions are implemented through additional clauses
 % of the multifile predicate swrl_builtin/4.
@@ -32,7 +31,7 @@ swrl:swrl_builtin(
 %
 swrlx_make_new_individual(Individual, Pattern) +>
 	% generate a unique IRI, use Type as prefix
-	ask(new_iri(Individual, owl:'Thing')),
+	ask(new_iri(Individual)),
 	% assert facts about the new individual
 	is_individual(Individual),
 	has_type(Individual, owl:'Thing'),

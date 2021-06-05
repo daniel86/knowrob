@@ -16,7 +16,13 @@ The following predicates are supported:
 :- use_module(library('db/mongo/client'),
 		[ mng_get_db/3, mng_strip_type/3 ]).
 :- use_module(library('lang/db')).
+
 :- use_module(library('lang/mongolog/mongolog')).
+:- use_module(library('lang/mongolog/aggregation/lookup')).
+:- use_module(library('lang/mongolog/aggregation/match')).
+:- use_module(library('lang/mongolog/aggregation/set')).
+:- use_module(library('lang/mongolog/stages/bulk_operation')).
+:- use_module(library('lang/mongolog/builtins/meta/context'), [ all_ground/2 ]).
 
 :- rdf_meta(query_annotation(+,r,+,+,-)).
 
@@ -37,14 +43,17 @@ lang_query:step_expand(
 
 %% annotation(+Entity, +Property, -Annotation)
 %
-mongolog:step_compile(
-		assert(annotation(Entity, Property, Annotation)),
-		Ctx, Pipeline, StepVars) :-
+mongolog:step_compile1(
+		assert(annotation(Entity, Property, Annotation)), Ctx,
+		[ document(Pipeline), variables(StepVars) ]) :-
 	assert_annotation(Entity, Property, Annotation, Ctx, Pipeline, StepVars).
 
 mongolog:step_compile(
-		annotation(Entity, Property, Annotation),
-		Ctx, Pipeline, StepVars) :-
+		annotation(Entity, Property, Annotation), Ctx,
+		[ document(Pipeline),
+		  variables(StepVars),
+		  input_collection(one)
+		]) :-
 	query_annotation(Entity, Property, Annotation, Ctx, Pipeline, StepVars).
 
 %% 
@@ -54,11 +63,11 @@ query_annotation(Entity, Property, Annotation, Ctx, Pipeline, StepVars) :-
 	mng_get_db(_DB, Coll, 'annotations'),
 	mongolog:var_key_or_val(Annotation, Ctx, Annotation0),
 	% pass input document values to lookup
-	mongolog:lookup_let_doc(StepVars, LetDoc),
+	lookup_let_doc(StepVars, LetDoc),
 	%
-	mongolog_database:match_predicate(
+	mongolog_db_predicate:match_predicate(
 		[[s,Entity,[]],[p,Property,[]]],
-		Ctx, Match),
+		Ctx, Ctx, Match),
 	% compute steps of the aggregate pipeline
 	findall(Step,
 		% look-up comments into 'next' field
@@ -70,8 +79,8 @@ query_annotation(Entity, Property, Annotation, Ctx, Pipeline, StepVars) :-
 			]]
 		% unwind lookup results and assign variable
 		;	Step=['$unwind',string('$next')]
-		;	mongolog:set_if_var(Annotation, string('$next.v'), Ctx, Step)
-		;	mongolog:match_equals(Annotation0, string('$next.v'), Step)
+		;	set_if_var(Annotation, string('$next.v'), Ctx, Step)
+		;	match_equals(Annotation0, string('$next.v'), Step)
 		;	Step=['$unset',string('next')]
 		),
 		Pipeline
@@ -93,15 +102,15 @@ assert_annotation(Entity, Property, Annotation, Stripped, Ctx, [Step], StepVars)
 	% enforce UTF8 encoding
 	utf8_value(Stripped, Annotation_en),
 	% throw instantiation_error if one of the arguments was not referred to before
-	mongolog:all_ground([Entity, Property, Annotation_en], Ctx),
+	all_ground([Entity, Property, Annotation_en], Ctx),
 	mongolog:step_vars([Entity,Property,Annotation], Ctx, StepVars0),
-	mongolog:add_assertion_var(StepVars0, StepVars),
+	add_assertion_var(StepVars0, StepVars),
 	% resolve arguments
 	mongolog:var_key_or_val(Entity,         Ctx, Entity0),
 	mongolog:var_key_or_val(Property,       Ctx, Property0),
 	mongolog:var_key_or_val(Annotation_en,  Ctx, Annotation0),
 	% get the query
-	mongolog:add_assertion([
+	add_assertion([
 				['s', Entity0],
 				['p', Property0],
 				['v', Annotation0]

@@ -314,8 +314,7 @@ has_description(Class,Descr) ?>
 	;	is_union_of(Class,Descr)
 	;	is_intersection_of(Class,Descr)
 	;	is_complement_of(Class,Descr)
-	),
-	!.
+	).
 
 
 %% is_all_disjoint_classes(?AllDisjointClasses) is nondet.
@@ -352,7 +351,7 @@ has_property_chain(P, Chain) +>
 	triple(P, owl:propertyChainAxiom, RDFList).
 
 has_property_chain(P, Chain) ?>
-	var(Chain),!,
+	var(Chain),
 	triple(P, owl:propertyChainAxiom, RDFList),
 	rdf_list(RDFList, Chain).
 
@@ -475,7 +474,8 @@ disjoint_with(A,B) ?>
 
 %%
 subclass_of_description(Class, Descr) ?>
-	ground(Class),
+%	ground(Class),
+	is_class(Class),
 	triple(Class, transitive(rdfs:subClassOf), SuperClass),
 	has_description(SuperClass, Descr).
 
@@ -515,45 +515,68 @@ instance_of_description(S, Descr) ?>
 	call(Expanded).
 
 instance_of_description(S, Descr) ?>
-	ground(S),
+%	ground(S),
+	is_individual(S),
 	has_type(S, SType),
 	subclass_of_description(SType, Descr).
 
 %%
-holds_description(S,P,Descr) ?>
-	pragma(compound(Descr)),
-	pragma(Descr=only(O)),
+holds_description(S,P,only(O)) ?>
 	instance_of_description(S,only(P,O)).
 
-holds_description(S,P,Descr) ?>
-	pragma(compound(Descr)),
-	pragma(Descr=some(O)),
+holds_description(S,P,some(O)) ?>
 	instance_of_description(S,some(P,O)).
 
-holds_description(S,P,Descr) ?>
-	pragma(compound(Descr)),
-	pragma(Descr=value(O)),
+holds_description(S,P,value(O)) ?>
 	instance_of_description(S,value(P,O)).
 
-holds_description(S,P,Descr) ?>
-	pragma(compound(Descr)),
-	pragma(Descr=min(M,O)),
+holds_description(S,P,min(M,O)) ?>
 	instance_of_description(S,min(P,M,O)).
 
-holds_description(S,P,Descr) ?>
-	pragma(compound(Descr)),
-	pragma(Descr=max(M,O)),
+holds_description(S,P,max(M,O)) ?>
 	instance_of_description(S,max(P,M,O)).
 
-holds_description(S,P,Descr) ?> 
-	pragma(compound(Descr)),
-	pragma(Descr=exactly(M,O)),
+holds_description(S,P,exactly(M,O)) ?>
 	instance_of_description(S,exactly(P,M,O)).
 
-holds_description(S,P,Descr) ?>
-	pragma(compound(Descr)),
-	pragma(Descr=value(O)),
+holds_description(S,P,value(O)) ?>
 	instance_of_description(S,value(P,O)).
+
+
+%holds_description(S,P,Descr) ?>
+%	pragma(compound(Descr)),
+%	pragma(Descr=only(O)),
+%	instance_of_description(S,only(P,O)).
+%
+%holds_description(S,P,Descr) ?>
+%	pragma(compound(Descr)),
+%	pragma(Descr=some(O)),
+%	instance_of_description(S,some(P,O)).
+%
+%holds_description(S,P,Descr) ?>
+%	pragma(compound(Descr)),
+%	pragma(Descr=value(O)),
+%	instance_of_description(S,value(P,O)).
+%
+%holds_description(S,P,Descr) ?>
+%	pragma(compound(Descr)),
+%	pragma(Descr=min(M,O)),
+%	instance_of_description(S,min(P,M,O)).
+%
+%holds_description(S,P,Descr) ?>
+%	pragma(compound(Descr)),
+%	pragma(Descr=max(M,O)),
+%	instance_of_description(S,max(P,M,O)).
+%
+%holds_description(S,P,Descr) ?> 
+%	pragma(compound(Descr)),
+%	pragma(Descr=exactly(M,O)),
+%	instance_of_description(S,exactly(P,M,O)).
+%
+%holds_description(S,P,Descr) ?>
+%	pragma(compound(Descr)),
+%	pragma(Descr=value(O)),
+%	instance_of_description(S,value(P,O)).
 
 %%
 % Allow OWL descriptions in instance_of expressions.

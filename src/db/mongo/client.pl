@@ -423,11 +423,17 @@ mng_query_value(Value0, [Operator, Value1]) :-
 	mng_operator(Operator0,Operator),
 	% ensure the value is wrapped in type term
 	mng_strip_type(X1, Type, X2),
+	
+	(	is_list(X2)		-> maplist(ensure_typed,X2,X3)
+	%;	compound(X2)	-> ...
+	;	X3 = X2
+	),
+	
 	(	Type==term
-	->	term_document(X2, Value1)
+	->	term_document(X3, Value1)
 	% finally wrap value in type again
 	;	(	type_mapping(Type, MngType),
-			mng_strip_type(Value1, MngType, X2)
+			mng_strip_type(Value1, MngType, X3)
 		)
 	).
 	% convert terms to atoms for storage
@@ -437,6 +443,11 @@ mng_query_value(Value0, [Operator, Value1]) :-
 %	),
 %	type_mapping(Type, MngType),
 %	mng_strip_type(Value1, MngType, X3).
+
+%
+ensure_typed(Untyped,Typed) :-
+	mng_strip_type(Untyped,Type,X),
+	mng_strip_type(Typed,Type,X).
 
 %%
 term_document(Term, [

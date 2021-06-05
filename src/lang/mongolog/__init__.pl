@@ -1,5 +1,6 @@
 
 :- use_module(mongolog).
-:- use_module(database).
-:- use_module(fluents).
 :- use_directory(builtins).
+:- use_directory(aggregation).
+:- use_directory(stages).
+:- use_directory(kb).

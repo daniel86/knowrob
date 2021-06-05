@@ -20,6 +20,10 @@
 :- op(800, yfx, user:since).
 :- op(800, yfx, user:until).
 
+% TODO: views on during/since etc
+%		- basically a join over all collections
+%		- probably better define as inline?
+
 %% during(+Statement,?Interval) is nondet.
 %
 % True iff Statement holds during the whole

@@ -1,8 +1,7 @@
 :- module(mongolog,
 	[ mongolog_call(t),
 	  mongolog_call(t,+),
-	  mongolog_rule_assert(+,+,+,+),
-	  is_mongolog_predicate(+)
+	  is_mongolog_term/1
 	]).
 /** <module> Compiling goals into aggregation pipelines.
 
@@ -30,80 +29,21 @@
 :- rdf_meta(step_compile(t,t,t)).
 :- rdf_meta(step_compile1(t,t,t)).
 
-
-%% mongolog_rule_assert(+Module, +Functor, +Args, +Pipeline) is det.
+%% is_mongolog_term(+PredicateIndicator) is semidet.
 %
-mongolog_rule_assert(_Module, Functor, Args, Zs) :-
-	Goal =.. [Functor|Args],
-%	writeln(compile_view(Goal)),
-	length(Args, Arity),
-	atomic_list_concat([Functor, Arity], '_', ViewName),
-	% compile an aggregation pipeline
-	current_scope(QScope),
-%once(( Functor==is_resource -> gtrace ; true )),
-	mongolog:mongolog_compile(Zs,
-		CompilerOutput,
-		Vars,
-		[ scope(QScope)
-		%, prune_unreferenced(false)
-		, compile_mode(view)
-		]),
-	memberchk(document(Pipeline), CompilerOutput),
-%	memberchk(variables(Vars), CompilerOutput),
-	option(input_collection(ViewOnCollection), CompilerOutput, _),
-	once((ground(ViewOnCollection);ViewOnCollection=one)),
-	% lookup variable keys used by the predicate and re-use
-	% the same keys.
-	findall(K,
-		(	member(Arg,Args),
-			once((
-				member([K,X],Vars),
-				X == Arg
-			))
-		),
-		Fields),
-	% lookup fields with rdfs values
-	findall(K,
-		(	member(K,Fields),
-			atom_concat(K,'_s',K0),
-			memberchk([K0,_],Vars)
-		),
-		RDFSFields),
-	!,
-	findall([K,Condition],
-		(	(	member(K,Fields), Condition=integer(1)	)
-		;	(	member(K0,RDFSFields),
-				atom_concat(K0,'_s',K),
-				atom_concat('$',K,Kv),
-				atom_concat(Kv,'.type',Kt),
-				Condition=['$cond',[
-					[if,   ['$eq', array([string(Kt), string('var')])]],
-					[then, string('$$REMOVE')],
-					[else, string(Kv)]
-				]]
-			)
-		;	(	K='v_scope', Condition=integer(1)	)
-		),
-		Projection),
-	append(Pipeline, [['$project',Projection]], Pipeline0),
-	% create a view for the head predicate
-%	mng_one_db(DBName, CollectionName),
-%	mng_view_create(DBName, CollectionName, ViewName, array(Pipeline0)),
-	mng_db_name(DBName),
-	mng_view_create(DBName, ViewOnCollection, ViewName, array(Pipeline0)),
-	% add head as an IDB predicate in mongolog
-	(	mongolog_database:mongolog_predicate(Goal, _, _)
-	->	true
-	;	mongolog_add_predicate(Functor, Fields,
-			[ type(idb),
-			  collection(ViewName),
-			  indices([]),
-			  rdfs_fields(RDFSFields)
-			])
-	).
-
-mongolog_rule_assert(Module, Functor, Args, _Zs) :-
-	writeln(mongolog_rule_assert_failed(Module, Functor, Args)).
+% True if PredicateIndicator corresponds to a known mongolog predicate.
+%
+is_mongolog_term((/(Functor,_Arity))) :-
+	!, step_command(Functor).
+	
+is_mongolog_term(Goal) :-
+	compound(Goal),!,
+	Goal =.. [Functor|_Args],
+	step_command(Functor).
+	
+is_mongolog_term(Functor) :-
+	atom(Functor),!,
+	step_command(Functor).
 
 
 %% add_command(+Command) is det.
@@ -118,23 +58,6 @@ mongolog_rule_assert(Module, Functor, Args, _Zs) :-
 %
 add_command(Command) :- step_command(Command),!.
 add_command(Command) :- assertz(step_command(Command)).
-
-
-%% is_mongolog_predicate(+PredicateIndicator) is semidet.
-%
-% True if PredicateIndicator corresponds to a known mongolog predicate.
-%
-is_mongolog_predicate((/(Functor,_Arity))) :-
-	!, step_command(Functor).
-	
-is_mongolog_predicate(Goal) :-
-	compound(Goal),!,
-	Goal =.. [Functor|_Args],
-	step_command(Functor).
-	
-is_mongolog_predicate(Functor) :-
-	atom(Functor),!,
-	step_command(Functor).
 
 
 %% mongolog_call(+Goal) is nondet.

@@ -27,6 +27,7 @@ check_is_restriction_false(Entity, OWLRestriction, TestProperty, TestRange) :-
   assert_false(kb_call(triple(Entity,OWLRestriction,TestRange))).
 
 test('is_class(?)') :-
+	gtrace,
   assert_true(is_class(test:'E')),
   assert_true(is_class(owl:'Thing')),
   assert_true(is_class(owl:'Nothing')),

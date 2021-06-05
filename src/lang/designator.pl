@@ -70,11 +70,11 @@ get_designator_statement2(Entity,Property,NestedDesignator,Statement) :-
 	%%
 	!,
 	(	get_designator_statement0(NestedEntity,NestedDesignator,Statement)
-	;	Statement=holds(Entity,Property,NestedEntity)
+	;	Statement=triple(Entity,Property,NestedEntity)
 	).
 
 get_designator_statement2(Entity,Property,AtomicValue,
-		holds(Entity,Property,Value)) :-
+		triple(Entity,Property,Value)) :-
 	get_designator_value(Property,AtomicValue,Value).
 
 %%
@@ -146,7 +146,7 @@ test('designator type name') :-
 test('designator property') :-
 	test_designator(X,
 		[ an, adult, [ has_age, 70] ],
-		[ holds(X,regex('^.*#hasAge$'), 70),
+		[ triple(X,regex('^.*#hasAge$'), 70),
 		  triple(X,rdf:type,regex('^.*#Adult$'))
 		]
 	).
@@ -157,7 +157,7 @@ test('designator nested') :-
 			[ an, adult, [ iri, Part ]]
 		]],
 		[ triple(Part,rdf:type,regex('^.*#Adult$')),
-		  holds(X,regex('^.*#hasParent$'),Part),
+		  triple(X,regex('^.*#hasParent$'),Part),
 		  triple(X,rdf:type,regex('^.*#Adult$'))
 		]
 	).

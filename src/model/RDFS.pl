@@ -194,23 +194,31 @@ expand_list(This, [Child|Rest],
 % Read a RDF list into a Prolog list.
 %
 rdf_list(RDF_list, Pl_List) ?>
-	var(Pl_List),
-	ground(RDF_list),
+	has_type(RDF_list, rdf:'List'),
 	findall(X,
 		(	triple(RDF_list, reflexive(transitive(rdf:rest)), Ys),
 			triple(Ys, rdf:first, X)
 		),
 		Pl_List).
 
-rdf_list(RDF_list, Pl_list) ?>
-	pragma(Pl_list = [First|_]),
-	ground(First),
-	triple(RDF_list, rdf:first, First),
-	findall(X,
-		(	triple(RDF_list, reflexive(transitive(rdf:rest)), Ys),
-			triple(Ys, rdf:first, X)
-		),
-		Pl_list).
+%rdf_list(RDF_list, Pl_List) ?>
+%	var(Pl_List),
+%	ground(RDF_list),
+%	findall(X,
+%		(	triple(RDF_list, reflexive(transitive(rdf:rest)), Ys),
+%			triple(Ys, rdf:first, X)
+%		),
+%		Pl_List).
+%
+%rdf_list(RDF_list, Pl_list) ?>
+%	pragma(Pl_list = [First|_]),
+%	ground(First),
+%	triple(RDF_list, rdf:first, First),
+%	findall(X,
+%		(	triple(RDF_list, reflexive(transitive(rdf:rest)), Ys),
+%			triple(Ys, rdf:first, X)
+%		),
+%		Pl_list).
 
 rdf_list(RDF_list, Pl_List) +>
 	pragma((
@@ -224,6 +232,7 @@ rdf_list(RDF_list, Pl_List) +>
 
 %%
 rdf_list_head(SubList, ListHead) ?>
+	has_type(SubList, rdf:'List'),
 	findall(X,
 		(	X = SubList
 		;	triple(X, transitive(rdf:rest), SubList)

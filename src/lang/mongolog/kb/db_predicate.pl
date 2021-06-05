@@ -1,49 +1,62 @@
-:- module(mongolog_database,
-		[ mongolog_add_predicate(+,+,+),
-		  mongolog_drop_predicate(+)
+:- module(mongolog_db_predicate,
+		[ is_db_predicate/1,
+		  db_predicate/3,
+		  db_predicate_collection/3,
+		  db_predicate_zip/5,
+		  db_predicate_create/3,
+		  db_predicate_drop/1,
+		  db_predicate_compile/3
 		]).
-/** <module> Storage of predicates in mongolog programs.
 
-The following predicates are supported:
+:- use_module('../mongolog').
+:- use_module('../aggregation/lookup').
+:- use_module('../stages/bulk_operation').
 
-| Predicate    | Arguments |
-| ---          | ---       |
-| assert/1     | +Head |
-| retractall/1 | +Head |
+:- dynamic db_predicate/3.
 
-@author Daniel Beßler
-@see https://www.swi-prolog.org/pldoc/man?section=dynpreds
-@license BSD
-*/
-
-:- use_module('mongolog').
-:- use_module('aggregation/lookup').
-:- use_module('stages/bulk_operation').
-:- use_module('builtins/meta/context', [ is_referenced/2 ]).
+%% is_db_predicate(+Indicator) is semidet.
+%
+% True if PredicateIndicator corresponds to a known mongolog predicate.
+%
+is_db_predicate(Indicator) :-
+	db_predicate(Indicator,_,_).
 
 
-%% Predicates that are stored in a mongo collection
-:- dynamic mongolog_predicate/3.
-
-
-%% query commands
-:- mongolog:add_command(assert).
-:- mongolog:add_command(retractall).
-
-
-%% mongolog_predicate(+Term, -Fields, -Options) is semidet.
+%% db_predicate(+Term, -Fields, -Options) is semidet.
 %
 %
-mongolog_predicate(Term, Fields, Options) :-
+db_predicate((/(Functor,Arity)), Fields, Options) :-
+	atom(Functor), number(Arity),
+	!,
+	db_predicate(Functor, Fields, Options),
+	length(Fields,Arity).
+
+db_predicate(Term, Fields, Options) :-
 	compound(Term),
 	Term =.. [Functor|Args],
-	mongolog_predicate(Functor, Fields, Options),
+	!,
+	db_predicate(Functor, Fields, Options),
 	length(Args,Arity),
-	length(Fields,Arity),
-	!.
+	length(Fields,Arity).
 
 
-%% mongolog_add_predicate(+Functor, +Fields, +Options) is semidet.
+%% db_predicate_collection(+Predicate, ?DB, ?Collection) is semidet.
+%
+%
+db_predicate_collection(Predicate, DB, Collection) :-
+	db_predicate(Predicate, ArgFields, Options),
+	length(ArgFields,Arity),
+	% get predicate functor and arguments
+	Predicate =.. [Functor|Args],
+	length(Args,Arity),
+	% get the database collection of the predicate
+	(	(option(collection(CollectionName), Options), ground(CollectionName))
+	;	CollectionName=Functor
+	),
+	mng_get_db(DB, Collection, CollectionName).
+
+
+%% db_predicate_create(+Functor, +Fields, +Options) is semidet.
 %
 % Register a predicate that stores facts in the database.
 % Functor is the functor of a n-ary predicate, and Fields is
@@ -61,16 +74,16 @@ mongolog_predicate(Term, Fields, Options) :-
 % @param Fields field names of predicate arguments
 % @param Options option list
 %
-mongolog_add_predicate(Functor, Fields, _) :-
-	mongolog_predicate(Functor, Args, _),
+db_predicate_create(Functor, Fields, _) :-
+	db_predicate(Functor, Args, _),
 	length(Fields,Arity),
 	length(Args,Arity),
 	!,
 	throw(permission_error(modify,database_predicate,Functor)).
 
-mongolog_add_predicate(Functor, Fields, Options) :-
+db_predicate_create(Functor, Fields, Options) :-
 	setup_predicate_collection(Functor, Fields, Options),
-	assertz(mongolog_predicate(Functor, Fields, Options)),
+	assertz(db_predicate(Functor, Fields, Options)),
 	mongolog:add_command(Functor).
 
 %%
@@ -81,51 +94,26 @@ setup_predicate_collection(Functor, [FirstField|_], Options) :-
 	;	setup_collection(Functor, Indices)
 	).
 
-
-%% mongolog_drop_predicate(+Functor) is det.
+%% db_predicate_drop(+Predicate) is det.
 %
 % Delete all facts associated to predicate with
 % given functor.
 %
 % @param Functor functor of the predicate
 %
-mongolog_drop_predicate(Functor) :-
-	mng_get_db(DB, Collection, Functor),
+db_predicate_drop(Predicate) :-
+	db_predicate_collection(Predicate, DB, Collection),
 	mng_drop(DB, Collection).
 
 %%
-lang_query:step_expand(project(Term), assert(Term)) :-
-	mongolog_predicate(Term, _, Opts),
-	option(type(edb), Opts, edb),
-	!.
-
-%%
-mongolog:step_compile1(assert(Term), Ctx,
-		[ document(Pipeline),
-		  variables(StepVars)
-		]) :-
-	mongolog_predicate(Term, _, Opts),
-	option(type(edb), Opts, edb),
-	!,
-	mongolog_predicate_assert(Term, Ctx, Pipeline, StepVars).
-
-mongolog:step_compile1(retractall(Term), Ctx,
-		[ document(Pipeline),
-		  variables(StepVars)
-		]) :-
-	mongolog_predicate(Term, _, Opts),
-	option(type(edb), Opts, edb),
-	!,
-	mongolog_predicate_retractall(Term, Ctx, Pipeline, StepVars).
-
-mongolog:step_compile1(Term, Ctx,
+db_predicate_compile(Term, Ctx,
 		[ document(Pipeline),
 		  variables(StepVars0),
 		  input_collection(Collection),
 		  input_keys(Fields)
 		]) :-
-	mongolog_predicate(Term, Fields, Opts),!,
-	mongolog_predicate_call(Term, Ctx, Pipeline, StepVars, Collection),
+	db_predicate(Term, Fields, Opts),!,
+	db_predicate_call(Term, Ctx, Pipeline, StepVars, Collection),
 	%
 	add_array_vars(Term, Opts, Ctx, StepVars, StepVars0).
 
@@ -144,8 +132,8 @@ add_array_vars(Term, Opts, Ctx, StepVars, StepVars0) :-
 add_array_vars(_, _, _, StepVars, StepVars).
 
 %%
-mongolog_predicate_call(Term, Ctx, Pipeline, StepVars, Collection) :-
-	mongolog_predicate_zip(Term, Ctx, Zipped, Ctx_pred, read),
+db_predicate_call(Term, Ctx, Pipeline, StepVars, Collection) :-
+	db_predicate_zip(Term, Ctx, Zipped, Ctx_pred, read),
 	option(collection(Collection), Ctx_pred),
 	option(step_vars(StepVars), Ctx_pred),
 	unpack_compound(Zipped, Unpacked),
@@ -153,10 +141,10 @@ mongolog_predicate_call(Term, Ctx, Pipeline, StepVars, Collection) :-
 	findall(InnerStep,
 		match_predicate(Unpacked, Ctx, Ctx_pred, InnerStep),
 		InnerPipeline),
-	mongolog_predicate_call1(Unpacked, InnerPipeline, Ctx_pred, Pipeline).
+	db_predicate_call1(Unpacked, InnerPipeline, Ctx_pred, Pipeline).
 
 %%
-mongolog_predicate_call1(Unpacked, Matches, Ctx, Pipeline) :-
+db_predicate_call1(Unpacked, Matches, Ctx, Pipeline) :-
 	% no need to perform a $lookup if input collection was assigned before
 	\+ option(input_assigned,Ctx),!,
 	findall(Step,
@@ -165,7 +153,7 @@ mongolog_predicate_call1(Unpacked, Matches, Ctx, Pipeline) :-
 		),
 		Pipeline).
 	
-mongolog_predicate_call1(Unpacked, InnerPipeline, Ctx, Pipeline) :-
+db_predicate_call1(Unpacked, InnerPipeline, Ctx, Pipeline) :-
 	% option(input_assigned,Ctx),!,
 	findall(Step,
 		% look-up documents into 't_pred' array field
@@ -178,62 +166,17 @@ mongolog_predicate_call1(Unpacked, InnerPipeline, Ctx, Pipeline) :-
 		Pipeline).
 
 %%
-mongolog_predicate_retractall(Term, Ctx, Pipeline, StepVars) :-
-	mongolog_predicate_zip(Term, Ctx, Zipped, Ctx_pred, write),
-	option(collection(Collection), Ctx_pred),
-	option(step_vars(StepVars), Ctx_pred),
-	unpack_compound(Zipped, Unpacked),
-	findall(InnerStep,
-		(	match_predicate(Unpacked, Ctx, Ctx_pred, InnerStep)
-		% retractall first performs match, then only projects the id of the document
-		;	project_retract(InnerStep)
-		),
-		InnerPipeline),
-	%
-	findall(Step,
-		% look-up documents into 't_pred' array field
-		(	lookup_predicate('t_pred', InnerPipeline, Ctx_pred, Step)
-		% add removed facts to assertions list
-		;	add_assertions(string('$t_pred'), Collection, Step)
-		;	Step=['$unset', string('t_pred')]
-		),
-		Pipeline
-	).
-
-%%
-mongolog_predicate_assert(Term, Ctx, Pipeline, StepVars) :-
-	mongolog_predicate_zip(Term, Ctx, Zipped, Ctx_pred, write),
-	option(collection(Collection), Ctx_pred),
-	option(step_vars(StepVars), Ctx_pred),
-	% create a document
-	findall([Field,Val],
-		(	member([Field,Arg],Zipped),
-			mongolog:var_key_or_val(Arg, Ctx_pred, Val)
-		),
-		PredicateDoc),
-	% and add it to the list of asserted documents
-	findall(Step,
-		add_assertion(PredicateDoc, Collection, Step),
-		Pipeline).
-
-%%
 %
-mongolog_predicate_zip(Term, Ctx, Zipped, Ctx_zipped, ReadOrWrite) :-
+db_predicate_zip(Term, Ctx, Zipped, Ctx_zipped, ReadOrWrite) :-
 	% get predicate fields and options
-	mongolog_predicate(Term, ArgFields, Options),
+	db_predicate(Term, ArgFields, Options),
 	length(ArgFields,Arity),
 	% get predicate functor and arguments
-	Term =.. [Functor|Args],
+	Term =.. [_Functor|Args],
 	length(Args,Arity),
 	% get the database collection of the predicate
-	(	(option(collection(Collection), Options), ground(Collection))
-	;	mng_get_db(_DB, Collection, Functor)
-	),
+	db_predicate_collection(Term, _DB, Collection),
 	!,
-	% try to re-use field name if a field in the document refers to a variable
-	% in Term
-%	predicate_vars(ArgFields, Args, PredVars),
-%	merge_options([step_vars(PredVars)], Ctx, Ctx_tmp),
 	% read variable in Term
 	mongolog:step_vars(Term, Ctx, StepVars0),
 	(	ReadOrWrite==read -> StepVars=StepVars0
@@ -427,120 +370,3 @@ match_conditional(FieldKey, Arg, OuterCtx, Ctx, ['$expr', ['$or', array([
 		mng_operator(Operator1, ArgOperator),
 		FieldQuery=FieldQuery0
 	)).
-
-		 /*******************************
-		 *    	  UNIT TESTING     		*
-		 *******************************/
-
-:- begin_tests('mongolog_database').
-
-test('add_predicate') :-
-	assert_true(mongolog_add_predicate(woman, [name], [[name]])),
-	assert_true(mongolog_add_predicate(loves, [a,b], [[a],[b],[a,b]])).
-
-test('assert(woman)') :-
-	assert_true(mongolog_call(assert(woman(mia)))),
-	assert_true(mongolog_call(assert(woman(jody)))).
-
-test('woman(+)') :-
-	assert_true(mongolog_call(woman(mia))),
-	assert_true(mongolog_call(woman(jody))),
-	assert_false(mongolog_call(woman(vincent))).
-
-test('woman(-)') :-
-	findall(X, mongolog_call(woman(X)), Xs),
-	assert_unifies([_,_],Xs),
-	assert_true(ground(Xs)),
-	assert_true(memberchk(mia,Xs)),
-	assert_true(memberchk(jody,Xs)).
-
-test('retract(woman)') :-
-	assert_true(mongolog_call(woman(jody))),
-	assert_true(mongolog_call(retractall(woman(jody)))),
-	assert_false(mongolog_call(woman(jody))).
-
-test('assert(loves)') :-
-	assert_true(mongolog_call(assert(loves(vincent,mia)))),
-	assert_true(mongolog_call(assert(loves(marsellus,jody)))),
-	assert_true(mongolog_call(assert(loves(pumpkin,honey_bunny)))).
-
-test('loves(+,+)') :-
-	assert_true(mongolog_call(loves(vincent,mia))),
-	assert_true(mongolog_call(loves(marsellus,jody))),
-	assert_false(mongolog_call(loves(mia,vincent))).
-
-test('loves(+,-)') :-
-	findall(X, mongolog_call(loves(vincent,X)), Xs),
-	assert_unifies([_],Xs),
-	assert_true(ground(Xs)),
-	assert_true(memberchk(mia,Xs)).
-
-test('loves(-,+)') :-
-	findall(X, mongolog_call(loves(X,mia)), Xs),
-	assert_unifies([_],Xs),
-	assert_true(ground(Xs)),
-	assert_true(memberchk(vincent,Xs)).
-
-test('assert(shape)') :-
-	assert_true(mongolog_add_predicate(shape, [name,term], [[name]])),
-	assert_true(mongolog_call(assert(shape(obj1,sphere(1.0))))),
-	assert_true(mongolog_call(assert(shape(obj3,sphere(2.0))))),
-	assert_true(mongolog_call(assert(shape(obj2,box(1.0,2.0,3.0))))).
-
-test('shape(+,+)') :-
-	assert_true(mongolog_call(shape(obj1,sphere(1.0)))),
-	assert_true(mongolog_call(shape(obj2,box(1.0,2.0,3.0)))),
-	assert_false(mongolog_call(shape(obj1,cylinder(1.0)))),
-	assert_false(mongolog_call(shape(obj2,sphere(1.0)))).
-
-test('shape(+,-)') :-
-	mongolog_call(shape(obj1,Term)),
-	assert_equals(Term, sphere(1.0)).
-
-test('shape(-,+)') :-
-	findall(X, mongolog_call(shape(X,sphere(1.0))), Xs),
-	assert_unifies([_],Xs),
-	assert_true(ground(Xs)),
-	assert_true(memberchk(obj1,Xs)).
-
-test('shape(+,sphere(-))') :-
-	findall(X, mongolog_call(shape(obj1,sphere(X))), Xs),
-	assert_unifies([_],Xs),
-	assert_true(ground(Xs)),
-	assert_true(memberchk(1.0,Xs)).
-
-test('edb_rule') :-
-	lang_query:expand_ask_rule(loved_woman(A), (woman(A), loves(_,A)), _),
-	lang_query:flush_predicate(user),
-	%%
-	findall(X, mongolog_call(loved_woman(X)), Xs),
-	assert_equals(Xs, [mia]),
-	assert_true(mongolog_drop_predicate(loved_woman_1)).
-
-test('+Cond->assert(woman);assert(woman)') :-
-	% TODO: move into disjunction test
-	assert_false(mongolog_call(woman(bar))),
-	assert_true(mongolog:test_call(
-		(	Num > 5
-		->	assert(woman(foo))
-		;	assert(woman(bar))
-		),
-		Num, 4.5)),
-	assert_true(mongolog_call(woman(bar))),
-	assert_false(mongolog_call(woman(foo))).
-
-test('findall_rule') :-
-	% TODO: move into findall test
-	lang_query:expand_ask_rule(findall_test(As), findall(A, woman(A), As), _),
-	lang_query:flush_predicate(user),
-	%%
-	findall(As, mongolog_call(findall_test(As)), X),
-	assert_equals(X, [[mia,bar]]),
-	assert_true(mongolog_drop_predicate(findall_test_1)).
-
-test('drop_database_predicate') :-
-	assert_true(mongolog_drop_predicate(shape)),
-	assert_true(mongolog_drop_predicate(woman)),
-	assert_true(mongolog_drop_predicate(loves)).
-
-:- end_tests('mongolog_database').
