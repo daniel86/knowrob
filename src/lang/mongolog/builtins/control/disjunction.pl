@@ -148,8 +148,7 @@ compile_disjunction(
 	merge_options([
 		outer_vars(OuterVarsCopy0),
 		orig_vars(VOs),
-		copy_vars(VCs),
-		additional_vars(CutVars)
+		copy_vars(VCs)
 	], Ctx0, InnerCtx),
 	% compile the step
 	mongolog:var_key(Var, Ctx, Key),

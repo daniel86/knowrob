@@ -68,21 +68,12 @@ lookup_findall(ArrayKey, Terminals,
 	% add variables that have received a grounding in compile_terms
 	% to StepVars
 	append(GroundVars0, StepVars0, StepVars1),
-%	append(GroundVars0, OuterVars, StepVars1),
-%	append(GroundVars0, [], StepVars1),
 	list_to_set(StepVars1, StepVars),
-	% finally also add user supplied variables to the list
-	(	option(additional_vars(AddVars), Context)
-	->	append(AddVars, StepVars, StepVars2)
-	;	StepVars2 = StepVars
-	),
 	% pass variables from outer goal to inner if they are referred to
 	% in the inner goal.
-%	lookup_let_doc(StepVars2, LetDoc),
 	lookup_let_doc(OuterVars, LetDoc),
 	% set all let variables so that they can be accessed
 	% without aggregate operators in Pipeline
-%	lookup_set_vars(StepVars2, SetVars),
 	lookup_set_vars(OuterVars, SetVars),
 	% compose inner pipeline
 	(	SetVars=[] -> Prefix0=Prefix
