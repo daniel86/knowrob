@@ -148,8 +148,8 @@ test('findall_rule') :-
 	assert_true(idb_drop(findall_test/1)).
 
 test('drop_database_predicate') :-
-	assert_true(edb_drop(shape)),
-	assert_true(edb_drop(woman)),
-	assert_true(edb_drop(loves)).
+	assert_true(edb_drop(shape/2)),
+	assert_true(edb_drop(woman/1)),
+	assert_true(edb_drop(loves/2)).
 
 :- end_tests('mongolog_edb').

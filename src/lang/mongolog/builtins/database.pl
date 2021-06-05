@@ -57,7 +57,7 @@ mongolog:step_compile1(retractall(Term), Ctx,
 	db_predicate_zip(Term, Ctx, Zipped, Ctx_pred, write),
 	option(collection(Collection), Ctx_pred),
 	option(step_vars(StepVars), Ctx_pred),
-	unpack_compound(Zipped, Unpacked),
+	mongolog_db_predicate:unpack_compound(Zipped, Unpacked),
 	findall(InnerStep,
 		(	mongolog_db_predicate:match_predicate(Unpacked, Ctx, Ctx_pred, InnerStep)
 		% retractall first performs match, then only projects the id of the document
@@ -73,4 +73,10 @@ mongolog:step_compile1(retractall(Term), Ctx,
 		;	Step=['$unset', string('t_pred')]
 		),
 		Pipeline
+	).
+
+%%
+project_retract(Step) :-
+	(	Step=['$project',[['_id',int(1)]]]
+	;	Step=['$set',['delete',bool(true)]]
 	).

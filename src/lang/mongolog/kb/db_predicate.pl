@@ -25,13 +25,17 @@ is_db_predicate(Indicator) :-
 %% db_predicate(+Term, -Fields, -Options) is semidet.
 %
 %
-db_predicate((/(Functor,Arity)), Fields, Options) :-
+db_predicate(Term, Fields, Options) :-
+	db_predicate(Term, _, Fields, Options).
+
+%%
+db_predicate((/(Functor,Arity)), Functor, Fields, Options) :-
 	atom(Functor), number(Arity),
 	!,
 	db_predicate(Functor, Fields, Options),
 	length(Fields,Arity).
 
-db_predicate(Term, Fields, Options) :-
+db_predicate(Term, Functor, Fields, Options) :-
 	compound(Term),
 	Term =.. [Functor|Args],
 	!,
@@ -44,11 +48,7 @@ db_predicate(Term, Fields, Options) :-
 %
 %
 db_predicate_collection(Predicate, DB, Collection) :-
-	db_predicate(Predicate, ArgFields, Options),
-	length(ArgFields,Arity),
-	% get predicate functor and arguments
-	Predicate =.. [Functor|Args],
-	length(Args,Arity),
+	db_predicate(Predicate, Functor, _, Options),
 	% get the database collection of the predicate
 	(	(option(collection(CollectionName), Options), ground(CollectionName))
 	;	CollectionName=Functor
@@ -274,12 +274,6 @@ project_predicate1(Unpacked, Ctx, Step) :-
 	atom_concat('$', FieldPath, FieldQuery),
 	% FIXME: some unneeded set's here. can we skip if not one of the predicate variable fields?
 	Step=['$set', [VarKey, string(FieldQuery)]].
-
-%%
-project_retract(Step) :-
-	(	Step=['$project',[['_id',int(1)]]]
-	;	Step=['$set',['delete',bool(true)]]
-	).
 
 %% $match
 %
