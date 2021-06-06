@@ -4,6 +4,7 @@
 	  arg_val_nested/3,
 	  goal_vars/3,
 	  goal_var/3,
+	  goal_var_in_head/2,
 	  context_var/2,
 	  merge_substitutions/3
 	]).
@@ -136,6 +137,17 @@ goal_var(Compound, Ctx, Var) :-
 	Compound =.. [_Functor|Args],
 	member(Arg,Args),
 	goal_var(Arg, Ctx, Var).
+
+
+%% goal_var_in_head(+Goal, +Ctx) is semidet.
+%
+goal_var_in_head(Goal, Ctx) :-
+	option(head_vars(HeadVars), Ctx),
+	goal_vars(Goal, Ctx, InnerVars),
+	member([_,V],HeadVars),
+	member([_,W],InnerVars),
+	V == W,
+	!.
 
 
 %%

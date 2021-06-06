@@ -77,6 +77,7 @@ compile_disjunction(
 		StepVars) :-
 	select_option(outer_vars(OuterVarsOrig), Ctx, Ctx0, []),
 	select_option(copy_vars(CopiedVars1), Ctx0, Ctx1, []),
+	select_option(head_vars(HeadVarsOrig), Ctx1, Ctx2, []),
 	% ensure goal is a list
 	(	is_list(Goal)
 	->	GoalOrig=Goal
@@ -92,6 +93,7 @@ compile_disjunction(
 	term_variables(GoalOrig, VarsOrig),
 	term_variables(GoalCopy, VarsCopy),
 	copy_vars(OuterVarsOrig, VarsOrig, VarsCopy, OuterVarsCopy),
+	copy_vars(HeadVarsOrig, VarsOrig, VarsCopy, HeadVarsCopy),
 	% remember the mapping between original and copy of the variables,
 	% This is important as the copies may receive groundings in the compilation
 	% process (when lookup_findall is called)
@@ -113,9 +115,10 @@ compile_disjunction(
 	% compile the step
 	merge_options([
 		outer_vars(CutOuterVarsCopy),
+		head_vars(HeadVarsCopy),
 		orig_vars(VOs),
 		copy_vars(VCs)
-	], Ctx1, InnerCtx),
+	], Ctx2, InnerCtx),
 	var_key(FindallVar, Ctx, Key),
 	lookup_findall(Key, GoalCopy, CutMatches, [],
 		InnerCtx, StepVars_copy, Stage),

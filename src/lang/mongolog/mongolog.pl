@@ -81,7 +81,7 @@ mongolog_call(Goal) :-
 mongolog_call(Goal, Context) :-
 	% get the pipeline document
 	mongolog_compile(Goal, CompilerOutput, Vars,
-		[clause_head([]),Context]),
+		[head_vars([])|Context]),
 	compiled_document(CompilerOutput, Doc),
 	% get name of collection on which the aggregate operation
 	% should be performed. This is basically the first collection
@@ -144,19 +144,21 @@ query_compile1(Terminals, Output0, Vars, Context) :-
 		]) ], Output, Output0).
 
 %%
-compile_terms(Goal, Vars, Output, Context) :-
-	\+ is_list(Goal), !,
-	compile_terms([Goal], Vars, Output, Context).
-
-compile_terms([], V0->V0, [document([]),variables([])], _) :- !.
+compile_terms([], V0->V0, [document([]),variables([])], _) :-
+	!.
 
 compile_terms([X|Xs], V0->Vn, Output, Context) :-
+	!,
 	% compile first
 	compile_term(X,  V0->V1, Output0, Context),
 	% compile rest
 	compile_terms(Xs, V1->Vn, Output1, Context),
 	% merge both compiler outputs
 	merge_outputs(Output0, Output1, Output).
+
+compile_terms(Goal, Vars, Output, Context) :-
+	\+ is_list(Goal),!,
+	compile_terms([Goal], Vars, Output, Context).
 
 %% Compile a single command (Term) into an aggregate pipeline (Doc).
 compile_term(Term, V0->V1, Output, Context) :-
@@ -165,13 +167,11 @@ compile_term(Term, V0->V1, Output, Context) :-
 	compile_expanded_terms(Expanded, V0->V1, Output, Context).
 
 %%
-compile_expanded_terms(Goal, Vars, Output, Context) :-
-	\+ is_list(Goal), !,
-	compile_expanded_terms([Goal], Vars, Output, Context).
-
-compile_expanded_terms([], V0->V0, [document([]),variables([])], _) :- !.
+compile_expanded_terms([], V0->V0, [document([]),variables([])], _) :-
+	!.
 
 compile_expanded_terms([Expanded|Rest], V0->Vn, Output, Context) :-
+	!,
 	% compile first
 	compile_expanded_term(Expanded, V0->V1, Output0, Context),
 	% toggle on input_assigned flag in compile context to indicate that
@@ -185,6 +185,10 @@ compile_expanded_terms([Expanded|Rest], V0->Vn, Output, Context) :-
 	compile_expanded_terms(Rest, V1->Vn, Output1, Context1),
 	% finally merge both compilation outputs
 	merge_outputs(Output0, Output1, Output).
+
+compile_expanded_terms(Goal, Vars, Output, Context) :-
+	\+ is_list(Goal), !,
+	compile_expanded_terms([Goal], Vars, Output, Context).
 
 %
 compile_expanded_term(List, Vars, Output, Context) :-

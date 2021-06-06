@@ -49,6 +49,14 @@ lang_query:step_expand(
 % TODO: If there is only one incoming document, it would be possible
 %       to avoid $lookup and use $group after the Goal has been executed.
 %
+mongolog:step_compile1(findall(_, Goal, _), Ctx, []) :-
+	% findall views cannot be created if
+	% the findall-goal shares a variable with the head of the rule that is compiled
+	option(compile_mode(view), Ctx),
+	goal_var_in_head(Goal, Ctx),
+	!,
+	fail.
+
 mongolog:step_compile1(
 		findall(Template, Terminals, List), Ctx,
 		% CompilerOutput:

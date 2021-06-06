@@ -583,18 +583,13 @@ is_callable_with(mongolog, Goal) :- mongolog:is_mongolog_term(Goal).
 % @param Body The body of a rule.
 %
 kb_add_rule(Module, Head, Body) :-
-	%% get the functor of the predicate
+	% get the functor of the predicate
 	Head =.. [Functor|Args],
-	%% expand goals into terminal symbols
+	% expand goals into terminal symbols
 	(	kb_expand(Body, Expanded) -> true
 	;	log_error_and_fail(lang(assertion_failed(Body), Functor))
 	),
-	% HACK: this is to make mongolog recognize the predicate symbol before
-	%        the rule has been added (after all clauses have been expanded)
-	once((
-		atom_concat('project_',_,Functor)
-	;	mongolog:add_command(Functor)
-	)),
+	% assert the clause
 	assertz(kb_rule(Module, Functor, Args, Expanded)).
 
 
@@ -766,15 +761,15 @@ expand_cut(Terms,Expanded) :-
 		)
 	).
 
-%
-step_expand(ask(Goal), ask(Expanded)) :-
-	kb_expand(Goal, Expanded).
-
 % split list at cut operator.
 take_until_cut([],[],[]) :- !.
 take_until_cut(['!'|Xs],[],['!'|Xs]) :- !.
 take_until_cut([X|Xs],[X|Ys],Remaining) :-
 	take_until_cut(Xs,Ys,Remaining).
+
+%
+step_expand(ask(Goal), ask(Expanded)) :-
+	kb_expand(Goal, Expanded).
 
 % 
 has_list_head([]) :- !.
@@ -799,6 +794,7 @@ flush_predicate(SrcModule, Functor, Arity) :-
 flush_predicate(SrcModule) :-
 	forall(
 		expanding_term(Functor, Arity, SrcModule, _),
+%		ignore(flush_predicate(SrcModule, Functor, Arity))
 		flush_predicate(SrcModule, Functor, Arity)
 	).
 

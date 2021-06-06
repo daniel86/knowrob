@@ -48,14 +48,16 @@ idb_assert(_Module, Functor, Args, Clauses) :-
 	atomic_list_concat([Functor, Arity], '_', ViewName),
 	% compile an aggregation pipeline
 	current_scope(QScope),
-%once(( Functor==is_resource -> gtrace ; true )),
+%once(( Functor==findall_test2 -> gtrace ; true )),
+	head_vars(Args, HeadVars),
 	mongolog:mongolog_compile(
 		Clauses,
 		CompilerOutput,
 		Vars,
 		[ scope(QScope)
 		, compile_mode(view)
-		, clause_head(Goal)
+		, head_functor(Functor)
+		, head_vars(HeadVars)
 		]),
 	memberchk(document(Pipeline), CompilerOutput),
 %	memberchk(variables(Vars), CompilerOutput),
@@ -107,12 +109,19 @@ idb_assert(_Module, Functor, Args, Clauses) :-
 	).
 
 idb_assert(Module, Functor, Args, _Zs) :-
-	writeln(mongolog_rule_assert_failed(Module, Functor, Args)).
+	length(Args, Arity),
+	writeln(not_viewable(('/'((:(Module, Functor)), Arity)))).
 
 %%
 mongolog:step_compile1(Term, Ctx, Output) :-
 	is_idb_predicate(Term),!,
 	db_predicate_compile(Term, Ctx, Output).
+
+%%
+head_vars([], []) :- !.
+head_vars([V|Xs],[[K,V]|Ys]) :-
+	gensym('v_', K),
+	head_vars(Xs,Ys).
 
 		 /*******************************
 		 *    	  UNIT TESTING     		*
@@ -125,16 +134,20 @@ mongolog:step_compile1(Term, Ctx, Output) :-
 		  woman(mia), woman(jola),
 		  loves(fred,mia), loves(jola,fred),
 		  % IDB clauses
-		  ( findall_test(X1) :- findall(Y1, woman(Y1), X1) ),
-		  ( loved_woman(X2)  :- woman(X2), loves(_,X2) ),
-		  ( test_nested_rule1(X3) :- assign(X3,2) ),
-		  ( test_nested_rule1(X4) :- assign(X4,3) ),
-		  ( test_nested_rule(X5)  :- test_nested_rule1(Y5), X5 is Y5 + 2 ),
+		  ( findall_test(X1)       :- findall(Y1, woman(Y1), X1) ),
+		  ( loved_woman(X2)        :- woman(X2), loves(_,X2) ),
+		  ( test_nested_rule1(X3)  :- assign(X3,2) ),
+		  ( test_nested_rule1(X4)  :- assign(X4,3) ),
+		  ( test_nested_rule(X5)   :- test_nested_rule1(Y5), X5 is Y5 + 2 ),
+		  % not viewable because X1 appears in findall goal
+		  ( findall_test1(X6,Y6)   :- findall(Z6, loves(Z6,X6), Y6) ),
+		  % viewable because call context instantiates X1 in above clause
+		  ( findall_test2(Y7)      :- findall_test1(mia, Y7) ),
 		  % ask-rule with partially instantiated arg and multiple clauses
-		  ( test_shape1(mesh(X))   :- =(X,foo) ),
-		  ( test_shape1(sphere(X)) :- =(X,5.0) ),
-		  ( test_shape2(X)         :- ( =(X,mesh(foo)) ; =(X,sphere(5.0)) ) ),
-		  ( test_shape3(X)         :- ( test_shape1(X) ; =(X,mesh(bar)) ) )
+		  ( test_shape1(mesh(X8))   :- =(X8,foo) ),
+		  ( test_shape1(sphere(X9)) :- =(X9,5.0) ),
+		  ( test_shape2(X10)        :- ( =(X10,mesh(foo)) ; =(X10,sphere(5.0)) ) ),
+		  ( test_shape3(X11)        :- ( test_shape1(X11) ; =(X11,mesh(bar)) ) )
 		]).
 
 test('edb-conjunction') :-
@@ -148,6 +161,12 @@ test('findall(edb)') :-
 test('idb-body') :-
 	findall(X, mongolog_call(test_nested_rule(X)), Xs),
 	assert_equals(Xs, [4.0,5.0]).
+
+test('viewable-findall') :-
+	% findall_test1 is not viewable because head var appears in findall goal
+	% findall_test2 is viewable as it instantiates this var
+	assert_true(is_mongolog_term(findall_test2/1)),
+	assert_false(is_mongolog_term(findall_test1/2)).
 
 test('test_shape1(mesh(foo))') :-
 	assert_true(mongolog_call(test_shape1(mesh(foo)))).

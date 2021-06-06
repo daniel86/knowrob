@@ -59,6 +59,14 @@ mongolog:step_compile1(limit(_, Terminals), Ctx, Output) :-
 	mongolog:step_compile1(true,Ctx,Output),
 	!.
 
+mongolog:step_compile1(limit(_, Goal), Ctx, []) :-
+	% limit views cannot be created if
+	% the limit-goal shares a variable with the head of the rule that is compiled
+	option(compile_mode(view), Ctx),
+	goal_var_in_head(Goal, Ctx),
+	!,
+	fail.
+
 mongolog:step_compile1(
 		limit(Count, Terminals), Ctx,
 		[ document(Pipeline), variables(StepVars) ]) :-

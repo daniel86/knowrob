@@ -91,11 +91,11 @@ cleanup([EDBPredicates,_], [IDBPredicates,_]) :-
 	% drop all predicates
 	forall(
 		member([Functor,Fields,_],EDBPredicates),
-		(length(Fields,N), edb_drop(('/'(Functor,N))))
+		(length(Fields,N), ignore(edb_drop(('/'(Functor,N)))))
 	),
 	forall(
 		member([Functor,Fields,_],IDBPredicates),
-		(length(Fields,N), idb_drop(('/'(Functor,N))))
+		(length(Fields,N), ignore(idb_drop(('/'(Functor,N)))))
 	).
 
 %%
