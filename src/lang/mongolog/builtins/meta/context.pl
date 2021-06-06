@@ -20,6 +20,7 @@ The following predicates are supported:
 :- use_module(library('lang/scope'),
 		[ time_scope/3 ]).
 :- use_module('../../mongolog').
+:- use_module('../../variables').
 
 :- mongolog:add_command(call_with_context).
 :- mongolog:add_command(context).
@@ -72,7 +73,7 @@ resolve_scope(In, _, In).
 %%
 resolve_scope1(In, Ctx, Out) :-
 	mng_strip_operator(In, Operator, Time1),
-	mongolog:var_key_or_val(Time1, Ctx, Time2),
+	arg_val(Time1, Ctx, Time2),
 	mng_strip_operator(Out, Operator, Time2).
 
 %%
@@ -82,7 +83,7 @@ resolve_scope1(In, Ctx, Out) :-
 %
 is_referenced(Arg, Ctx) :-
 	option(outer_vars(OuterVars),Ctx),
-	mongolog:var_key(Arg, Ctx, Key),
+	var_key(Arg, Ctx, Key),
 	memberchk([Key,_], OuterVars).
 
 %%

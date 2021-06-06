@@ -15,6 +15,7 @@ The following predicates are supported:
 */
 
 :- use_module('../mongolog').
+:- use_module('../variables').
 :- use_module('../aggregation/match').
 :- use_module('../aggregation/set').
 
@@ -38,8 +39,8 @@ lang_query:step_expand(\=(A,B), Expanded) :-
 mongolog:step_compile(
 		assign(Var,Value), Ctx,
 		[['$set', [[Key,Value0]]]]) :-
-	mongolog:var_key_or_val(Value,Ctx,Value0),
-	mongolog:var_key(Var,Ctx,Key).
+	arg_val(Value,Ctx,Value0),
+	var_key(Var,Ctx,Key).
 
 %% ?Term1 = ?Term2
 % Unify Term1 with Term2. True if the unification succeeds.
@@ -49,8 +50,8 @@ mongolog:step_compile(=(Term1, Term2), _, _) :-
 	fail.
 
 mongolog:step_compile(=(Term1, Term2), Ctx, Pipeline) :-
-	mongolog:var_key_or_val(Term1,Ctx,Term1_val),
-	mongolog:var_key_or_val(Term2,Ctx,Term2_val),
+	arg_val(Term1,Ctx,Term1_val),
+	arg_val(Term2,Ctx,Term2_val),
 	% TODO: if var(Term1) then $set key(Term1) <- t_term1
 	findall(Step,
 		(	set_if_var(Term1, Term2_val, Ctx, Step)
@@ -142,7 +143,7 @@ set_term_vars(Term, _, _, _) :-
 set_term_vars(Term, Field, Ctx, ['$set', [TermField, string(FieldValue)]]) :-
 	% the term itself is a var -> $set var field
 	var(Term),!,
-	mongolog:var_key(Term, Ctx, TermField),
+	var_key(Term, Ctx, TermField),
 	atom_concat('$', Field, FieldValue).
 
 set_term_vars(Args, Field, Ctx, SetVars) :-
@@ -165,7 +166,7 @@ set_term_vars1(Args, ArrayField, Ctx, ['$set', [ArgField,
 	between(0, NumArgs0, Index),
 	nth0(Index, Args, Arg),
 	% get the varkey or fail if it is not a var
-	mongolog:var_key(Arg, Ctx, ArgField).
+	var_key(Arg, Ctx, ArgField).
 
 		 /*******************************
 		 *    	  UNIT TESTING     		*

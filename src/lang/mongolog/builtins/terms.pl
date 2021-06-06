@@ -16,6 +16,7 @@ The following predicates are supported:
 */
 
 :- use_module('../mongolog').
+:- use_module('../variables').
 :- use_module('../aggregation/match').
 :- use_module('../aggregation/set').
 
@@ -32,9 +33,9 @@ The following predicates are supported:
 % True when Term is a term with functor Name/Arity.
 %
 mongolog:step_compile(functor(Term,Functor,Arity), Ctx, Pipeline) :-
-	mongolog:var_key_or_val(Term,Ctx,Term0),
-	mongolog:var_key_or_val(Functor,Ctx,Functor0),
-	mongolog:var_key_or_val(Arity,Ctx,Arity0),
+	arg_val(Term,Ctx,Term0),
+	arg_val(Functor,Ctx,Functor0),
+	arg_val(Arity,Ctx,Arity0),
 	findall(Step,
 		(	set_if_var(Term, [
 				['type', string('compound')],
@@ -71,9 +72,9 @@ mongolog:step_compile(arg(Arg,Term,Value), Ctx, Pipeline) :-
 	%		- can be handled with conditional $set, add [X,Y] to
 	%         var array if both of them are vars
 	%
-	mongolog:var_key_or_val(Arg,Ctx,Arg0),
-	mongolog:var_key_or_val(Term,Ctx,Term0),
-	mongolog:var_key_or_val(Value,Ctx,Value0),
+	arg_val(Arg,Ctx,Arg0),
+	arg_val(Term,Ctx,Term0),
+	arg_val(Value,Ctx,Value0),
 	findall(Step,
 		(	Step=['$set', ['t_term', Term0]]
 		;	set_if_var(Arg, ['$add', array([
@@ -96,8 +97,8 @@ mongolog:step_compile(arg(Arg,Term,Value), Ctx, Pipeline) :-
 % Create a version of In with renamed (fresh) variables and unify it to Out.
 %
 mongolog:step_compile(copy_term(In,Out), Ctx, Pipeline) :-
-	mongolog:var_key_or_val(In,Ctx,In0),
-	mongolog:var_key(Out,Ctx,OutKey),
+	arg_val(In,Ctx,In0),
+	var_key(Out,Ctx,OutKey),
 	findall(Step,
 		(	Step=['$set', ['t_term', In0]]
 		;	Step=['$set', [OutKey, ['$cond', [
@@ -137,8 +138,8 @@ mongolog:step_compile(=..(Term,List), Ctx, Pipeline) :-
 	%          - needs additional map/filter operation
 	%				- get args that are different vars in list and term, then add to var array
 	%
-	mongolog:var_key_or_val(Term,Ctx,Term0),
-	mongolog:var_key_or_val(List,Ctx,List0),
+	arg_val(Term,Ctx,Term0),
+	arg_val(List,Ctx,List0),
 	findall(Step,
 		(	set_if_var(Term, [
 				['type', string('compound')],

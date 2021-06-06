@@ -23,6 +23,7 @@ filtering based on the fluent value.
 */
 
 :- use_module('../mongolog').
+:- use_module('../variables').
 :- use_module('../aggregation/match').
 :- use_module('../stages/bulk_operation').
 
@@ -238,7 +239,7 @@ mongolog_fluent_assert(Term, Ctx, Pipeline, StepVars) :-
 	% create a document
 	findall([Field,Val],
 		(	member([Field,Arg],Zipped),
-			mongolog:var_key_or_val(Arg, Ctx, Val)
+			arg_val(Arg, Ctx, Val)
 		),
 		PredicateDoc),
 	% make sure we have a nested doc since keys with a '.' are not allowed here!
@@ -258,7 +259,7 @@ fluent_zip(Term, Ctx, ZippedKeys, ZippedValues, TimeKey, Ctx_zipped, ReadOrWrite
 	fluent_collection(Functor, Options, Collection),
 	!,
 	% read variable in Term
-	mongolog:step_vars(Term, Ctx, StepVars0),
+	goal_vars(Term, Ctx, StepVars0),
 	(	ReadOrWrite==read -> StepVars=StepVars0
 	;	add_assertion_var(StepVars0, StepVars)
 	),

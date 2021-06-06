@@ -9,6 +9,7 @@
 		]).
 
 :- use_module('../mongolog').
+:- use_module('../variables').
 :- use_module('../aggregation/lookup').
 :- use_module('../stages/bulk_operation').
 
@@ -124,7 +125,7 @@ add_array_vars(Term, Opts, Ctx, StepVars, StepVars0) :-
 	option(rdfs_fields(RDFSFields), Opts, []),
 	RDFSFields \== [],
 	bagof([K0,_],
-		(	mongolog:goal_var(Term, Ctx, [K,_]),
+		(	goal_var(Term, Ctx, [K,_]),
 			memberchk(K,RDFSFields),
 			atom_concat(K,'_s',K0)
 		),
@@ -180,7 +181,7 @@ db_predicate_zip(Term, Ctx, Zipped, Ctx_zipped, ReadOrWrite) :-
 	db_predicate_collection(Term, _DB, Collection),
 	!,
 	% read variable in Term
-	mongolog:step_vars(Term, Ctx, StepVars0),
+	goal_vars(Term, Ctx, StepVars0),
 	(	ReadOrWrite==read -> StepVars=StepVars0
 	;	add_assertion_var(StepVars0, StepVars)
 	),
@@ -263,7 +264,7 @@ lookup_predicate(Field, InnerPipeline, Ctx, ['$lookup', [
 %
 project_predicate(Unpacked, Ctx, Step) :-
 	member([FieldPath0,Var,Is], Unpacked),
-	mongolog:var_key(Var,Ctx,VarKey),
+	var_key(Var,Ctx,VarKey),
 	atomic_list_concat([FieldPath0|Is],'_',FieldPath),
 	atom_concat('$t_pred.', FieldPath, FieldQuery),
 	% FIXME: some unneeded set's here. can we skip if not one of the predicate variable fields?
@@ -271,7 +272,7 @@ project_predicate(Unpacked, Ctx, Step) :-
 
 project_predicate1(Unpacked, Ctx, Step) :-
 	member([FieldPath0,Var,Is], Unpacked),
-	mongolog:var_key(Var,Ctx,VarKey),
+	var_key(Var,Ctx,VarKey),
 	atomic_list_concat([FieldPath0|Is],'_',FieldPath),
 	atom_concat('$', FieldPath, FieldQuery),
 	% FIXME: some unneeded set's here. can we skip if not one of the predicate variable fields?
@@ -347,7 +348,7 @@ match_conditional(FieldKey, Arg, OuterCtx, Ctx, ['$expr', ['$or', array([
 	term_variables(Arg0, [ArgVar]),!,
 	% do not perform conditional match if variable was not referred to before
 	is_referenced(ArgVar, OuterCtx),
-	mongolog:var_key(ArgVar, Ctx, ArgKey),
+	var_key(ArgVar, Ctx, ArgKey),
 	% TODO: need to set let variables or use $ vs $$ conditional
 	(	option(input_assigned,Ctx)
 	->	atom_concat('$$',ArgKey,ArgValue)

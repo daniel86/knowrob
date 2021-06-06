@@ -14,6 +14,7 @@ The following predicates are supported:
 */
 
 :- use_module('../mongolog').
+:- use_module('../variables').
 
 %% mongolog:add_command
 :- mongolog:add_command(==).
@@ -28,8 +29,8 @@ mongolog:step_compile(==(X,Y), _, []) :-
 
 mongolog:step_compile(==(X,Y), Ctx,
 		[['$match', ['$expr', ['$eq', array([X0,Y0])]]]]) :-
-	mongolog:var_key_or_val(X,Ctx,X0),
-	mongolog:var_key_or_val(Y,Ctx,Y0).
+	arg_val(X,Ctx,X0),
+	arg_val(Y,Ctx,Y0).
 
 %% @Term1 \== @Term2
 % Equivalent to \+Term1 == Term2.
@@ -40,8 +41,8 @@ mongolog:step_compile(\==(X,Y), _, []) :-
 
 mongolog:step_compile(\==(X,Y), Ctx,
 		[['$match', ['$expr', ['$ne', array([X0,Y0])]]]]) :-
-	mongolog:var_key_or_val(X,Ctx,X0),
-	mongolog:var_key_or_val(Y,Ctx,Y0).
+	arg_val(X,Ctx,X0),
+	arg_val(Y,Ctx,Y0).
 
 		 /*******************************
 		 *    	  UNIT TESTING     		*

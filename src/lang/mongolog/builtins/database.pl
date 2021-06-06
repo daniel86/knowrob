@@ -14,6 +14,7 @@ The following predicates are supported:
 */
 
 :- use_module('../mongolog').
+:- use_module('../variables').
 :- use_module('../stages/bulk_operation').
 :- use_module('../kb/db_predicate').
 :- use_module('../kb/edb').
@@ -40,7 +41,7 @@ mongolog:step_compile1(assert(Term), Ctx,
 	% create a document
 	findall([Field,Val],
 		(	member([Field,Arg],Zipped),
-			mongolog:var_key_or_val(Arg, Ctx_pred, Val)
+			arg_val(Arg, Ctx_pred, Val)
 		),
 		PredicateDoc),
 	% and add it to the list of asserted documents

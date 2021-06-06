@@ -1,6 +1,6 @@
 
 :- use_module(mongolog).
-:- ensure_loaded(compiler).
+:- ensure_loaded(variables).
 
 :- use_directory(builtins).
 :- use_directory(aggregation).

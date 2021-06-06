@@ -18,6 +18,7 @@ The following predicates are supported:
 :- use_module(library('lang/db')).
 
 :- use_module(library('lang/mongolog/mongolog')).
+:- use_module(library('lang/mongolog/variables')).
 :- use_module(library('lang/mongolog/aggregation/lookup')).
 :- use_module(library('lang/mongolog/aggregation/match')).
 :- use_module(library('lang/mongolog/aggregation/set')).
@@ -58,10 +59,10 @@ mongolog:step_compile(
 
 %% 
 query_annotation(Entity, Property, Annotation, Ctx, Pipeline, StepVars) :-
-	mongolog:step_vars([Entity,Property,Annotation], Ctx, StepVars),
+	goal_vars([Entity,Property,Annotation], Ctx, StepVars),
 	% get the DB collection
 	mng_get_db(_DB, Coll, 'annotations'),
-	mongolog:var_key_or_val(Annotation, Ctx, Annotation0),
+	arg_val(Annotation, Ctx, Annotation0),
 	% pass input document values to lookup
 	lookup_let_doc(StepVars, LetDoc),
 	%
@@ -103,12 +104,12 @@ assert_annotation(Entity, Property, Annotation, Stripped, Ctx, [Step], StepVars)
 	utf8_value(Stripped, Annotation_en),
 	% throw instantiation_error if one of the arguments was not referred to before
 	all_ground([Entity, Property, Annotation_en], Ctx),
-	mongolog:step_vars([Entity,Property,Annotation], Ctx, StepVars0),
+	goal_vars([Entity,Property,Annotation], Ctx, StepVars0),
 	add_assertion_var(StepVars0, StepVars),
 	% resolve arguments
-	mongolog:var_key_or_val(Entity,         Ctx, Entity0),
-	mongolog:var_key_or_val(Property,       Ctx, Property0),
-	mongolog:var_key_or_val(Annotation_en,  Ctx, Annotation0),
+	arg_val(Entity,         Ctx, Entity0),
+	arg_val(Property,       Ctx, Property0),
+	arg_val(Annotation_en,  Ctx, Annotation0),
 	% get the query
 	add_assertion([
 				['s', Entity0],

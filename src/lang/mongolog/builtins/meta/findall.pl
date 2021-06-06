@@ -14,6 +14,7 @@ The following predicates are supported:
 
 :- use_module(library('db/mongo/client'), [ mng_one_db/2 ]).
 :- use_module('../../mongolog').
+:- use_module('../../variables').
 :- use_module('../../aggregation/lookup').
 :- use_module('../../aggregation/match').
 :- use_module('../../aggregation/set').
@@ -58,8 +59,8 @@ mongolog:step_compile1(
 		]) :-
 	mng_one_db(_,OneColl),
 	% get field key for list and variables in template
-	mongolog:step_vars(List, Ctx, StepVars),
-	mongolog:step_vars(Template, Ctx, TemplateVars),
+	goal_vars(List, Ctx, StepVars),
+	goal_vars(Template, Ctx, TemplateVars),
 	% add template vars to compile context.
 	% this is important to enforce that vars in Template are referred
 	% to with a common key within findall.
@@ -102,7 +103,7 @@ mongolog:step_compile1(
 				['in', Instantiation] ]]]]
 		;	set_if_var(List, string('$t_list'), Ctx3, Step)
 		;	(
-				mongolog:var_key_or_val(List, Ctx3, List0),
+				arg_val(List, Ctx3, List0),
 				match_equals(List0, string('$t_list'), Step)
 			)
 		% array at 'next' field not needed anymore
@@ -118,7 +119,7 @@ mongolog:step_compile1(
 template_instantiation(Var, Ctx, string(Val)) :-
 	% for variables in template, lookup in compile context
 	% or create a key used in mongo to refer to the var
-	mongolog:var_key(Var, Ctx, Key),
+	var_key(Var, Ctx, Key),
 	atom_concat('$$this.', Key, Val).
 
 template_instantiation(List, Ctx, array(Elems)) :-

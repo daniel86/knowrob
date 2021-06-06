@@ -14,6 +14,7 @@ The following predicates are supported:
 */
 
 :- use_module('../../mongolog').
+:- use_module('../../variables').
 :- use_module('../../aggregation/lookup').
 
 %%%% query commands
@@ -61,14 +62,14 @@ mongolog:step_compile1(limit(_, Terminals), Ctx, Output) :-
 mongolog:step_compile1(
 		limit(Count, Terminals), Ctx,
 		[ document(Pipeline), variables(StepVars) ]) :-
-	mongolog:var_key_or_val(Count,Ctx,Count0),
+	arg_val(Count,Ctx,Count0),
 	% appended to inner pipeline of lookup
 	Suffix=[['$limit',Count0]],
 	% create a lookup and append $limit to inner pipeline,
 	% then unwind next and assign variables to the toplevel document.
 	lookup_call(Terminals, Suffix, Ctx, Pipeline, StepVars0),
 	%
-	(	mongolog:goal_var(Count,Ctx,Count_var)
+	(	goal_var(Count,Ctx,Count_var)
 	->	StepVars=[Count_var|StepVars0]
 	;	StepVars=StepVars0
 	).

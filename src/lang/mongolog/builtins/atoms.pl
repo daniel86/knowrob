@@ -21,6 +21,7 @@ The following predicates are supported:
 */
 
 :- use_module('../mongolog').
+:- use_module('../variables').
 :- use_module('../aggregation/match').
 :- use_module('../aggregation/set').
 
@@ -47,8 +48,8 @@ mongolog:step_compile(
 mongolog:step_compile(
 		atom_number(Atom,Number),
 		Ctx, Pipeline) :-
-	mongolog:var_key_or_val(Atom,Ctx,Atom0),
-	mongolog:var_key_or_val(Number,Ctx,Number0),
+	arg_val(Atom,Ctx,Atom0),
+	arg_val(Number,Ctx,Number0),
 	findall(Step,
 		(	set_if_var(Atom,    ['$toString', Number0], Ctx, Step)
 		;	set_if_var(Number,  ['$toDouble', Atom0],   Ctx, Step)
@@ -63,8 +64,8 @@ mongolog:step_compile(atom_length(Atom,Length), _, []) :-
 mongolog:step_compile(
 		atom_length(Atom,Length),
 		Ctx, Pipeline) :-
-	mongolog:var_key_or_val(Atom,Ctx,Atom0),
-	mongolog:var_key_or_val(Length,Ctx,Length0),
+	arg_val(Atom,Ctx,Atom0),
+	arg_val(Length,Ctx,Length0),
 	findall(Step,
 		(	set_if_var(Length,    ['$strLenCP', Atom0], Ctx, Step)
 		;	match_equals(Length0, ['$strLenCP', Atom0], Step)
@@ -78,8 +79,8 @@ mongolog:step_compile(upcase_atom(Atom,UpperCase), _, []) :-
 mongolog:step_compile(
 		upcase_atom(Atom,UpperCase),
 		Ctx, Pipeline) :-
-	mongolog:var_key_or_val(Atom,Ctx,Atom0),
-	mongolog:var_key_or_val(UpperCase,Ctx,UpperCase0),
+	arg_val(Atom,Ctx,Atom0),
+	arg_val(UpperCase,Ctx,UpperCase0),
 	findall(Step,
 		(	set_if_var(UpperCase,    ['$toUpper', Atom0], Ctx, Step)
 		;	match_equals(UpperCase0, ['$toUpper', Atom0], Step)
@@ -93,8 +94,8 @@ mongolog:step_compile(downcase_atom(Atom,UpperCase), _, []) :-
 mongolog:step_compile(
 		downcase_atom(Atom,LowerCase),
 		Ctx, Pipeline) :-
-	mongolog:var_key_or_val(Atom,Ctx,Atom0),
-	mongolog:var_key_or_val(LowerCase,Ctx,LowerCase0),
+	arg_val(Atom,Ctx,Atom0),
+	arg_val(LowerCase,Ctx,LowerCase0),
 	findall(Step,
 		(	set_if_var(LowerCase,    ['$toLower', Atom0], Ctx, Step)
 		;	match_equals(LowerCase0, ['$toLower', Atom0], Step)
@@ -108,8 +109,8 @@ mongolog:step_compile(atom_prefix(Atom,Prefix), _, []) :-
 mongolog:step_compile(
 		atom_prefix(Atom,Prefix),
 		Ctx, Pipeline) :-
-	mongolog:var_key_or_val(Atom,Ctx,Atom0),
-	mongolog:var_key_or_val(Prefix,Ctx,Prefix0),
+	arg_val(Atom,Ctx,Atom0),
+	arg_val(Prefix,Ctx,Prefix0),
 	findall(Step,
 		match_equals(Prefix0,
 			['$substr', array([
@@ -129,9 +130,9 @@ mongolog:step_compile(
 		Ctx, Pipeline) :-
 	% FIXME: SWI Prolog allows var(Left), var(Right), atom(Atom), and then
 	%         yields all possible concatenations.
-	mongolog:var_key_or_val(Left,Ctx,Left0),
-	mongolog:var_key_or_val(Right,Ctx,Right0),
-	mongolog:var_key_or_val(Atom,Ctx,Atom0),
+	arg_val(Left,Ctx,Left0),
+	arg_val(Right,Ctx,Right0),
+	arg_val(Atom,Ctx,Atom0),
 	findall(Step,
 		(	set_if_var(Left, ['$substr', array([Atom0,
 				int(0),
@@ -155,10 +156,10 @@ mongolog:step_compile(
 		Ctx, Pipeline) :-
 	findall(Resolved,
 		(	member(Unresolved,List),
-			mongolog:var_key_or_val(Unresolved,Ctx,Resolved)
+			arg_val(Unresolved,Ctx,Resolved)
 		),
 		List0),
-	mongolog:var_key_or_val(Atom,Ctx,Atom0),
+	arg_val(Atom,Ctx,Atom0),
 	findall(Step,
 		(	set_if_var(Atom,    ['$concat', array(List0)], Ctx, Step)
 		;	match_equals(Atom0, ['$concat', array(List0)], Step)
@@ -175,11 +176,11 @@ mongolog:step_compile(
 		Ctx, Pipeline) :-
 	findall(Resolved,
 		(	member(Unresolved,List),
-			mongolog:var_key_or_val(Unresolved,Ctx,Resolved)
+			arg_val(Unresolved,Ctx,Resolved)
 		),
 		List0),
-	mongolog:var_key_or_val(Sep, Ctx, Sep0),
-	mongolog:var_key_or_val(Atom, Ctx, Atom0),
+	arg_val(Sep, Ctx, Sep0),
+	arg_val(Atom, Ctx, Atom0),
 	add_separator(List0, Sep0, List1),
 	findall(Step,
 		(	set_if_var(Atom,    ['$concat', array(List1)], Ctx, Step)
@@ -190,8 +191,8 @@ mongolog:step_compile(
 mongolog:step_compile(
 		random_atom(Length,Atom),
 		Ctx, [Set]) :-
-	mongolog:var_key(Atom,Ctx,AtomKey),
-	mongolog:var_key_or_val(Length,Ctx,Length0),
+	var_key(Atom,Ctx,AtomKey),
+	arg_val(Length,Ctx,Length0),
 	maplist([X,string(X)]>>true, [
 		'0','1','2','3','4','5','6','7','8','9',
 		'A','B','E','F','G','H','I','J','K','L',

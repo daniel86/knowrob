@@ -13,7 +13,7 @@ The following predicates are supported:
 */
 
 :- use_module('../../mongolog').
-:- use_module('../../compiler').
+:- use_module('../../variables').
 :- use_module('../../aggregation/lookup').
 :- use_module('../../aggregation/set').
 
@@ -116,7 +116,7 @@ compile_disjunction(
 		orig_vars(VOs),
 		copy_vars(VCs)
 	], Ctx1, InnerCtx),
-	mongolog:var_key(FindallVar, Ctx, Key),
+	var_key(FindallVar, Ctx, Key),
 	lookup_findall(Key, GoalCopy, CutMatches, [],
 		InnerCtx, StepVars_copy, Stage),
 	!,
@@ -211,7 +211,7 @@ get_varkeys(Ctx, ParentVars,
 		[[Key,VC]|VCs]) :-
 	once((
 		( member([Key,X],ParentVars), X == VO )
-	;	( mongolog:var_key(VO, Ctx, Key) )
+	;	( var_key(VO, Ctx, Key) )
 	)),
 	get_varkeys(Ctx,ParentVars,VV,VOs,VCs).
 

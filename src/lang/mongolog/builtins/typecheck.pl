@@ -19,6 +19,7 @@ The following predicates are supported:
 */
 
 :- use_module('../mongolog').
+:- use_module('../variables').
 :- use_module('meta/context', [ is_referenced/2 ]).
 
 %% register query commands
@@ -45,7 +46,7 @@ mongolog:step_compile(ground(Arg), Ctx, []) :-
 	fail.
 
 mongolog:step_compile(ground(Arg), Ctx, Pipeline) :-
-	mongolog:var_key_or_val(Arg, Ctx, Arg0),
+	arg_val(Arg, Ctx, Arg0),
 	findall(Step,
 		(	Step=['$set', ['t_term', Arg0]]
 		% fail if t_term is a variable
@@ -87,7 +88,7 @@ mongolog:step_compile(
 		[['$match', [
 			[Key0, ['$eq', string('var')]]
 		]]]) :-
-	mongolog:var_key(Arg, Ctx, Key),
+	var_key(Arg, Ctx, Key),
 	atom_concat(Key, '.type', Key0).
 
 %% nonvar(@Term)
@@ -102,7 +103,7 @@ mongolog:step_compile(
 		[['$match', [
 			[Key0, ['$ne', string('var')]]
 		]]]) :-
-	mongolog:var_key(Arg, Ctx, Key),
+	var_key(Arg, Ctx, Key),
 	atom_concat(Key, '.type', Key0).
 
 %% number(@Term)
@@ -173,7 +174,7 @@ mongolog:step_compile(
 		]]]) :-
 	% compound terms are represented as documents that have
 	% a field "functor"
-	mongolog:var_key(Arg, Ctx, Key),
+	var_key(Arg, Ctx, Key),
 	atom_concat(Key,'.value.functor',Key0).
 
 
@@ -196,7 +197,7 @@ match_type_(Arg, _Goal, Type, Ctx,
 		[['$match',
 			[Key, ['$type', string(Type)]]
 		]]) :-
-	mongolog:var_key(Arg, Ctx, Key).
+	var_key(Arg, Ctx, Key).
 
 
 		 /*******************************

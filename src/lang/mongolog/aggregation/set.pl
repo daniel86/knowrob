@@ -3,6 +3,8 @@
 	  set_if_var/4
 	]).
 
+:- use_module('../variables').
+
 %%
 % Move ground variables in "next" document to the
 % document root.
@@ -31,6 +33,6 @@ set_if_var(X, Exp, Ctx,
 			Exp,          % evaluate the expression and set new value
 			string(XVal)  % else value remains the same
 		])]]]) :-
-	mongolog:var_key(X, Ctx, Key),
+	var_key(X, Ctx, Key),
 	atom_concat('$',Key,XVal),
 	atom_concat(XVal,'.type',TypeVal).

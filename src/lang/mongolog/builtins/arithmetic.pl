@@ -23,6 +23,7 @@ The following set of basic and special purpose predicates are supported:
 		[ mng_strip_operator/3 ]).
 
 :- use_module('../mongolog').
+:- use_module('../variables').
 :- use_module('../aggregation/match').
 :- use_module('../aggregation/set').
 
@@ -53,9 +54,9 @@ mongolog:step_compile(=:=(X,Y), Ctx, Z) :- comparison(=:=(X,Y),Ctx,Z).
 mongolog:step_compile(
 		between(Low, High, Value),
 		Ctx, Pipeline) :-
-	mongolog:var_key_or_val(Low,Ctx,Low0),
-	mongolog:var_key_or_val(High,Ctx,High0),
-	mongolog:var_key_or_val(Value,Ctx,Value0),
+	arg_val(Low,Ctx,Low0),
+	arg_val(High,Ctx,High0),
+	arg_val(Value,Ctx,Value0),
 	findall(Step,
 		% TODO: conditional $set to array holding only Value if Value is given
 		%       this would avoid iteration between Low and High for faster between checking.
@@ -76,7 +77,7 @@ assignment(Var, Exp, _Ctx, []) :-
 
 assignment(Number, Exp, Ctx, Pipeline) :-
 	% NOTE: SWI Prolog allows to write e.g. `7 is 7`, so here we use set+match
-	mongolog:var_key_or_val(Number,Ctx,Number0),
+	arg_val(Number,Ctx,Number0),
 	expression(Exp, Ctx, Doc),
 	findall(Step,
 		(	set_if_var(Number, Doc, Ctx, Step)
@@ -99,7 +100,7 @@ comparison(Exp, Ctx,
 %% variables
 expression(Var, Ctx, string(VarValue)) :-
 	var(Var),!,
-	mongolog:var_key(Var,Ctx,Key),
+	var_key(Var,Ctx,Key),
 	atom_concat('$',Key,VarValue).
 %% functions
 expression(Exp, Ctx, Doc) :-

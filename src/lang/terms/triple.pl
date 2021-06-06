@@ -29,7 +29,7 @@ The following predicates are supported:
 		  mng_query_value/2,
 		  mng_typed_value/2 ]).
 :- use_module(library('lang/mongolog/mongolog')).
-%:- use_module(library('lang/mongolog/builtins/control')).
+:- use_module(library('lang/mongolog/variables')).
 :- use_module(library('lang/mongolog/aggregation/lookup')).
 :- use_module(library('lang/mongolog/stages/bulk_operation')).
 :- use_module(library('lang/mongolog/builtins/meta/context'), [ is_referenced/2, all_ground/2 ]).
@@ -105,7 +105,7 @@ mongolog:step_compile1(triple(S,P,O), Ctx,
 %
 add_array_vars(triple(_,P,O), Ctx, StepVars, StepVars0) :-
 	bagof([K0,_],
-		(	mongolog:goal_var([P,O], Ctx, [K,_]),
+		(	goal_var([P,O], Ctx, [K,_]),
 			atom_concat(K,'_s',K0)
 		),
 		ArrayVars),
@@ -116,13 +116,13 @@ add_array_vars(_, _, StepVars, StepVars).
 %%
 triple_step_vars(triple(S,P,O), Ctx, StepVars) :-
 	(	bagof(Var,
-			(	mongolog:goal_var([S,P,O], Ctx, Var)
-			;	mongolog:context_var(Ctx, Var)
+			(	goal_var([S,P,O], Ctx, Var)
+			;	context_var(Ctx, Var)
 			% HACK: remember that variable is wrapped in term/1
 			;	(	nonvar(O),
 					O=term(O1),
 					var(O1),
-					mongolog:var_key(O1, Ctx, Key),
+					var_key(O1, Ctx, Key),
 					Var=[Key,term(O1)]
 				)
 			),
@@ -184,8 +184,8 @@ compile_assert(triple(S,P,O), Ctx, Pipeline) :-
 	% throw instantiation_error if one of the arguments was not referred to before
 	all_ground([S,O], Ctx),
 	% resolve arguments
-	mongolog:var_key_or_val(S, Ctx, S_query),
-	mongolog:var_key_or_val(O, Ctx, V_query),
+	arg_val(S, Ctx, S_query),
+	arg_val(O, Ctx, V_query),
 	% special handling for RDFS semantic
 	% FIXME: with below code P can not be inferred in query
 	(	taxonomical_property(P1)
@@ -275,7 +275,7 @@ lookup_triple(triple(S,P,V), Ctx, Step) :-
 		% next match variables grounded in call context
 		;	(	member([Arg,FieldValue],[[S,'$s'],[P,Key_p],[V,Key_o]]),
 				triple_arg_var(Arg, ArgVar),
-				mongolog:var_key(ArgVar, Ctx, ArgKey),
+				var_key(ArgVar, Ctx, ArgKey),
 				atom_concat('$$',ArgKey,ArgValue),
 				atom_concat(ArgValue,'.type',ArgType),
 				triple_arg_value(Arg, ArgValue, FieldValue, Ctx, ArgExpr),
@@ -337,8 +337,8 @@ lookup_triple(triple(S,P,V), Ctx, Step) :-
 	% TODO: can query operators be supported?
 	mng_strip_variable(S, S0),
 	mng_strip_variable(V, V0),
-	mongolog:var_key_or_val(S0, Ctx, S_val),
-	mongolog:var_key_or_val(V0, Ctx, V_val),
+	arg_val(S0, Ctx, S_val),
+	arg_val(V0, Ctx, V_val),
 	
 	% FIXME: a runtime condition is needed to cover the case where S was
 	%        referred to in ignore'd goal that failed.
@@ -434,9 +434,9 @@ delete_overlapping(triple(S,P,V), Ctx,
 	memberchk(collection(Coll), Ctx),
 	memberchk(step_vars(StepVars), Ctx),
 	% read triple data
-	mongolog:var_key_or_val1(P, Ctx, P0),
-	mongolog:var_key_or_val1(S, Ctx, S0),
-	mongolog:var_key_or_val1(V, Ctx, V0),
+	arg_val_nested(P, Ctx, P0),
+	arg_val_nested(S, Ctx, S0),
+	arg_val_nested(V, Ctx, V0),
 	% read scope data
 	option(scope(Scope), Ctx),
 	time_scope_values(Scope, Since, Until),
@@ -798,7 +798,7 @@ extend_context(triple(_,P,_), P1, Context, Context0) :-
 get_triple_vars(S, P, O, Ctx, Vars) :-
 	findall([Key,Field],
 		(	member([Field,Arg], [[s,S],[p,P],[o,O]]),
-			mongolog:goal_var(Arg, Ctx, [Key, _Var])
+			goal_var(Arg, Ctx, [Key, _Var])
 		),
 		Vars).
 

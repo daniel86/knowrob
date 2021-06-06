@@ -17,6 +17,7 @@ The following predicates are supported:
 :- use_module(library('lang/db'),
 		[ get_unique_name/2 ]).
 :- use_module('../mongolog').
+:- use_module('../variables').
 :- use_module('../aggregation/match').
 :- use_module('../aggregation/set').
 
@@ -27,9 +28,9 @@ The following predicates are supported:
 mongolog:step_compile(
 		iri_xml_namespace(IRI,NS,Name),
 		Ctx, Pipeline) :-
-	mongolog:var_key_or_val(IRI, Ctx, IRI0),
-	mongolog:var_key_or_val(NS, Ctx, NS0),
-	mongolog:var_key_or_val(Name, Ctx, Name0),
+	arg_val(IRI, Ctx, IRI0),
+	arg_val(NS, Ctx, NS0),
+	arg_val(Name, Ctx, Name0),
 	findall(Step,
 		% first extract the name from the IRI and set new field "t_name".
 		% here we use the remainder after the last '#' as name.

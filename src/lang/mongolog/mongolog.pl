@@ -18,9 +18,9 @@
 	    [ rdf_meta/1, rdf_global_term/2 ]).
 :- use_module(library('db/mongo/client')).
 
+:- use_module('variables').
 :- use_module('stages/aggregation', [ aggregate/4 ]).
 :- use_module('stages/bulk_operation', [ bulk_operation/1 ]).
-:- use_module('compiler').
 
 %% set of registered query commands.
 :- dynamic step_command/1.
@@ -248,7 +248,7 @@ step_compile1(Step, Ctx, [document(Doc), variables(StepVars)]) :-
 	% first compute stepvars and extend context.
 	% this is to avoid that different keys are assigned
 	% to the same variable
-	step_vars(Step, Ctx, StepVars),
+	goal_vars(Step, Ctx, StepVars),
 	merge_options([step_vars(StepVars)], Ctx, Ctx0),
 	step_compile(Step, Ctx0, Doc).
 
@@ -262,148 +262,6 @@ step_compile(stepvars(_), _, []) :- true.
 
 step_command(ask).
 step_command(stepvars).
-
-%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%% VARIABLES in queries
-%%%%%%%%%%%%%%%%%%%%%%%
-
-% read all variables referred to in Step into list StepVars
-step_vars(Step, Ctx, StepVars) :-
-	(	bagof(Vs, goal_var(Step, Ctx, Vs), StepVars)
-	;	StepVars=[]
-	),!.
-
-%%
-goal_var(Var, Ctx, [Key,Var]) :-
-	var(Var),!,
-	var_key(Var, Ctx, Key).
-
-goal_var(List, Ctx, Var) :-
-	is_list(List),!,
-	member(X,List),
-	goal_var(X, Ctx, Var).
-
-goal_var(Dict, Ctx, Var) :-
-	is_dict(Dict),!,
-	get_dict(Key, Dict, Value),
-	(	goal_var(Key,Ctx,Var)
-	;	goal_var(Value,Ctx,Var)
-	).
-
-goal_var(Compound, Ctx, Var) :-
-	compound(Compound),!,
-	Compound =.. [_Functor|Args],
-	member(Arg,Args),
-	goal_var(Arg, Ctx, Var).
-
-%%
-context_var(Ctx, [Key,ReferredVar]) :-
-	option(scope(Scope), Ctx),
-	% NOTE: vars are resolved to keys in scope already!
-	%       e.g. `Since == =<(string($v_235472))`
-	time_scope(Since, Until, Scope),
-	member(X, [Since, Until]),
-	mng_strip(X, _, string, Stripped),
-	atom(Stripped),
-	atom_concat('$', Key, Stripped),
-	once((
-		option(outer_vars(Vars), Ctx),
-		member([Key,ReferredVar],Vars)
-	)).
-
-%%
-get_var(Term, Ctx, [Key,Var]) :-
-	term_variables(Term,Vars),
-	member(Var,Vars),
-	var_key(Var, Ctx, Key).
-
-%%
-% Map a Prolog variable to the key that used to
-% refer to this variable in mongo queries.
-%
-var_key(Var, Ctx, Key) :-
-	var(Var),
-	% TODO: can this be done better then iterating over all variables?
-	%		- i.e. by testing if some variable is element of a list
-	%		- member/2 cannot be used as it would unify each array element
-	(	option(outer_vars(Vars), Ctx, [])
-	;	option(step_vars(Vars), Ctx, [])
-	),
-	member([Key,ReferredVar],Vars),
-	ReferredVar == Var,
-	!.
-var_key(Var, _Ctx, Key) :-
-	var(Var),
-	%term_to_atom(Var,Atom),
-	%atom_concat('v',Atom,Key).
-	gensym('v_', Key).
-
-%%
-% yield either the key of a variable in mongo,
-% or a typed term for some constant value provided
-% in the query.
-%
-var_key_or_val(In, Ctx, Out) :-
-	mng_strip_operator(In, '=', In0),
-	var_key_or_val0(In0, Ctx, Out).
-	
-var_key_or_val0(In, Ctx, string(Key)) :-
-	mng_strip_type(In, _, In0),
-	var_key(In0, Ctx, Out),
-	atom_concat('$',Out,Key),
-	!.
-
-var_key_or_val0(In, _Ctx, Out) :-
-	atomic(In),!,
-	once(get_constant(In,Out)).
-
-var_key_or_val0(In, Ctx, array(L)) :-
-	is_list(In),!,
-	findall(X,
-		(	member(Y,In),
-			var_key_or_val0(Y, Ctx, X)
-		),
-		L).
-
-var_key_or_val0(:(NS,Atom), _, _) :-
-	throw(unexpanded_namespace(NS,Atom)).
-
-var_key_or_val0(TypedValue, _Ctx, TypedValue) :-
-	compound(TypedValue),
-	TypedValue =.. [Type|_],
-	mng_client:type_mapping(Type,_),
-	!.
-
-var_key_or_val0(Term, Ctx, [
-		['type', string('compound')],
-		['value', [
-			['functor', string(Functor)],
-			['args', array(Vals)]
-		]]
-	]) :-
-	mng_strip_type(Term, term, Stripped),
-	compound(Stripped),
-	Stripped =.. [Functor|Args],
-	findall(X,
-		(	member(Y,Args),
-			var_key_or_val0(Y, Ctx, X)
-		),
-		Vals).
-
-var_key_or_val1(In, Ctx, Out) :-
-	var_key_or_val(In, Ctx, X),
-	(	(X=string(Str), atom(Str), atom_concat('$',_,Str))
-	->	(X=string(Str), atom_concat('$',Str,Y), Out=string(Y))
-	;	Out=X
-	).
-
-%% in case of atomic in query
-get_constant(Value, double(Value)) :- number(Value).
-get_constant(true,  bool(true)).
-get_constant(false, bool(false)).
-get_constant(Value, string(Value)) :- atom(Value).
-get_constant(Value, string(Value)) :- string(Value).
-
 
 		 /*******************************
 		 *    	  UNIT TESTING     		*

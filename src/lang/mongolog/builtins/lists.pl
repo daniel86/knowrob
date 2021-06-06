@@ -21,6 +21,7 @@ The following predicates are supported:
 */
 
 :- use_module('../mongolog').
+:- use_module('../variables').
 :- use_module('../aggregation/match').
 :- use_module('../aggregation/set').
 
@@ -111,8 +112,8 @@ mongolog:step_compile(
 		[Step]) :-
 	% FIXME: SWI Prolog allows ground(Set)
 	% FIXME: Set and List have same ordering in SWI Prolog, but mongo does not ensure this.
-	mongolog:var_key_or_val(List,Ctx,List0),
-	mongolog:var_key(Set,Ctx,SetKey),
+	arg_val(List,Ctx,List0),
+	var_key(Set,Ctx,SetKey),
 	Step=['$set', [SetKey, ['$setUnion', array([List0])]]].
 
 %% sort(+List, -Sorted)
@@ -121,8 +122,8 @@ mongolog:step_compile(
 %
 mongolog:step_compile(
 		sort(List, Sorted), Ctx, Pipeline) :-
-	mongolog:var_key_or_val(List,Ctx,List0),
-	mongolog:var_key(Sorted,Ctx,SortedKey),
+	arg_val(List,Ctx,List0),
+	var_key(Sorted,Ctx,SortedKey),
 	mng_one_db(_DB, Coll),
 	% compute steps of the aggregate pipeline
 	findall(Step,
@@ -160,9 +161,9 @@ mongolog:step_compile(
 	% TODO: below is a bit redundant with unification.pl
 	%		- it also does not handle var-var bindings!
 	%
-	mongolog:var_key_or_val(Index,Ctx,Index0),
-	mongolog:var_key_or_val(List,Ctx,List0),
-	mongolog:var_key_or_val(Elem,Ctx,Elem0),
+	arg_val(Index,Ctx,Index0),
+	arg_val(List,Ctx,List0),
+	arg_val(Elem,Ctx,Elem0),
 	% compute steps of the aggregate pipeline
 	findall(Step,
 		(	set_if_var(Elem,  ['$arrayElemAt', array([List0,Index0])], Ctx, Step)
@@ -187,8 +188,8 @@ mongolog:step_compile(
 % second argument with the result (i.e. Attribute maybe ground or var).
 %
 compile_list_attribute(List, Attribute, Operator, Ctx, Pipeline) :-
-	mongolog:var_key_or_val(List, Ctx, List0),
-	mongolog:var_key_or_val(Attribute, Ctx, Attribute0),
+	arg_val(List, Ctx, List0),
+	arg_val(Attribute, Ctx, Attribute0),
 	findall(Step,
 		% first compute the attribute
 		(	Step=['$set', ['t_val', [Operator, array([List0])]]]

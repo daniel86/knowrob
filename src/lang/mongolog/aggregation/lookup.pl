@@ -5,7 +5,7 @@
 	]).
 
 :- use_module('set').
-:- use_module('../compiler').
+:- use_module('../variables').
 
 %% FIXME: redundant with call foo
 lookup_call(Terminals, Suffix, Ctx, Pipeline, StepVars) :-
@@ -130,7 +130,7 @@ grounded_vars(Ctx,
 	nonvar(VC),
 	\+ is_dict(VC),
 	!,
-	mongolog:var_key_or_val(VC, Ctx, Val),
+	arg_val(VC, Ctx, Val),
 	grounded_vars(Ctx,VOs,VCs,Xs,Ys).
 grounded_vars(Ctx,[_|VOs],[_|VCs],Xs,Ys) :-
 	grounded_vars(Ctx,VOs,VCs,Xs,Ys).
@@ -141,7 +141,7 @@ grounded_vars(Ctx,[_|VOs],[_|VCs],Xs,Ys) :-
 %	\+ is_dict(VC),
 %	!,
 %	var_key(VO, Ctx, Key),
-%	var_key_or_val(VC, Ctx, Val),
+%	arg_val(VC, Ctx, Val),
 %	grounded_vars(VV,Ctx,Xs,Ys).
 %grounded_vars([_|VV],Ctx,Xs,Ys) :-
 %	grounded_vars(VV,Ctx,Xs,Ys).
