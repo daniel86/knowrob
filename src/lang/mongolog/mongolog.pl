@@ -89,8 +89,7 @@ mongolog_call(Goal, Context) :-
 	once((ground(Coll);Coll=one)),
 	% TODO: below really needed?
 	option(global_vars(GlobalVars), Context, []),
-	append(Vars, GlobalVars, Vars1),
-	list_to_set(Vars1,Vars2),
+	merge_substitutions(Vars, GlobalVars, Vars2),
 	% run the pipeline
 	% TODO: split goal at assert's such that they are available in the rest of the query
 	aggregate(Coll, Doc, Vars2, Result),
