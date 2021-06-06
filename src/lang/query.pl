@@ -11,6 +11,7 @@
       kb_add_rule(+,t,t),
       kb_drop_rule(t),
       kb_expand(t,-),
+      inline/1,
       is_callable_with(?,t),  % ?Backend, :Goal
       call_with(?,t,+) ,       % +Backend, :Goal, +Options
       ask(t),      % +Statement, NOTE: deprecated
@@ -33,6 +34,7 @@ one step into the input queue of the next step.
 :- op(1100, xfx, user:(?>)).
 :- op(1100, xfx, user:(+>)).
 :- op(1100, xfx, user:(?+>)).
+:- op(1150, fx,  user:(inline)).
 
 :- use_module(library(settings)).
 :- use_module(library('semweb/rdf_db'),
@@ -46,6 +48,7 @@ one step into the input queue of the next step.
 :- dynamic kb_rule/4.
 :- dynamic kb_predicate/1.
 :- dynamic expanding_term/4.
+:- dynamic inline_predicate/2.
 % optionally implemented by query commands.
 :- multifile step_expand/2.
 % interface implemented by query backends
@@ -798,6 +801,12 @@ flush_predicate(SrcModule) :-
 		flush_predicate(SrcModule, Functor, Arity)
 	).
 
+%
+inline((/(Functor,Arity))) :-
+	atom(Functor),
+	number(Arity),
+	assertz(inline_predicate(Functor,Arity)).
+
 % handle last rule in a file
 user:term_expansion(end_of_file, end_of_file) :-
 	prolog_load_context(module, SrcModule),
@@ -819,12 +828,12 @@ expand_ask_rule(Head, Body, Export) :-
 	Term =.. [Functor|Args],
 	length(Args,Arity),
 	% remember that Functor is being expanded from SrcModule into DstModule
-	(	expanding_term(Functor, Arity, SrcModule, _) -> true
-	;	(	% TODO: is it possible to detect that a last clause of some predicate has been loaded?
-			%flush_predicate(SrcModule),
-			assertz(expanding_term(Functor, Arity, SrcModule, DstModule))
-		)
-	),
+	once((
+		expanding_term(Functor, Arity, SrcModule, _)
+		% do not assert expanding_term if this the cause has been marked as inline
+	;	inline_predicate(Functor, Arity)
+	;	assertz(expanding_term(Functor, Arity, SrcModule, DstModule))
+	)),
 	% add the rule to the DB backend
 	kb_add_rule(DstModule, Term, BodyGlobal),
 	%
