@@ -61,7 +61,7 @@ lang_query:step_expand('->'(If,Then), Epanded) :-
 :- begin_tests('mongolog_ifthenelse').
 
 test('((+If -> +Then) ; +Else)::Then') :-
-	mongolog:test_call(
+	mongolog_tests:test_call(
 		(	Num > 5 -> X is Num * 2
 		;	X is Num + 2
 		),
@@ -69,7 +69,7 @@ test('((+If -> +Then) ; +Else)::Then') :-
 	assert_equals(X,11.0).
 
 test('((+If -> +Then) ; +Else)::Else'):-
-	mongolog:test_call(
+	mongolog_tests:test_call(
 		(	Num > 5 -> X is Num * 2
 		;	X is Num + 2
 		),

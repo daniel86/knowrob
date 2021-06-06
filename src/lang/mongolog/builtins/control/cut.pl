@@ -40,7 +40,7 @@ The following predicates are supported:
 :- begin_tests('mongolog_cut').
 
 test('((+Goal ; +Goal), !)'):-
-	mongolog:test_call(
+	mongolog_tests:test_call(
 		(	(	(X is (Num + 5))
 			;	(X is (Num * 2))
 			), !

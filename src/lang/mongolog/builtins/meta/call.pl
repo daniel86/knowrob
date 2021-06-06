@@ -71,12 +71,12 @@ mongolog:step_compile1(
 :- begin_tests('mongolog_call').
 
 test('call(+Goal)'):-
-	mongolog:test_call(
+	mongolog_tests:test_call(
 		call(Y is X), X, -3.25),
 	assert_equals(Y, -3.25).
 
 test('call(+Functor, -Arg1, +Arg2)'):-
-	mongolog:test_call(
+	mongolog_tests:test_call(
 		call(is, Arg1, Arg2), Arg2, -3.25),
 	assert_equals(Arg1, -3.25).
 

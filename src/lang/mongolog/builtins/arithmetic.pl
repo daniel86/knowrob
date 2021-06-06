@@ -171,40 +171,40 @@ expression_function(*,        '$multiply').
 :- begin_tests('mongolog_arithmetic').
 
 test('is(-Y,+X)'):-
-	mongolog:test_call(
+	mongolog_tests:test_call(
 		(Y is X), X, -3.25),
 	assert_equals(Y, -3.25).
 
 test('is(-Y,+Exp)'):-
-	mongolog:test_call(
+	mongolog_tests:test_call(
 		(Y is (X + 0.5)*2), X, 2.5),
 	assert_equals(Y, 6.0).
 
 test('is(+Y,+X)') :-
-	assert_true(mongolog:test_call(
+	assert_true(mongolog_tests:test_call(
 		(3.0 is X), X, 3)),
-	assert_false(mongolog:test_call(
+	assert_false(mongolog_tests:test_call(
 		(4.0 is X), X, 3)).
 
 test('<(+X,+Y)'):-
-	assert_true(mongolog:test_call(
+	assert_true(mongolog_tests:test_call(
 		(X < 7.0), X, 6)),
-	assert_false(mongolog:test_call(
+	assert_false(mongolog_tests:test_call(
 		(X < 7.0), X, 8)),
-	assert_false(mongolog:test_call(
+	assert_false(mongolog_tests:test_call(
 		(X < 7.0), X, 7)).
 
 test('<(+Exp1,+Exp2)'):-
-	assert_true(mongolog:test_call(
+	assert_true(mongolog_tests:test_call(
 		((X*2) < (X + 5)), X, 2)),
-	assert_false(mongolog:test_call(
+	assert_false(mongolog_tests:test_call(
 		((X*2) < (X + 5)), X, 5)),
-	assert_false(mongolog:test_call(
+	assert_false(mongolog_tests:test_call(
 		((X*2) < (X + 5)), X, 6)).
 
 test('between(+Low,+High,-Value)'):-
 	findall(Value,
-		mongolog:test_call(
+		mongolog_tests:test_call(
 			between(Low,10,Value), Low, 8),
 		Values),
 	assert_equals(Values, [8,9,10]).

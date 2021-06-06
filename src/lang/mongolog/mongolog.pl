@@ -81,7 +81,7 @@ mongolog_call(Goal) :-
 mongolog_call(Goal, Context) :-
 	% get the pipeline document
 	mongolog_compile(Goal, CompilerOutput, Vars, Context),
-	memberchk(document(Doc), CompilerOutput),
+	compiled_document(CompilerOutput, Doc),
 	% get name of collection on which the aggregate operation
 	% should be performed. This is basically the first collection
 	% which is explicitely used in a step of the goal.
@@ -126,42 +126,36 @@ query_compile1(Terminals, Output0, Vars, Context) :-
 	% get global variables supplied by the call context and add it
 	% to the compile context
 	option(global_vars(GlobalVars), Context, []),
-	%
-	DocVars=[['g_assertions',_]|GlobalVars],
-	compile_terms(Terminals, DocVars->Vars, Output, Context),
-	memberchk(document(Doc0), Output),
-	%memberchk(variables(StepVars), Output),
-	Doc=[['$set',['g_assertions',array([])]] | Doc0],
-	merge_options([document(Doc)],Output,Output0).
+	% compile an aggregation pipeline.
+	% also add a variable with field "g_assertions" used for storing
+	% asserted,retracted and modified documents.
+	% TODO: this variable should only be added if assert etc. actually appear in the query!
+	compile_terms(Terminals,
+		[['g_assertions',_]|GlobalVars]->Vars,
+		Output, Context),
+	compiled_document(Output, Doc0),
+	% add g_assertions field to output documents.
+	% TODO: do not add this field to every output document!
+	merge_options(
+		[ document([
+			['$set',['g_assertions',array([])]]
+		|	Doc0
+		]) ], Output, Output0).
 
 %%
 compile_terms(Goal, Vars, Output, Context) :-
 	\+ is_list(Goal), !,
 	compile_terms([Goal], Vars, Output, Context).
 
-% FIXME: redundant with compile_expanded_terms
 compile_terms([], V0->V0, [document([]),variables([])], _) :- !.
+
 compile_terms([X|Xs], V0->Vn, Output, Context) :-
-	%
+	% compile first
 	compile_term(X,  V0->V1, Output0, Context),
-	memberchk(document(Pipeline_x), Output0),
-	memberchk(variables(StepVars0), Output0),
-	option(input_collection(InCollection0), Output0, _),
-	%
+	% compile rest
 	compile_terms(Xs, V1->Vn, Output1, Context),
-	memberchk(document(Pipeline_xs), Output1),
-	memberchk(variables(StepVars1), Output1),
-	%
-	append(Pipeline_x, Pipeline_xs, Pipeline),
-	append(StepVars0, StepVars1, StepVars),
-	(	ground(InCollection0) -> InCollection = InCollection0
-	;	ignore(option(input_collection(InCollection), Output1))
-	),
-	Output=[
-		document(Pipeline),
-		variables(StepVars),
-		input_collection(InCollection)
-	].
+	% merge both compiler outputs
+	merge_outputs(Output0, Output1, Output).
 
 %% Compile a single command (Term) into an aggregate pipeline (Doc).
 compile_term(Term, V0->V1, Output, Context) :-
@@ -175,31 +169,23 @@ compile_expanded_terms(Goal, Vars, Output, Context) :-
 	compile_expanded_terms([Goal], Vars, Output, Context).
 
 compile_expanded_terms([], V0->V0, [document([]),variables([])], _) :- !.
+
 compile_expanded_terms([Expanded|Rest], V0->Vn, Output, Context) :-
+	% compile first
 	compile_expanded_term(Expanded, V0->V1, Output0, Context),
-	memberchk(document(Doc0), Output0),
-	memberchk(variables(StepVars0), Output0),
-	ignore(option(input_collection(InCollection0), Output0)),
-	% toggle on input_assigned flag in compile context
-	(	(ground(InCollection0), \+ option(input_assigned,Context))
+	% toggle on input_assigned flag in compile context to indicate that
+	% a previoud step has assigned the input collection of the operation
+	option(input_collection(InCollection), Output0, _),
+	(	(ground(InCollection), \+ option(input_assigned,Context))
 	->	merge_options([input_assigned],Context,Context1)
 	;	Context1=Context
 	),
+	% compile rest
 	compile_expanded_terms(Rest, V1->Vn, Output1, Context1),
-	memberchk(document(Doc1), Output1),
-	memberchk(variables(StepVars1), Output1),
-	%
-	append(Doc0, Doc1, Doc),
-	append(StepVars0, StepVars1, StepVars),
-	(	ground(InCollection0) -> InCollection = InCollection0
-	;	ignore(option(input_collection(InCollection), Output1))
-	),
-	Output=[
-		document(Doc),
-		variables(StepVars),
-		input_collection(InCollection)
-	].
-	
+	% finally merge both compilation outputs
+	merge_outputs(Output0, Output1, Output).
+
+%
 compile_expanded_term(List, Vars, Output, Context) :-
 	is_list(List),!,
 	compile_expanded_terms(List, Vars, Output, Context).
@@ -209,8 +195,8 @@ compile_expanded_term(Expanded, V0->V1, Output0, Context) :-
 	merge_options([outer_vars(V0)], Context, InnerContext),
 	% and finall compile expanded terms
 	once(step_compile1(Expanded, InnerContext, Output)),
-	memberchk(document(Doc), Output),
-	memberchk(variables(StepVars), Output),
+	compiled_document(Output, Doc),
+	compiled_substitution(Output, StepVars),
 	list_to_set(StepVars, StepVars_unique),
 	% merge StepVars with variables in previous steps (V0)
 	merge_substitutions(StepVars_unique, V0, V1),
@@ -242,6 +228,32 @@ compile_expanded_term(Expanded, V0->V1, Output0, Context) :-
 		],
 		Output, Output0).
 
+% combine outputs of two compilations
+merge_outputs(Output0,Output1,
+	[ document(Doc),
+	  variables(StepVars),
+	  input_collection(InCollection)
+	]) :-
+	% concat pipelines
+	compiled_document(Output0, Doc0),
+	compiled_document(Output1, Doc1),
+	append(Doc0, Doc1, Doc),
+	% merge substitutions
+	compiled_substitution(Output0, StepVars0),
+	compiled_substitution(Output1, StepVars1),
+	merge_substitutions(StepVars0, StepVars1, StepVars),
+	% use first input collection
+	option(input_collection(InCollection0), Output0, _),
+	(	ground(InCollection0) -> InCollection = InCollection0
+	;	option(input_collection(InCollection), Output1, _)
+	).
+
+%
+compiled_document(CompilerOutput, Doc) :-
+	memberchk(document(Doc), CompilerOutput).
+compiled_substitution(CompilerOutput, Substitution) :-
+	memberchk(variables(Substitution), CompilerOutput).
+
 %%
 step_compile1(Step, Ctx, [document(Doc), variables(StepVars)]) :-
 	% first compute stepvars and extend context.
@@ -257,19 +269,5 @@ step_compile1(Step, Ctx, [document(Doc), variables(StepVars)]) :-
 step_compile1(ask(Goal), Ctx, Output) :-
 	mongolog:step_compile1(call(Goal), Ctx, Output).
 
-step_compile(stepvars(_), _, []) :- true.
-
 step_command(ask).
-step_command(stepvars).
-
-		 /*******************************
-		 *    	  UNIT TESTING     		*
-		 *******************************/
-
-:- rdf_meta(test_call(t,?,t)).
-
-%%
-test_call(Goal, Var, Value) :-
-	WithSet=(','(assign(Var,Value), Goal)),
-	mongolog_call(WithSet).
 

@@ -66,7 +66,7 @@ mongolog:step_compile(
 
 test('iri_xml_namespace(+IRI,-NS,-Name)'):-
 	rdf_global_term(rdf:'Resource', Resource),
-	mongolog:test_call(
+	mongolog_tests:test_call(
 		iri_xml_namespace(X,NS,Name),
 		X, Resource),
 	assert_true(atom(NS)),

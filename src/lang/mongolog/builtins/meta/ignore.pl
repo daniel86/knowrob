@@ -31,13 +31,13 @@ lang_query:step_expand(ignore(Goal), Expanded) :-
 :- begin_tests('mongolog_ignore').
 
 test('ignore(+Failing)'):-
-	mongolog:test_call(
+	mongolog_tests:test_call(
 		ignore(((Num < 3), (X is (Num * 2)))),
 		Num, 4.5),
 	assert_unifies(X,_).
 
 test('ignore(+Failing), +Goal'):-
-	mongolog:test_call(
+	mongolog_tests:test_call(
 		(ignore(Num < 3), (X is (Num * 2))),
 		Num, 4.5),
 	assert_equals(X,9.0).
@@ -46,7 +46,7 @@ test('ignore(+FailingWithVar), +Goal'):-
 	% test with variable Z being assigned only in failing ignored
 	% goal. Then no grounding will be part of result set and Z still a variable
 	% after the call.
-	mongolog:test_call(
+	mongolog_tests:test_call(
 		(	ignore((Num < 3, Z is Num + 2)),
 			X is (Num * 2)
 		),

@@ -4,6 +4,13 @@
 	  end_mongolog_tests/1
 	]).
 
+:- rdf_meta(test_call(t,?,t)).
+
+%%
+test_call(Goal, Var, Value) :-
+	WithSet=(','(assign(Var,Value), Goal)),
+	mongolog_call(WithSet).
+
 %% begin_mongolog_tests(+Name, +KB, +Options) is det.
 %
 % Begin unit testing code section with RDF data.

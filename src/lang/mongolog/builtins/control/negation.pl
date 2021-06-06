@@ -56,9 +56,9 @@ lang_query:step_expand(\+(Goal), Expanded) :-
 :- begin_tests('mongolog_negation').
 
 test('\\+(+Goal)'):-
-	assert_true(mongolog:test_call(
+	assert_true(mongolog_tests:test_call(
 		\+(Number > 5), Number, 4.5)),
-	assert_false(mongolog:test_call(
+	assert_false(mongolog_tests:test_call(
 		\+(Number > 4), Number, 4.5)).
 
 :- end_tests('mongolog_negation').

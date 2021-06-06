@@ -40,6 +40,7 @@ one step into the input queue of the next step.
 :- use_module('scope',
     [ current_scope/1, universal_scope/1 ]).
 :- use_module('mongolog/mongolog').
+:- use_module('mongolog/builtins/meta/touch').
 
 % Stores list of terminal terms for each clause. 
 :- dynamic kb_rule/4.
@@ -739,9 +740,9 @@ expand_rule(ParentArgs,
 		[[ChildArgs,Terminals]|Xs],
 		[Expanded|Ys]) :-
 	Expanded=[
-		% HACK: force that ParentArgs are added to variable map as
-		%       following pragma call may make the variables disappear.
-		stepvars(ParentArgs),
+		% "touch" variables in ParentArgs
+		touch(ParentArgs),
+		% unify ChildArgs and ParentArgs
 		pragma(=(ChildArgs,ParentArgs)),
 		Terminals
 	],

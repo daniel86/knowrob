@@ -81,7 +81,7 @@ mongolog:step_compile1(
 :- begin_tests('mongolog_limit').
 
 test('limit(1, +Goal)'):-
-	mongolog:test_call(
+	mongolog_tests:test_call(
 		limit(1, (
 			(X is (Num + 5))
 		;	(X is (Num * 2))
@@ -91,7 +91,7 @@ test('limit(1, +Goal)'):-
 
 test('limit(2, +Goal)'):-
 	findall(X,
-		mongolog:test_call(
+		mongolog_tests:test_call(
 			limit(2, (
 				(X is (Num + 5))
 			;	(X is (Num * 2))
@@ -106,7 +106,7 @@ test('limit(2, +Goal)'):-
 	assert_true(memberchk(9.0, Results)).
 
 test('once(+Goal)'):-
-	mongolog:test_call(
+	mongolog_tests:test_call(
 		once((
 			(X is (Num + 5))
 		;	(X is (Num * 2))
