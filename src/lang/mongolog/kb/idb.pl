@@ -55,6 +55,7 @@ idb_assert(_Module, Functor, Args, Clauses) :-
 		Vars,
 		[ scope(QScope)
 		, compile_mode(view)
+		, clause_head(Goal)
 		]),
 	memberchk(document(Pipeline), CompilerOutput),
 %	memberchk(variables(Vars), CompilerOutput),

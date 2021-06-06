@@ -80,7 +80,8 @@ mongolog_call(Goal) :-
 %
 mongolog_call(Goal, Context) :-
 	% get the pipeline document
-	mongolog_compile(Goal, CompilerOutput, Vars, Context),
+	mongolog_compile(Goal, CompilerOutput, Vars,
+		[clause_head([]),Context]),
 	compiled_document(CompilerOutput, Doc),
 	% get name of collection on which the aggregate operation
 	% should be performed. This is basically the first collection
