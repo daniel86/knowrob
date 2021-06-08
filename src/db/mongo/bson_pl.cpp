@@ -28,6 +28,8 @@ static PlAtom ATOM_regex("regex");
 static PlAtom ATOM_string("string");
 static PlAtom ATOM_time("time");
 static PlAtom ATOM_list("list");
+static PlAtom ATOM_null("null");
+static PlAtom ATOM_constant("constant");
 static PlAtom ATOM_array("array");
 static PlAtom ATOM_true("true");
 static PlAtom ATOM_false("false");
@@ -67,6 +69,11 @@ static bool bson_visit_bool(const bson_iter_t *iter, const char *key, bool v_boo
 static bool bson_visit_utf8(const bson_iter_t *iter, const char *key, size_t v_utf8_len, const char *v_utf8, void *data)
 {
 	return APPEND_BSON_PL_PAIR(data,key,v_utf8,"string");
+}
+
+static bool bson_visit_null(const bson_iter_t *iter, const char *key, void *data)
+{
+	return APPEND_BSON_PL_PAIR(data,key,ATOM_null,"constant");
 }
 
 static bool bson_visit_date_time(const bson_iter_t *iter, const char *key, int64_t msec_since_epoch, void *data)
@@ -178,6 +185,9 @@ static bool bson_iter_append_array(bson_iter_t *iter, PlTail *pl_array)
 		double sec_since_epoch = ((double)bson_iter_date_time(iter))/1000.0;
 		pl_array->append(PlCompound("time", PlTerm(sec_since_epoch)));
 	}
+	else if(BSON_ITER_HOLDS_NULL(iter)) {
+		pl_array->append(PlCompound("constant", PlTerm(ATOM_null)));
+	}
 	else {
 		bson_type_t iter_t = bson_iter_type(iter);
 		std::cout << "WARN: unsupported array type '" << iter_t << "'" << std::endl;
@@ -222,6 +232,7 @@ static bson_visitor_t get_bson_visitor()
 	visitor.visit_date_time  = bson_visit_date_time;
 	visitor.visit_array      = bson_visit_array;
 	visitor.visit_document   = bson_visit_document;
+	visitor.visit_null       = bson_visit_null;
 	return visitor;
 }
 
@@ -279,6 +290,9 @@ static bool bsonpl_append_typed(bson_t *doc, const char *key, const PlTerm &term
 		else {
 			BSON_APPEND_BOOL(doc,key,(bool)((int)pl_value));
 		}
+	}
+	else if(type_atom == ATOM_constant && pl_value == ATOM_null) {
+		BSON_APPEND_NULL(doc, key);
 	}
 	else if(type_atom == ATOM_regex) {
 		BSON_APPEND_REGEX(doc,key,(char*)pl_value,"msi");
