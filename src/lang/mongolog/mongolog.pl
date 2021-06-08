@@ -259,6 +259,14 @@ compiled_document(CompilerOutput, Doc) :-
 compiled_substitution(CompilerOutput, Substitution) :-
 	memberchk(variables(Substitution), CompilerOutput).
 
+%
+unassign_input(Ctx_in, Ctx_out) :-
+	once((
+		select_option(input_assigned, Ctx_in, Ctx_x)
+	;	Ctx_x=Ctx_in
+	)),
+	select_option(input_collection(_), Ctx_x, Ctx_out, _).
+
 %%
 step_compile1(Step, Ctx, [document(Doc), variables(StepVars)]) :-
 	% first compute stepvars and extend context.

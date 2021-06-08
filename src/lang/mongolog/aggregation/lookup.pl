@@ -31,34 +31,40 @@ lookup_call(Terminals, Suffix, Ctx, Pipeline, StepVars) :-
 % find all records matching a query and store them
 % in an array.
 %
-lookup_findall(ArrayKey, Terminals,
+lookup_findall(
+		ArrayKey,
+		Goal,
 		Prefix, Suffix,
-		Context, StepVars,
+		Context,
+		StepVars,
 		['$lookup', [
-			['from', string(Coll)],
-			['as', string(ArrayKey)],
-			['let', LetDoc],
+			['from',     string(Coll)],
+			['as',       string(ArrayKey)],
+			['let',      LetDoc],
 			['pipeline', array(Pipeline1)]
 		]]) :-
 	% get variables referred to in query
 	option(outer_vars(OuterVars), Context, []),
 	% remove input selected flag
-	once((select_option(input_assigned, Context, Context0) ; Context0=Context)),
-	once((select_option(input_collection(_), Context0, Context1) ; Context1=Context0)),
+	mongolog:unassign_input(Context, Context_inner),
 	% generate inner pipeline
-	mongolog:compile_terms(Terminals, OuterVars->_InnerVars, Output0, Context1),
-	% find join collection
-	option(input_collection(Coll), Output0, _),
+	mongolog:compile_terms(
+		Goal,
+		OuterVars->_,
+		CompilerOutput,
+		Context_inner),
+	% read from compiler output
+	option(input_collection(Coll), CompilerOutput, _),
 	once((ground(Coll);Coll=one)),
-	%
-	mongolog:compiled_document(Output0, Pipeline),
-	mongolog:compiled_substitution(Output0, StepVars),
+	mongolog:compiled_document(CompilerOutput, Pipeline),
+	mongolog:compiled_substitution(CompilerOutput, StepVars),
 	% pass variables from outer goal to inner if they are referred to in the inner goal.
 	lookup_let_doc(OuterVars, LetDoc),
 	% set all let variables so that they can be accessed without aggregate operators in Pipeline
 	lookup_set_vars(OuterVars, SetVars),
 	% compose inner pipeline
-	(	SetVars=[] -> Prefix0=Prefix
+	(	SetVars=[]
+	->	Prefix0=Prefix
 	;	Prefix0=[['$set', SetVars] | Prefix]
 	),
 	append(Prefix0,Pipeline,Pipeline0),
@@ -75,19 +81,19 @@ lookup_let_doc(InnerVars, LetDoc) :-
 
 
 %%
+% let doc above ensures all vars can be accessed.
+% this does also work if the let var was undefined.
+% then the set below is basically a no-op.
+% e.g. this runs through _without_ assigning "key" field:
+%
+%       db.one.aggregate([{'$lookup': {
+%			from: "one",
+%			as: "next",
+%			let: { "test": "$test"},
+%			pipeline: [{'$set': {"key": "$$test"}}]
+%		}}])
+%
 lookup_set_vars(InnerVars, SetVars) :-
-	% NOTE: let doc above ensures all vars can be accessed.
-	%       this does also work if the let var was undefined.
-	%       then the set below is basically a no-op.
-	%       e.g. this runs through _without_ assigning "key" field:
-	%
-	%       db.one.aggregate([{'$lookup': {
-	%			from: "one",
-	%			as: "next",
-	%			let: { "test": "$test"},
-	%			pipeline: [{'$set': {"key": "$$test"}}]
-	%		}}])
-	%
 	findall([Y,string(Y0)],
 		(	member([Y,_], InnerVars),
 			atom_concat('$$',Y,Y0)
