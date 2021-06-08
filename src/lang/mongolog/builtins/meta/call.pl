@@ -44,15 +44,8 @@ lang_query:step_expand(call(Goal,Arg1,Arg2,Arg3,Arg4),
 %% call(:Goal)
 % Call Goal. This predicate is normally used for goals that are not known at compile time.
 %
-mongolog:step_compile1(
-		call(Goal), Ctx,
-		[ document(Pipeline),
-		  variables(StepVars),
-		  input_collection(one)
-		]) :-
-	% TODO: support input collections here
-	merge_options([input_assigned],Ctx,Ctx0),
-	lookup_call(Goal, [], Ctx0, Pipeline, StepVars).
+mongolog:step_compile1(call(Goal), Ctx, Output) :-
+	mongolog:step_compile1(Goal, Ctx, Output).
 
 %% call_with_args(:Goal,:Args)
 % Call Goal. This predicate is normally used for goals that are not known at compile time.
