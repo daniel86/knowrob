@@ -110,7 +110,7 @@ idb_assert(_Module, Functor, Args, Clauses) :-
 
 idb_assert(Module, Functor, Args, _Zs) :-
 	length(Args, Arity),
-	writeln(not_viewable(('/'((:(Module, Functor)), Arity)))).
+	writeln(not_viewable((/((:(Module, Functor)), Arity)))).
 
 %%
 mongolog:step_compile1(Term, Ctx, Output) :-

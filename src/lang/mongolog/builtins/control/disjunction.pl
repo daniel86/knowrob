@@ -120,9 +120,30 @@ compile_disjunction(
 		copy_vars(VCs)
 	], Ctx2, InnerCtx),
 	var_key(FindallVar, Ctx, Key),
-	lookup_findall(Key, GoalCopy, CutMatches, [],
-		InnerCtx, StepVars_copy, Stage),
+	lookup_findall(Key, GoalCopy,
+		CutMatches,
+		PipelineSuffix,
+		InnerCtx,
+		StepVars_copy0,
+		Stage),
 	!,
+	
+	merge_substitutions(StepVars_copy0, OuterVarsCopy, OuterVars_x0),
+	% get list of variables whose copies have received a grounding
+	% in compile_terms, as these need some special handling
+	% to avoid that the original remains ungrounded.
+	% GroundVars0: key-original variable mapping
+	% GroundVars1: key-grounding mapping
+	grounded_vars(
+		[outer_vars(OuterVars_x0)|Ctx0],
+		[VOs,VCs], GroundVars0, GroundVars1),
+	(	GroundVars1=[]
+	->	PipelineSuffix=[] %Suffix0=Suffix
+	;	PipelineSuffix=[['$set', GroundVars1]]
+	),
+	% add variables that have received a grounding in compile_terms to StepVars
+	merge_substitutions(GroundVars0, StepVars_copy0, StepVars_copy),
+	
 	% check if this goal has a cut, if so extend CutVars list
 	(	has_cut(Goal)
 	->	CutVars0=[[Key,FindallVar]|CutVars]
@@ -228,6 +249,26 @@ has_cut(Goal) :-
 has_cut(Goal) :-
 	comma_list(Goal,List),
 	has_cut(List).
+
+
+% yield list of variables whose copies have received a grounding
+% VO: original variable
+% VC: copied variable
+grounded_vars(Ctx,[VOs,VCs],Xs,Ys) :-
+	grounded_vars(Ctx,VOs,VCs,Xs,Ys).
+grounded_vars(_,[],[],[],[]) :- !.
+grounded_vars(Ctx,
+		[[Key,VO]|VOs],
+		[[Key,VC]|VCs],
+		[[Key,VO]|Xs],
+		[[Key,Val]|Ys]) :-
+	nonvar(VC),
+	\+ is_dict(VC),
+	!,
+	arg_val(VC, Ctx, Val),
+	grounded_vars(Ctx,VOs,VCs,Xs,Ys).
+grounded_vars(Ctx,[_|VOs],[_|VCs],Xs,Ys) :-
+	grounded_vars(Ctx,VOs,VCs,Xs,Ys).
 
 
 		 /*******************************

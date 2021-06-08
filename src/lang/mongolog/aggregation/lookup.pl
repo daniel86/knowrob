@@ -7,7 +7,9 @@
 :- use_module('set').
 :- use_module('../variables').
 
-%% FIXME: redundant with call foo
+%%
+%
+%
 lookup_call(Terminals, Suffix, Ctx, Pipeline, StepVars) :-
 	lookup_findall('next', Terminals, [], Suffix, Ctx, StepVars, Lookup),
 	findall(Step,
@@ -25,7 +27,6 @@ lookup_call(Terminals, Suffix, Ctx, Pipeline, StepVars) :-
 	Lookup \== [].
 
 
-
 %%
 % find all records matching a query and store them
 % in an array.
@@ -40,11 +41,7 @@ lookup_findall(ArrayKey, Terminals,
 			['pipeline', array(Pipeline1)]
 		]]) :-
 	% get variables referred to in query
-	select_option(outer_vars(OuterVars), Context, Context_x0, []),
-	% within a disjunction VV provides mapping between
-	% original and copied variables (see control.pl)
-	option(orig_vars(VOs), Context, []),
-	option(copy_vars(VCs), Context, []),
+	option(outer_vars(OuterVars), Context, []),
 	% remove input selected flag
 	once((select_option(input_assigned, Context, Context0) ; Context0=Context)),
 	once((select_option(input_collection(_), Context0, Context1) ; Context1=Context0)),
@@ -54,19 +51,8 @@ lookup_findall(ArrayKey, Terminals,
 	option(input_collection(Coll), Output0, _),
 	once((ground(Coll);Coll=one)),
 	%
-	memberchk(document(Pipeline), Output0),
-	memberchk(variables(StepVars0), Output0),
-	% get list of variables whose copies have received a grounding
-	% in compile_terms, as these need some special handling
-	% to avoid that the original remains ungrounded.
-	% GroundVars0: key-original variable mapping
-	% GroundVars1: key-grounding mapping
-	merge_substitutions(StepVars0, OuterVars, OuterVars_x0),
-	grounded_vars(
-		[outer_vars(OuterVars_x0)|Context_x0],
-		[VOs,VCs], GroundVars0, GroundVars1),
-	% add variables that have received a grounding in compile_terms to StepVars
-	merge_substitutions(GroundVars0, StepVars0, StepVars),
+	mongolog:compiled_document(Output0, Pipeline),
+	mongolog:compiled_substitution(Output0, StepVars),
 	% pass variables from outer goal to inner if they are referred to in the inner goal.
 	lookup_let_doc(OuterVars, LetDoc),
 	% set all let variables so that they can be accessed without aggregate operators in Pipeline
@@ -76,14 +62,7 @@ lookup_findall(ArrayKey, Terminals,
 	;	Prefix0=[['$set', SetVars] | Prefix]
 	),
 	append(Prefix0,Pipeline,Pipeline0),
-	% $set compile-time grounded vars for later unification.
-	% this is needed because different branches cannot ground the same
-	% variable to different values compile-time.
-	% hence the values need to be assigned within the query.
-	(	GroundVars1=[] -> Suffix0=Suffix
-	;	Suffix0=[['$set', GroundVars1] | Suffix]
-	),
-	append(Pipeline0,Suffix0,Pipeline1).
+	append(Pipeline0,Suffix,Pipeline1).
 
 %%
 lookup_let_doc(InnerVars, LetDoc) :-
@@ -116,32 +95,3 @@ lookup_set_vars(InnerVars, SetVars) :-
 		SetVars0),
 	list_to_set(SetVars0,SetVars).
 
-% yield list of variables whose copies have received a grounding
-% VO: original variable
-% VC: copied variable
-grounded_vars(Ctx,[VOs,VCs],Xs,Ys) :-
-	grounded_vars(Ctx,VOs,VCs,Xs,Ys).
-grounded_vars(_,[],[],[],[]) :- !.
-grounded_vars(Ctx,
-		[[Key,VO]|VOs],
-		[[Key,VC]|VCs],
-		[[Key,VO]|Xs],
-		[[Key,Val]|Ys]) :-
-	nonvar(VC),
-	\+ is_dict(VC),
-	!,
-	arg_val(VC, Ctx, Val),
-	grounded_vars(Ctx,VOs,VCs,Xs,Ys).
-grounded_vars(Ctx,[_|VOs],[_|VCs],Xs,Ys) :-
-	grounded_vars(Ctx,VOs,VCs,Xs,Ys).
-
-%grounded_vars([],_,[],[]) :- !.
-%grounded_vars([VO-VC|VV],Ctx,[[Key,VO]|Xs],[[Key,Val]|Ys]) :-
-%	nonvar(VC),
-%	\+ is_dict(VC),
-%	!,
-%	var_key(VO, Ctx, Key),
-%	arg_val(VC, Ctx, Val),
-%	grounded_vars(VV,Ctx,Xs,Ys).
-%grounded_vars([_|VV],Ctx,Xs,Ys) :-
-%	grounded_vars(VV,Ctx,Xs,Ys).
