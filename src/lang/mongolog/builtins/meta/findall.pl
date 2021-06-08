@@ -57,66 +57,104 @@ mongolog:step_compile1(findall(_, Goal, _), Ctx, []) :-
 	!,
 	fail.
 
+mongolog:step_compile1(findall(Template, Goal, List), Ctx, Output) :-
+	% try to avoid doing a lookup.
+	% this is only possible if findall is the first step that draws
+	% input documents, and that generates choicepoints.
+	% FIXME: need to check for nondet predicates before findall
+	\+ option(input_assigned,Ctx), !,
+	% add list to step variables
+	goal_vars(List, Ctx, StepVars),
+	% add template variables to goal context
+	findall_goal_ctx(Template, Ctx, Ctx_goal),
+	% compile the goal
+	mongolog:step_compile1(Goal, Ctx_goal, Output_goal),
+	mongolog:compiled_substitution(Output_goal, InnerStepVars),
+	% make sure to use a common key with the inner pipeline when instantiating
+	% the template.
+	merge_options([step_vars(InnerStepVars)], Ctx_goal, Context_inner),
+	merge_options([step_vars(StepVars)],      Ctx_goal, Context_outer),
+	% compile a pipeline for grouping results of Goal into an array
+	findall(Step,
+		% group incoming documents into 't_next' array
+		(	Step=['$group', [
+				% "null" indicates that all documents are added to the same group.
+				% thus $group will output exactly one document.
+				['_id', constant(null)],
+				% the output document of $group has an array field "t_next"
+				% where all documents are added
+				['t_next', ['$push', string('$$ROOT') ]]
+			] ]
+		% re-add lost vars
+		;	set_grouped_vars(Ctx, StepVars, Step)
+		% create output array using $map
+		;	findall_map(Template, List, Context_outer, Context_inner, Step)
+		),
+		Pipeline),
+	% merge compiler outputs
+	mongolog:merge_outputs(Output_goal,
+		[ document(Pipeline),
+		  variables(StepVars)
+		],
+		Output).
+
 mongolog:step_compile1(
-		findall(Template, Terminals, List), Ctx,
-		% CompilerOutput:
+		findall(Template, Goal, List), Ctx,
 		[ document(Pipeline),
 		  variables(StepVars),
 		  % if not assigned otherwise, draw a document from "one" collection
 		  input_collection(OneColl)
 		]) :-
 	mng_one_db(_,OneColl),
-	% get field key for list and variables in template
 	goal_vars(List, Ctx, StepVars),
-	goal_vars(Template, Ctx, TemplateVars),
-	% add template vars to compile context.
-	% this is important to enforce that vars in Template are referred
-	% to with a common key within findall.
-	% note that the vars should not be added to the "outer_vars"
-	% array as variables in template are _not_ exposed to the outside.
-	% TODO: why we cannot add to outer_vars? it is only given to lookup afterall.
-	%        or are the vars included in InnerStepVars below for some reason?
-	select_option(step_vars(SV), Ctx, Ctx0, []),
-	merge_substitutions(TemplateVars, SV, SV1),
-	Ctx1=[step_vars(SV1)|Ctx0],
+	% add template variables to goal context
+	findall_goal_ctx(Template, Ctx, Ctx_goal),
 	% compile a $lookup query
 	lookup_findall(
-		% lookup collection
-		't_next',
-		% lookup goal
-		Terminals,
-		% prefix/suffix for inner pipeline
-		[],[],
-		% compile context
-		Ctx1, InnerStepVars,
-		% the $lookup query
-		Lookup),
+		't_next',        % array field
+		Goal,            % lookup goal
+		[],[],           % prefix/suffix for inner pipeline
+		Ctx_goal,        % compile context
+		InnerStepVars,   % variables in Goal
+		Lookup           % the $lookup query
+	),
 	% make sure to use a common key with the inner pipeline when instantiating
 	% the template.
-	merge_options([step_vars(InnerStepVars)],Ctx1,Ctx2),
-	merge_options([step_vars(StepVars)],Ctx1,Ctx3),
-	% Get the $map expression to instantiate the template for each list element.
-	% NOTE: it is not allowed due to handling here to construct
-	% the pattern in a query, it must be given in the findall command compile-time.
-	% if really needed it could be done more dynamic, I think.
-	template_instantiation(Template, Ctx2, Instantiation),
-	%
+	merge_options([step_vars(InnerStepVars)], Ctx_goal, Ctx_inner),
+	merge_options([step_vars(StepVars)],      Ctx_goal, Ctx_outer),
+	% compile a pipeline using $lookup
 	findall(Step,
 		% perform lookup, collect results in 'next' array
 		(	Step=Lookup
-		% $set the list variable field from 'next' field
-		;	Step=['$set', ['t_list', ['$map',[
-				['input',string('$t_next')],
-				['in', Instantiation] ]]]]
-		;	set_if_var(List, string('$t_list'), Ctx3, Step)
-		;	(
-				arg_val(List, Ctx3, List0),
-				match_equals(List0, string('$t_list'), Step)
-			)
-		% array at 'next' field not needed anymore
-		;	Step=['$unset', array([string('t_next'), string('t_list')])]
+		% create output array using $map
+		;	findall_map(Template, List, Ctx_outer, Ctx_inner, Step)
 		),
 		Pipeline).
+
+%%
+findall_goal_ctx(Template, Ctx, [step_vars(SV2)|Ctx0]) :-
+	select_option(step_vars(SV), Ctx, Ctx0, []),
+	goal_vars(Template, Ctx, TemplateVars),
+	merge_substitutions(TemplateVars, SV, SV2).
+
+%%
+findall_map(Template, List, Ctx_outer, Ctx_inner, Step) :-
+	% Get the $map expression to instantiate the template for each list element.
+	% NOTE: it is not allowed due to handling here to construct
+	% the pattern in a query, it must be given in the findall command compile-time.
+	template_instantiation(Template, Ctx_inner, Instantiation),
+	% $set the list variable field from 'next' field
+	(	Step=['$set', ['t_list', ['$map',[
+				['input',string('$t_next')],
+				['in', Instantiation] ]]]]
+	;	set_if_var(List, string('$t_list'), Ctx_outer, Step)
+	;	(
+			arg_val(List, Ctx_outer, List0),
+			match_equals(List0, string('$t_list'), Step)
+		)
+	% array at 'next' field not needed anymore
+	;	Step=['$unset', array([string('t_next'), string('t_list')])]
+	).
 
 %%
 % findall template must be given compile-time to construct the mongo expression
@@ -151,6 +189,19 @@ template_instantiation(Template, Ctx, [
 template_instantiation(Atomic, _Ctx, Constant) :-
 	atomic(Atomic),
 	mongolog:get_constant(Atomic, Constant).
+
+% re-add fields that were removed by $group
+set_grouped_vars(Ctx, StepVars, ['$set', OuterSet]) :-
+	option(outer_vars(OV), Ctx, []),
+	findall([VarKey,[['type',string('var')], ['value',string(VarKey)]]],
+		(	(member([VarKey,Var], OV) ; member([VarKey,Var],StepVars)),
+			% FIXME: improve assertion handling
+			VarKey \== 'g_assertions',
+			var(Var)
+		),
+		OuterSet0
+	),
+	list_to_set(OuterSet0,OuterSet).
 
 		 /*******************************
 		 *    	  UNIT TESTING     		*

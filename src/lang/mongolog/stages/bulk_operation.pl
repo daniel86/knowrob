@@ -9,7 +9,10 @@
 
 %%
 bulk_operation(Result) :-
-	mng_get_dict('g_assertions', Result, array(Assertions)),
+	once((
+		mng_get_dict('g_assertions', Result, array(Assertions))
+	;	Assertions=[]
+	)),
 	once((setof(X,
 		(	member(A,Assertions),
 			member(collection-string(X),A)
