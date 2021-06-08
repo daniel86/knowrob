@@ -51,11 +51,11 @@ mongolog:step_compile1(call(Goal), Ctx, Output) :-
 % Call Goal. This predicate is normally used for goals that are not known at compile time.
 %
 mongolog:step_compile1(
-		call_with_args(Term0,Args), Ctx, Output) :-
-	Term0 =.. Buf0,
+		call_with_args(Term,Args), Ctx, Output) :-
+	Term =.. Buf0,
 	append(Buf0, Args, Buf1),
-	Term1 =.. Buf1,
-	mongolog:step_compile1(call(Term1), Ctx, Output).
+	Goal =.. Buf1,
+	mongolog:step_compile1(call(Goal), Ctx, Output).
 
 		 /*******************************
 		 *    	  UNIT TESTING     		*
