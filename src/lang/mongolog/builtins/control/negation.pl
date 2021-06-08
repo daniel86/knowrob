@@ -44,7 +44,7 @@ lang_query:step_expand(\+(Goal), Expanded) :-
 	% another way to write it:
 %	Expanded=((once(GoalExpanded),!,fail) ; true).
 	Expanded = (
-		findall([], once(GoalExpanded), L),
+		findall([], (call(GoalExpanded), limit(1)), L),
 		length(L,0)
 	).
 

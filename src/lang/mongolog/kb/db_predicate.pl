@@ -142,7 +142,11 @@ db_predicate_call(Term, Ctx, Pipeline, StepVars, Collection) :-
 	unpack_compound(Zipped, Unpacked),
 	%
 	findall(InnerStep,
-		match_predicate(Unpacked, Ctx, Ctx_pred, InnerStep),
+		(	match_predicate(Unpacked, Ctx, Ctx_pred, InnerStep)
+		;	(	option(limit(Count), Ctx_pred),
+				InnerStep=['$limit',Count]
+			)
+		),
 		InnerPipeline),
 	db_predicate_call1(Unpacked, InnerPipeline, Ctx_pred, Pipeline).
 

@@ -147,7 +147,9 @@ head_vars([V|Xs],[[K,V]|Ys]) :-
 		  ( test_shape1(mesh(X8))   :- =(X8,foo) ),
 		  ( test_shape1(sphere(X9)) :- =(X9,5.0) ),
 		  ( test_shape2(X10)        :- ( =(X10,mesh(foo)) ; =(X10,sphere(5.0)) ) ),
-		  ( test_shape3(X11)        :- ( test_shape1(X11) ; =(X11,mesh(bar)) ) )
+		  ( test_shape3(X11)        :- ( test_shape1(X11) ; =(X11,mesh(bar)) ) ),
+		  % once with edb predicate
+		  ( one_woman(X12) :- once(woman(_)), assign(X12,2) )
 		]).
 
 test('edb-conjunction') :-
@@ -161,6 +163,11 @@ test('findall(edb)') :-
 test('idb-body') :-
 	findall(X, mongolog_call(test_nested_rule(X)), Xs),
 	assert_equals(Xs, [4.0,5.0]).
+
+test('once(edb)') :-
+	findall(X, mongolog_call(one_woman(X)), Xs),
+	assert_unifies(Xs, [_]),
+	assert_true(ground(Xs)).
 
 test('viewable-findall') :-
 	% findall_test1 is not viewable because head var appears in findall goal

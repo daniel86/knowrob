@@ -16,6 +16,7 @@ The following predicates are supported:
 :- use_module('../../mongolog').
 :- use_module('../../variables').
 :- use_module('../../aggregation/lookup').
+:- use_module('../../kb/edb').
 
 %%%% query commands
 :- mongolog:add_command(once).
@@ -55,14 +56,35 @@ mongolog:step_compile1(limit(_, Goal), Ctx, []) :-
 	!,
 	fail.
 
+mongolog:step_compile1(limit(Count, Goal), Ctx, Output) :-
+	% try to get rid of the Goal argument of limit.
+	% this is only possible if limit is the first step that draws
+	% input documents, and that generates choicepoints.
+	% FIXME: checking input_assigned flag is not sufficient!
+	%        e.g. one could have such a statement:
+	%		- member(A,[1,2])
+	%		- between(...)
+	%        thus we need to keep track of nonderministic predicate calls.
+	\+ option(input_assigned,Ctx), !,
+	mongolog:step_compile1(Goal,         Ctx, Output1),
+	mongolog:step_compile1(limit(Count), Ctx, Output2),
+	mongolog:merge_outputs(Output1, Output2, Output).
+
+mongolog:step_compile1(limit(Count, Goal), Ctx, Output) :-
+	% if Goal is an EDB predicate, and the input was assigned before,
+	% then the EDB predicate lookup can perform the limit.
+	is_edb_predicate(Goal), !,
+	arg_val(Count,Ctx,Count0),
+	mongolog:step_compile1(Goal, [limit(Count0)|Ctx], Output).
+
 mongolog:step_compile1(
 		limit(Count, Goal), Ctx,
 		[ document(Pipeline),
 		  variables(StepVars)
 		]) :-
 	arg_val(Count,Ctx,Count0),
-	% create a lookup and append $limit to inner pipeline,
-	% then unwind next and assign variables to the toplevel document.
+	% perform a $lookup and append $limit to inner pipeline,
+	% then unwind and assign fields in the toplevel document.
 	Suffix=[['$limit',Count0]],
 	lookup_call(Goal, Suffix, Ctx, Pipeline, StepVars0),
 	%

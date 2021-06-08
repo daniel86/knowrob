@@ -32,6 +32,8 @@ The following predicates are supported:
 %
 %mongolog:step_compile('!', _, [['$limit',int(1)]]).
 
+% TODO: replace cut with unary limit
+
 
 		 /*******************************
 		 *    	  UNIT TESTING     		*
