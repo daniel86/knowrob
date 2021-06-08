@@ -77,8 +77,7 @@ mongolog:step_compile1(
 	% TODO: why we cannot add to outer_vars? it is only given to lookup afterall.
 	%        or are the vars included in InnerStepVars below for some reason?
 	select_option(step_vars(SV), Ctx, Ctx0, []),
-	append(TemplateVars, SV, SV0),
-	list_to_set(SV0,SV1),
+	merge_substitutions(TemplateVars, SV, SV1),
 	Ctx1=[step_vars(SV1)|Ctx0],
 	% compile a $lookup query
 	lookup_findall(

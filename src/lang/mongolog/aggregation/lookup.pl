@@ -10,8 +10,21 @@
 %%
 %
 %
-lookup_call(Terminals, Suffix, Ctx, Pipeline, StepVars) :-
-	lookup_findall('next', Terminals, [], Suffix, Ctx, StepVars, Lookup),
+lookup_call(
+		Goal,
+		Suffix,
+		Context,
+		Pipeline,
+		StepVars) :-
+	lookup_findall(
+		'next',
+		Goal,
+		[], Suffix,
+		Context,
+		StepVars,
+		Lookup),
+	% the inner goal is not satisfiable if Pipeline==[]
+	Lookup \== [],
 	findall(Step,
 		% generate steps
 		(	Step=Lookup
@@ -22,9 +35,7 @@ lookup_call(Terminals, Suffix, Ctx, Pipeline, StepVars) :-
 		% remove "next" field again
 		;	Step=['$unset',string('next')]
 		),
-		Pipeline),
-	% the inner goal is not satisfiable if Pipeline==[]
-	Lookup \== [].
+		Pipeline).
 
 
 %%
