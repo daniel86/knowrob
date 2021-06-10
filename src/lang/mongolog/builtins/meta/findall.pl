@@ -64,12 +64,15 @@ mongolog:step_compile1(findall(Goal, List), Ctx,
 	merge_options([step_vars(StepVars)], Ctx, Ctx_outer),
 	% compile a pipeline
 	findall(Step,
-		% perform lookup, collect results in 'next' array
+		% collect results in 't_next' array
 		(	member(Step,InnerPipeline)
+		% field(List) = $t_next
 		;	set_if_var(List, string('$t_next'), Ctx_outer, Step)
+		% field(List) == argval(List)
 		;	(	arg_val(List, Ctx_outer, List0),
 				match_equals(List0, string('$t_next'), Step)
 			)
+		% delete(t_next)
 		;	Step=['$unset', array([string('t_next')])]
 		),
 		Pipeline).
@@ -100,9 +103,9 @@ mongolog:step_compile1(findall(Template, Goal, List), Ctx,
 	merge_options([step_vars(StepVars)],      Ctx_goal, Ctx_outer),
 	% compile a pipeline
 	findall(Step,
-		% perform lookup, collect results in 'next' array
+		% collect results in 't_next' array
 		(	member(Step,InnerPipeline)
-		% create output array using $map
+		% $map $t_next into field(List)
 		;	findall_map(Template, List, Ctx_outer, Ctx_inner, Step)
 		),
 		Pipeline).
@@ -119,9 +122,13 @@ findall_compile(Goal, _, Ctx, _, [], [],[]) :-
 
 findall_compile(Goal, List, Ctx, GoalCollection,
 		StepVars0, InnerStepVars, Pipeline) :-
-	% try to avoid doing a lookup.
-	% this is only possible if findall is the first step that draws
-	% input documents, and that generates choicepoints.
+	% findall via $group command.
+	% this is useful because findall can be evaluated without lookup.
+	% this is only possible if no nondet predicate preceeds findall,
+	% i.e. there cannot be any choicepoints before the findall.
+	% In such a case we can transform findall into a pipeline with $group
+	% command that groups all incoming documents into one group which
+	% is then used to instantiate the list variable.
 	% FIXME: need to check for nondet predicates before findall
 	\+ option(input_assigned,Ctx), !,
 	% add list to step variables
@@ -152,6 +159,9 @@ findall_compile(Goal, List, Ctx, GoalCollection,
 
 findall_compile(Goal, List, Ctx, GoalCollection,
 		StepVars, InnerStepVars, [Lookup]) :-
+	% findall via $lookup command.
+	% used in case findall is preceeded by a nondet predicate such that
+	% the findall goal must be scoped to create a result for each choice.
 	mng_one_db(_,GoalCollection),
 	goal_vars(List, Ctx, StepVars),
 	% compile a $lookup query
