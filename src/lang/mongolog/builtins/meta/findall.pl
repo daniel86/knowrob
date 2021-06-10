@@ -60,6 +60,18 @@ mongolog:step_compile1(findall(Goal, List), Ctx,
 		GoalCollection,
 		StepVars,
 		_InnerStepVars,
+		InnerPipeline),
+	merge_options([step_vars(StepVars)], Ctx, Ctx_outer),
+	% compile a pipeline
+	findall(Step,
+		% perform lookup, collect results in 'next' array
+		(	member(Step,InnerPipeline)
+		;	set_if_var(List, string('$t_next'), Ctx_outer, Step)
+		;	(	arg_val(List, Ctx_outer, List0),
+				match_equals(List0, string('$t_next'), Step)
+			)
+		;	Step=['$unset', array([string('t_next')])]
+		),
 		Pipeline).
 
 %% findall(+Template, :Goal, -Bag)
@@ -391,6 +403,16 @@ test('findall+member'):-
 test('findall+length'):-
 	mongolog_tests:test_call(
 		(	findall(X,
+				((Num < 4.0, X is Num + 5);(Num > 4.0, X is Num * 2)),
+				List),
+			length(List, Length)
+		),
+		Num, double(4.5)),
+	assert_equals(Length,1).
+
+test('findall/2+length'):-
+	mongolog_tests:test_call(
+		(	findall(
 				((Num < 4.0, X is Num + 5);(Num > 4.0, X is Num * 2)),
 				List),
 			length(List, Length)
