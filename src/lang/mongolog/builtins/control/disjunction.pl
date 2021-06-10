@@ -35,14 +35,23 @@ lang_query:step_expand(';'(A0,A1), ';'(B0,B1)) :-
 % 2. then concat all these array fields into single array stored in field 'next'
 % 3. unwind the next array
 %
-% TODO: the $facet command would be another option to implement disjunction.
-%       but it has some limitations that make it less attractive, especially
-%       that it _cannot_ use indices within facet pipelines. So match must be
-%       done outside, which cannot always be done (e.g. if both goals use input documents
-%       from different collections).
-%       It can also not be nested directly, however, it appears to be ok to create
-%       nested views with facetting (which is nowhere documented)!
-%       Anyway, under some circumstances, it might be good to translate ; into $facet...
+% TODO: use $unionWith (mongo DB 4.4) to implement disjunction
+%				h <- b1, ..., bn, (bn+1 ; ... ; bk)
+%       can be written as:
+%               h <- b1, ..., bn, bn+1, union(b1, ..., bn, bn+2), ...., union(b1, ..., bn, bk)
+%       the duplication is needed because within union it is not possible to access instantiations
+%       of b1, ..., bn (i.e. there is no *let* argument for union).
+%       - IDEA: create a view if n>0
+%				h' <- bn+1, union(bn+2), ..., union(bk)
+%				h  <- b1, ..., bn, h'
+%          this is fast if h' can use indices for matching against b1...bn
+%		- Approach:
+%			- compile into unionWith only if disjunction is first goal in body
+%				(todo: or if left side of disjunction fulfills some constaints?)
+%			- program transformation: create disjunction views where possible
+% TODO: $facet command could be used for some simple disjunctions.
+%       but it _cannot_ use search indices. so never use $lookup+$match within $facet.
+%       this limits its usefulness, but maybe there are some cases where it is superior?
 %
 mongolog:step_compile1(';'(A,B), Ctx,
 		[ document(Pipeline),
