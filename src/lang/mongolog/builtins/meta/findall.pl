@@ -31,6 +31,11 @@ lang_query:step_expand(
 		findall(Template, Expanded, List)) :-
 	lang_query:kb_expand(Goal, Expanded).
 
+lang_query:step_expand(
+		findall(Goal, List),
+		findall(Expanded, List)) :-
+	lang_query:kb_expand(Goal, Expanded).
+
 %% setof(+Template, +Goal, -Set)
 % Equivalent to bagof/3, but sorts the result using sort/2 to
 % get a sorted list of alternatives without duplicates.
@@ -40,16 +45,59 @@ lang_query:step_expand(
 %		','(bagof(Template, Expanded, List), sort(List, Set))) :-
 %	lang_query:kb_expand(Goal, Expanded).
 
+%% findall(:Goal, -Bag)
+% Create a list of the different documents where Goal is true.
+% Succeeds with an empty list if Goal has no solutions.
+%
+mongolog:step_compile1(findall(Goal, List), Ctx,
+		[ document(Pipeline),
+		  variables(StepVars),
+		  input_collection(GoalCollection)
+		]) :-
+	findall_compile(
+		Goal, List,
+		Ctx,
+		GoalCollection,
+		StepVars,
+		_InnerStepVars,
+		Pipeline).
+
 %% findall(+Template, :Goal, -Bag)
 % Create a list of the instantiations Template gets for different
 % cases where Goal is true.
 % Succeeds with an empty list if Goal has no solutions.
 %
-% The Goal is executed within a $lookup operation for every input document.
-% TODO: If there is only one incoming document, it would be possible
-%       to avoid $lookup and use $group after the Goal has been executed.
-%
-mongolog:step_compile1(findall(_, Goal, _), Ctx, []) :-
+mongolog:step_compile1(findall(Template, Goal, List), Ctx,
+		[ document(Pipeline),
+		  variables(StepVars),
+		  input_collection(GoalCollection)
+		]) :-
+	% add template variables to goal context
+	findall_goal_ctx(Template, Ctx, Ctx_goal),
+	% compile the goal
+	findall_compile(
+		Goal, List,
+		Ctx_goal,
+		GoalCollection,
+		StepVars,
+		InnerStepVars,
+		InnerPipeline),
+	% make sure to use a common key with the inner pipeline when instantiating
+	% the template.
+	merge_options([step_vars(InnerStepVars)], Ctx_goal, Ctx_inner),
+	merge_options([step_vars(StepVars)],      Ctx_goal, Ctx_outer),
+	% compile a pipeline
+	findall(Step,
+		% perform lookup, collect results in 'next' array
+		(	member(Step,InnerPipeline)
+		% create output array using $map
+		;	findall_map(Template, List, Ctx_outer, Ctx_inner, Step)
+		),
+		Pipeline).
+	
+
+%%
+findall_compile(Goal, _, Ctx, _, [], [],[]) :-
 	% findall views cannot be created if
 	% the findall-goal shares a variable with the head of the rule that is compiled
 	option(compile_mode(view), Ctx),
@@ -57,7 +105,8 @@ mongolog:step_compile1(findall(_, Goal, _), Ctx, []) :-
 	!,
 	fail.
 
-mongolog:step_compile1(findall(Template, Goal, List), Ctx, Output) :-
+findall_compile(Goal, List, Ctx, GoalCollection,
+		StepVars0, InnerStepVars, Pipeline) :-
 	% try to avoid doing a lookup.
 	% this is only possible if findall is the first step that draws
 	% input documents, and that generates choicepoints.
@@ -65,19 +114,18 @@ mongolog:step_compile1(findall(Template, Goal, List), Ctx, Output) :-
 	\+ option(input_assigned,Ctx), !,
 	% add list to step variables
 	goal_vars(List, Ctx, StepVars),
-	% add template variables to goal context
-	findall_goal_ctx(Template, Ctx, Ctx_goal),
 	% compile the goal
-	mongolog:step_compile1(Goal, Ctx_goal, Output_goal),
+	mongolog:step_compile1(Goal, Ctx, Output_goal),
+	mongolog:compiled_document(Output_goal, InnerPipeline),
 	mongolog:compiled_substitution(Output_goal, InnerStepVars),
-	% make sure to use a common key with the inner pipeline when instantiating
-	% the template.
-	merge_options([step_vars(InnerStepVars)], Ctx_goal, Context_inner),
-	merge_options([step_vars(StepVars)],      Ctx_goal, Context_outer),
+	option(input_collection(GoalCollection), Output_goal, _),
+	%
+	merge_substitutions(StepVars, InnerStepVars, StepVars0),
 	% compile a pipeline for grouping results of Goal into an array
 	findall(Step,
+		(	member(Step, InnerPipeline)
 		% group incoming documents into 't_next' array
-		(	Step=['$group', [
+		;	Step=['$group', [
 				% "null" indicates that all documents are added to the same group.
 				% thus $group will output exactly one document.
 				['_id', constant(null)],
@@ -87,49 +135,22 @@ mongolog:step_compile1(findall(Template, Goal, List), Ctx, Output) :-
 			] ]
 		% re-add lost vars
 		;	set_grouped_vars(Ctx, StepVars, Step)
-		% create output array using $map
-		;	findall_map(Template, List, Context_outer, Context_inner, Step)
 		),
-		Pipeline),
-	% merge compiler outputs
-	mongolog:merge_outputs(Output_goal,
-		[ document(Pipeline),
-		  variables(StepVars)
-		],
-		Output).
+		Pipeline).
 
-mongolog:step_compile1(
-		findall(Template, Goal, List), Ctx,
-		[ document(Pipeline),
-		  variables(StepVars),
-		  % if not assigned otherwise, draw a document from "one" collection
-		  input_collection(OneColl)
-		]) :-
-	mng_one_db(_,OneColl),
+findall_compile(Goal, List, Ctx, GoalCollection,
+		StepVars, InnerStepVars, [Lookup]) :-
+	mng_one_db(_,GoalCollection),
 	goal_vars(List, Ctx, StepVars),
-	% add template variables to goal context
-	findall_goal_ctx(Template, Ctx, Ctx_goal),
 	% compile a $lookup query
 	lookup_findall(
 		't_next',        % array field
 		Goal,            % lookup goal
 		[],[],           % prefix/suffix for inner pipeline
-		Ctx_goal,        % compile context
+		Ctx,             % compile context
 		InnerStepVars,   % variables in Goal
 		Lookup           % the $lookup query
-	),
-	% make sure to use a common key with the inner pipeline when instantiating
-	% the template.
-	merge_options([step_vars(InnerStepVars)], Ctx_goal, Ctx_inner),
-	merge_options([step_vars(StepVars)],      Ctx_goal, Ctx_outer),
-	% compile a pipeline using $lookup
-	findall(Step,
-		% perform lookup, collect results in 'next' array
-		(	Step=Lookup
-		% create output array using $map
-		;	findall_map(Template, List, Ctx_outer, Ctx_inner, Step)
-		),
-		Pipeline).
+	).
 
 %%
 findall_goal_ctx(Template, Ctx, [step_vars(SV2)|Ctx0]) :-
