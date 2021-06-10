@@ -129,8 +129,13 @@ findall_compile(Goal, List, Ctx, GoalCollection,
 	% In such a case we can transform findall into a pipeline with $group
 	% command that groups all incoming documents into one group which
 	% is then used to instantiate the list variable.
+	% But if Goal has no solutions findall with $group fails!
+	% So we add $unionWith("once") before $group and filter this document
+	% again in the $group stage.
 	% FIXME: need to check for nondet predicates before findall
 	\+ option(input_assigned,Ctx), !,
+	% needed to succeed findall if goal has no solution
+	mng_one_db(_,OneCollection),
 	% add list to step variables
 	goal_vars(List, Ctx, StepVars),
 	% compile the goal
@@ -143,6 +148,13 @@ findall_compile(Goal, List, Ctx, GoalCollection,
 	% compile a pipeline for grouping results of Goal into an array
 	findall(Step,
 		(	member(Step, InnerPipeline)
+		% add $unionWith such that we go into $group stage even if Goal has no solutions!
+		% TODO: $unionWith can be skipped in case we know that Goal has at least one
+		%       solution.
+		;	Step=['$unionWith', [
+				[coll, string(OneCollection)],
+				[pipeline, array([['$set', ['dummy',integer(1)]]])]
+			] ]
 		% group incoming documents into 't_next' array
 		;	Step=['$group', [
 				% "null" indicates that all documents are added to the same group.
@@ -150,7 +162,14 @@ findall_compile(Goal, List, Ctx, GoalCollection,
 				['_id', constant(null)],
 				% the output document of $group has an array field "t_next"
 				% where all documents are added
-				['t_next', ['$push', string('$$ROOT') ]]
+				% NOTE: we need to explicitely filter out the one document generated
+				%       by $unionWith above. Here only documents without "dummy" field will pass
+				%       and added to the list.
+				['t_next', ['$push', ['$cond', array([
+					['$not', array([string('$dummy')])],
+					string('$$ROOT'),
+					string('$$REMOVE')
+				]) ] ] ]
 			] ]
 		% re-add lost vars
 		;	set_grouped_vars(Ctx, StepVars, Step)
@@ -420,7 +439,7 @@ test('findall+length'):-
 		Num, double(4.5)),
 	assert_equals(Length,1).
 
-test('findall/2+length'):-
+test('findall/2+length(1)'):-
 	mongolog_tests:test_call(
 		(	findall(
 				((Num < 4.0, X is Num + 5);(Num > 4.0, X is Num * 2)),
@@ -429,6 +448,10 @@ test('findall/2+length'):-
 		),
 		Num, double(4.5)),
 	assert_equals(Length,1).
+
+test('findall(fail, -List)'):-
+	mongolog_call(findall(fail, List)),
+	assert_equals(List,[]).
 
 test('findall+nth0'):-
 	mongolog_tests:test_call(
