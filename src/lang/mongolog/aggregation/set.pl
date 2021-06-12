@@ -12,10 +12,9 @@
 % have a grounding, so we need to make a conditional $set here.
 %
 set_next_vars(InnerVars, ['$set', [Key,
-		['$cond',array([
-			['$not', array([string(NewVal)])], % if the field does not exist in 'next'
-			string(OldVal),                    % set the field to its current value
-			string(NewVal)                     % else overwrite with value in next
+		['$ifNull', array([
+			string(NewVal),
+			string(OldVal)
 		])]]]) :-
 	findall(Key0, member([Key0,_], InnerVars), Keys0),
 	list_to_set(Keys0, Keys),
