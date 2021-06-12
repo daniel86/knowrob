@@ -128,7 +128,7 @@ compile_disjunction(
 	pairs_keys_values(VV, VarsOrig, VarsCopy),
 	copy_vars(CopiedVars1, VarsOrig, VarsCopy, CopiedVars2),
 	get_varkeys(Ctx, CopiedVars2, VV, VOs, VCs),
-	% compile the step
+	% compile the lookup stage
 	merge_options([
 		outer_vars(OuterVarsCopy),
 		head_vars(HeadVarsCopy),
@@ -136,24 +136,19 @@ compile_disjunction(
 		copy_vars(VCs)
 	], Ctx2, InnerCtx),
 	var_key(FindallVar, Ctx, Key),
-	lookup_findall(Key, GoalCopy,
-		[],
-		PipelineSuffix,
-		InnerCtx,
-		StepVars_copy0,
-		Stage),
+	lookup_findall(GoalCopy, Key, PipelineSuffix,
+		InnerCtx, StepVars_copy0, Stage),
 	!,
-	
-	merge_substitutions(StepVars_copy0, OuterVarsCopy, OuterVars_x0),
 	% get list of variables whose copies have received a grounding
 	% in compile_terms, as these need some special handling
 	% to avoid that the original remains ungrounded.
 	% GroundVars0: key-original variable mapping
 	% GroundVars1: key-grounding mapping
+	merge_substitutions(StepVars_copy0, OuterVarsCopy, OuterVars_x0),
 	grounded_vars(
 		[outer_vars(OuterVars_x0)|Ctx0],
 		[VOs,VCs], GroundVars0, GroundVars1),
-	(	GroundVars1=[]
+	(	GroundVars1==[]
 	->	PipelineSuffix=[] %Suffix0=Suffix
 	;	PipelineSuffix=[['$set', GroundVars1]]
 	),

@@ -243,9 +243,9 @@ findall_compile(Goal, List, Ctx, GoalCollection,
 	goal_vars(List, Ctx, StepVars),
 	% compile a $lookup query
 	lookup_findall(
-		't_next',        % array field
 		Goal,            % lookup goal
-		[],[],           % prefix/suffix for inner pipeline
+		't_next',        % array field
+		[],              % suffix for inner pipeline
 		Ctx,             % compile context
 		InnerStepVars,   % variables in Goal
 		Lookup           % the $lookup query

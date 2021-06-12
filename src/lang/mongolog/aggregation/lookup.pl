@@ -1,39 +1,29 @@
 :- module(mongolog_lookup,
-	[ lookup_call/5,
-	  lookup_findall/7,
+	[ lookup_call/4,
+	  lookup_findall/6,
 	  lookup_let_doc/2
 	]).
 
 :- use_module('set').
 :- use_module('../variables').
 
-%%
+%% lookup_call(+Goal, +Context, -StepVars, -Pipeline)
 %
 %
-lookup_call(
-		Goal,
-		Suffix,
-		Context,
-		Pipeline,
-		StepVars) :-
-	lookup_findall(
-		'next',
-		Goal,
-		[], Suffix,
-		Context,
-		StepVars,
-		Lookup),
+lookup_call(Goal, Context, StepVars, Pipeline) :-
+	% compile lookup stage
+	lookup_findall(Goal, 'next', [], Context, StepVars, LookupStage),
 	% the inner goal is not satisfiable if Pipeline==[]
-	Lookup \== [],
-	findall(Step,
-		% generate steps
-		(	Step=Lookup
+	LookupStage \== [],
+	findall(Stage,
+		% lookup solutions to Goal in list at field "next"
+		(	Stage=LookupStage
 		% unwind "next" field
-		;	Step=['$unwind',string('$next')]
+		;	Stage=['$unwind',string('$next')]
 		% set variables from "next" field
-		;	set_next_vars(StepVars, Step)
+		;	set_next_vars(StepVars, Stage)
 		% remove "next" field again
-		;	Step=['$unset',string('next')]
+		;	Stage=['$unset',string('next')]
 		),
 		Pipeline).
 
@@ -42,12 +32,7 @@ lookup_call(
 % find all records matching a query and store them
 % in an array.
 %
-lookup_findall(
-		ArrayKey,
-		Goal,
-		Prefix, Suffix,
-		Context,
-		StepVars,
+lookup_findall(Goal, ArrayKey, Suffix, Context, StepVars,
 		['$lookup', [
 			['from',     string(Coll)],
 			['as',       string(ArrayKey)],
@@ -70,21 +55,20 @@ lookup_findall(
 	mongolog:compiled_document(CompilerOutput, Pipeline),
 	mongolog:compiled_substitution(CompilerOutput, StepVars),
 	% pass variables from outer goal to inner if they are referred to in the inner goal.
+	% TODO: only include intersection of OuterVars and StepVars
 	lookup_let_doc(OuterVars, LetDoc),
 	% set all let variables so that they can be accessed without aggregate operators in Pipeline
 	lookup_set_vars(OuterVars, SetVars),
 	% compose inner pipeline
-	(	SetVars=[]
-	->	Prefix0=Prefix
-	;	Prefix0=[['$set', SetVars] | Prefix]
+	(	SetVars==[] -> Pipeline0=Pipeline
+	;	append([['$set', SetVars]], Pipeline, Pipeline0)
 	),
-	append(Prefix0,Pipeline,Pipeline0),
 	append(Pipeline0,Suffix,Pipeline1).
 
 %%
-lookup_let_doc(InnerVars, LetDoc) :-
+lookup_let_doc(Vars, LetDoc) :-
 	findall([Key,string(Value)],
-		(	member([Key,_], InnerVars),
+		(	member([Key,_], Vars),
 			atom_concat('$',Key,Value)
 		),
 		LetDoc0),
@@ -104,9 +88,9 @@ lookup_let_doc(InnerVars, LetDoc) :-
 %			pipeline: [{'$set': {"key": "$$test"}}]
 %		}}])
 %
-lookup_set_vars(InnerVars, SetVars) :-
+lookup_set_vars(Vars, SetVars) :-
 	findall([Y,string(Y0)],
-		(	member([Y,_], InnerVars),
+		(	member([Y,_], Vars),
 			atom_concat('$$',Y,Y0)
 		),
 		SetVars0),

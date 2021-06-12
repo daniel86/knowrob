@@ -84,11 +84,9 @@ mongolog:step_compile1(
 		[ document(Pipeline),
 		  variables(StepVars)
 		]) :-
-	arg_val(Count,Ctx,Count0),
-	% perform a $lookup and append $limit to inner pipeline,
-	% then unwind and assign fields in the toplevel document.
-	Suffix=[['$limit',Count0]],
-	lookup_call(Goal, Suffix, Ctx, Pipeline, StepVars0),
+	lookup_call(
+		(Goal, limit(Count)),
+		Ctx, StepVars0, Pipeline),
 	%
 	(	goal_var(Count,Ctx,Count_var)
 	->	StepVars=[Count_var|StepVars0]

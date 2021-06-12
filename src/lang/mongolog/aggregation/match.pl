@@ -4,10 +4,12 @@
 	]).
 
 %%
-match_equals(X, Exp, ['$match', ['$expr', ['$eq', array([X,Exp])]]]).
+match_equals(A, B,
+	['$match', ['$expr', ['$eq', array([A,B])]]]).
 
 %%
-match_scope(['$match', ['$expr', ['$lt', array([
-				string('$v_scope.time.since'),
-				string('$v_scope.time.until')
-			])]]]).
+match_scope(
+	['$match', ['$expr', ['$lt', array([
+		string('$v_scope.time.since'),
+		string('$v_scope.time.until')
+	])]]]).
