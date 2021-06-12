@@ -39,14 +39,16 @@ expand_cut(Goal, SuccessorClauses, Expanded) :-
 	split_cut(Goal,Before,After),
 	( Before==[] -> If=true   ; If=Before ),
 	( After==[]  -> Then=true ; Then=After ),
-	% handle case where cut does not appear in
-	% disunction (SuccessorClauses==[])
-	( SuccessorClauses==[] -> Else=fail ; Else=SuccessorClauses ),
+	expand_cut(If, Then, SuccessorClauses, Expanded),
+	!.
+
+expand_cut(If, Then, [], Expanded) :-
+	% translate into once(if),then
+	lang_query:kb_expand((once(If), Then), Expanded).
+
+expand_cut(If, Then, Else, Expanded) :-
 	% translate into if-then-else
-	lang_query:kb_expand(
-		(If -> Then ; Else),
-		Expanded
-	).
+	lang_query:kb_expand((If -> Then ; Else), Expanded).
 
 %%
 split_cut(Goal,Before,After) :-
