@@ -22,8 +22,13 @@ The following predicates are supported:
 % Calls Goal as once/1, but succeeds, regardless of whether Goal succeeded or not.
 %
 lang_query:step_expand(ignore(Goal), Expanded) :-
-	% FIXME: must be XOR else true generates unneeded choicepoint
-	lang_query:kb_expand((once(Goal) ; true), Expanded).
+	lang_query:kb_expand(once((call(Goal) ; true)), Expanded).
+%	lang_query:kb_expand((
+%		% collect solutions of once(Goal)
+%		findall(once(Goal),Sols),
+%		% and unwind the solutions, also succeed if Sols is an empty array
+%		unwind(Sols,bool(true))
+%	), Expanded).
 
 		 /*******************************
 		 *    	  UNIT TESTING     		*
