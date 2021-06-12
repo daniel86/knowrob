@@ -102,6 +102,7 @@ mongolog:step_compile(copy_term(In,Out), Ctx, Pipeline) :-
 	findall(Step,
 		(	Step=['$set', ['t_term', In0]]
 		;	Step=['$set', [OutKey, ['$cond', [
+				% FIXME "$not 0" and "$not false" evaluates to true!
 				['if', ['$not', array([string('$t_term.value')])]],
 				['then', string('$t_term')],
 				['else', [

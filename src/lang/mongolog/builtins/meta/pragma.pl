@@ -13,8 +13,7 @@
 %step_compile(pragma(Goal), _, []) :-
 %	call(Goal).
 
-mongolog:step_compile1(pragma(Goal), _, [document([]), variables(StepVars)]) :-
+mongolog:step_compile1(pragma(Goal), _, [document([]), variables([])]) :-
 	% ignore vars referred to in pragma as these are handled compile-time.
 	% only the ones also referred to in parts of the query are added to the document.
-	StepVars=[],
 	call(Goal).

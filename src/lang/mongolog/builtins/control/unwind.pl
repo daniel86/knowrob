@@ -50,7 +50,7 @@ test('unwind([])'):-
 
 test('unwind([Doc1,Doc2])'):-
 	findall([],
-		mongolog_call( unwind(array([
+		mongolog_call(unwind(array([
 			[foo,integer(2)],
 			[foo,integer(2)]
 		]))),
