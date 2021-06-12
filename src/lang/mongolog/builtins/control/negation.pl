@@ -33,12 +33,19 @@ lang_query:step_expand(not(Goal), Expanded) :-
 % the backslash (\) is normally used to indicate negation in Prolog).
 %
 lang_query:step_expand(\+(Goal), Expanded) :-
-	lang_query:kb_expand(Goal, GoalExpanded),
+%	lang_query:kb_expand(Goal, GoalExpanded),
 %	Expanded=((once(GoalExpanded),!,fail) ; true).
-	Expanded = (
-		findall([], (call(GoalExpanded), limit(1)), L),
-		length(L,0)
-	).
+%	Expanded = (
+%		findall([], (call(GoalExpanded), limit(1)), L),
+%		length(L,0)
+%	).
+	lang_query:kb_expand((
+		once((
+			(call(Goal), assign(X,1))
+		;	assign(X,0)
+		)),
+		X==0
+	), Expanded).
 
 
 		 /*******************************
