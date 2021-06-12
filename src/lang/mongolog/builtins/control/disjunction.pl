@@ -16,16 +16,35 @@ The following predicates are supported:
 :- use_module('../../variables').
 :- use_module('../../aggregation/lookup').
 :- use_module('../../aggregation/set').
+:- use_module('cut').
 
 %% query commands
 :- mongolog:add_command(;).
-	
-%% :Goal1 ; :Goal2
-% Make sure goals of disjunction are expanded.
+
+
+% step through goals of a disjunction and expand them.
+% special handling is needed for cut-elimination via program
+% transformation
+lang_query:step_expand((A0;A1), Expanded) :-
+	semicolon_list((A0;A1), Goals),
+	expand_disunction(Goals, ExpandedGoals),
+	semicolon_list(Expanded, ExpandedGoals).
+
 %
-lang_query:step_expand(';'(A0,A1), ';'(B0,B1)) :-
-	lang_query:kb_expand(A0,B0),
-	lang_query:kb_expand(A1,B1).
+expand_disunction([],[]) :- !.
+expand_disunction([X|Xs],[Expanded]) :-
+	% special handling in case X contains a cut
+	has_cut(X),!,
+	semicolon_list(Clauses, Xs),
+	expand_cut(X, Clauses, Expanded).
+expand_disunction([X|Xs],[Y|Ys]) :-
+	% else simply expand X
+	lang_query:kb_expand(X,Y),
+	expand_disunction(Xs,Ys).
+
+%lang_query:step_expand(';'(A0,A1), ';'(B0,B1)) :-
+%	lang_query:kb_expand(A0,B0),
+%	lang_query:kb_expand(A1,B1).
 
 %% :Goal1 ; :Goal2
 % The ‘or' predicate.
@@ -69,19 +88,19 @@ mongolog:step_compile1(';'(A,B), Ctx,
 	% the result of each pipeline is written to a list,
 	% and resulting lists are concatenated later to
 	% achieve disjunction.
-	compile_disjunction(Goals, FindallVars, [], Ctx0, FindallStages, StepVars0),
+	compile_disjunction(Goals, FindallVars, Ctx0, FindallStages, StepVars0),
 	FindallStages \== [],
 	aggregate_disjunction(FindallStages, StepVars0, Pipeline, StepVars).
 
 %%
 % each goal in a disjunction compiles into a lookup expression.
 %
-compile_disjunction([], [], _, _, [], []) :- !.
+compile_disjunction([], [], _, [], []) :- !.
 
 compile_disjunction(
 		[Goal|RestGoals],
 		[FindallVar|RestVars],
-		CutVars, Ctx,
+		Ctx,
 		[[Stage,Key,Goal]|Ys],
 		StepVars) :-
 	select_option(outer_vars(OuterVarsOrig), Ctx, Ctx0, []),
@@ -109,28 +128,16 @@ compile_disjunction(
 	pairs_keys_values(VV, VarsOrig, VarsCopy),
 	copy_vars(CopiedVars1, VarsOrig, VarsCopy, CopiedVars2),
 	get_varkeys(Ctx, CopiedVars2, VV, VOs, VCs),
-	% add match command checking for all previous goals with cut having
-	% no solutions (size=0)
-	% TODO: could this be done also when embedded into limit?
-	findall([CutVarKey, ['$size', int(0)]],
-		member([CutVarKey, _],CutVars),
-		CutMatches0),
-	(	CutMatches0=[] -> CutMatches=[]
-	;	CutMatches=[['$match', CutMatches0]]
-	),
-	% since step_var does not list CutVars, we need to add them here to context
-	% such that they will be accessible in lookup
-	merge_substitutions(CutVars, OuterVarsCopy, CutOuterVarsCopy),
 	% compile the step
 	merge_options([
-		outer_vars(CutOuterVarsCopy),
+		outer_vars(OuterVarsCopy),
 		head_vars(HeadVarsCopy),
 		orig_vars(VOs),
 		copy_vars(VCs)
 	], Ctx2, InnerCtx),
 	var_key(FindallVar, Ctx, Key),
 	lookup_findall(Key, GoalCopy,
-		CutMatches,
+		[],
 		PipelineSuffix,
 		InnerCtx,
 		StepVars_copy0,
@@ -152,24 +159,18 @@ compile_disjunction(
 	),
 	% add variables that have received a grounding in compile_terms to StepVars
 	merge_substitutions(GroundVars0, StepVars_copy0, StepVars_copy),
-	
-	% check if this goal has a cut, if so extend CutVars list
-	(	has_cut(Goal)
-	->	CutVars0=[[Key,FindallVar]|CutVars]
-	;	CutVars0=CutVars
-	),
 	% map copied step-vars back to original
 	copy_vars(StepVars_copy, VarsCopy, VarsOrig, StepVars_this),
 	% then merge step-vars into outer vars of next step such that variables have a common key
 	merge_substitutions(StepVars_this, OuterVarsOrig, OuterVarsNext1),
 	% compile remaining goals
-	compile_disjunction(RestGoals, RestVars, CutVars0,
+	compile_disjunction(RestGoals, RestVars,
 		[outer_vars(OuterVarsNext1)|Ctx0], Ys, StepVars_rest),
 	merge_substitutions(StepVars_this, StepVars_rest, StepVars).
 
-compile_disjunction([_|Goals], [_|Vars], CutVars, Ctx, Pipelines, StepVars) :-
+compile_disjunction([_|Goals], [_|Vars], Ctx, Pipelines, StepVars) :-
 	% skip goal if compilation was "surpressed" above
-	compile_disjunction(Goals, Vars, CutVars, Ctx, Pipelines, StepVars).
+	compile_disjunction(Goals, Vars, Ctx, Pipelines, StepVars).
 
 
 %%
@@ -247,17 +248,6 @@ get_varkeys(Ctx, ParentVars,
 	;	( var_key(VO, Ctx, Key) )
 	)),
 	get_varkeys(Ctx,ParentVars,VV,VOs,VCs).
-
-%%
-has_cut('!') :- !.
-has_cut(Goal) :-
-	is_list(Goal), !,
-	% FIXME: cut was replaced with limit before. seems at the moment
-	%        we cannot distinguish cut from regular limit(1) here :/
-	memberchk(limit(1,_),Goal).
-has_cut(Goal) :-
-	comma_list(Goal,List),
-	has_cut(List).
 
 
 % yield list of variables whose copies have received a grounding

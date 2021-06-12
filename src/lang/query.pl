@@ -43,6 +43,7 @@ one step into the input queue of the next step.
     [ current_scope/1, universal_scope/1 ]).
 :- use_module('mongolog/mongolog').
 :- use_module('mongolog/builtins/meta/touch').
+:- use_module('mongolog/builtins/control/cut').
 
 % Stores list of terminal terms for each clause. 
 :- dynamic kb_rule/4.
@@ -639,8 +640,12 @@ kb_expand(Goal, Expanded) :-
 	comma_list(Goal, Terms),
 	kb_expand(Terms, Expanded).
 
+kb_expand(Goal, Expanded) :-
+	% special handling for cut
+	has_cut(Goal),!,
+	expand_cut(Goal, [], Expanded).
+
 kb_expand(Terms, Expanded) :-
-	has_list_head(Terms), !,
 	catch(
 		expand_term_0(Terms, Expanded0),
 		Exc,
@@ -648,18 +653,10 @@ kb_expand(Terms, Expanded) :-
 	),
 	comma_list(Buf,Expanded0),
 	comma_list(Buf,Expanded1),
-	% Handle cut after term expansion.
-	% It is important that this is done _after_ expansion because
-	% the cut within the call would yield an infinite recursion
-	% otherwhise.
-	% TODO: it is not so nice doing it here. would be better if it could be
-	%       done in control.pl where cut operator is implemented but current
-	%       interfaces don't allow to do the following operation in control.pl.
-	%		(without special handling of ',' it could be done, I think)
-	expand_cut(Expanded1, Expanded2),
 	%%
-	(	Expanded2=[One] -> Expanded=One
-	;	Expanded=Expanded2
+	(	Expanded1=[One]
+	->	Expanded=One
+	;	Expanded=Expanded1
 	).
 
 %%
@@ -746,29 +743,6 @@ expand_rule(ParentArgs,
 	],
 	expand_rule(ParentArgs, Xs, Ys),
 	!.
-
-%%
-% Each conjunction with cut operator [X0,...,Xn,!|_]
-% is rewritten as [limit(1,[X0,....,Xn])|_].
-%
-expand_cut([],[]) :- !.
-expand_cut(Terms,Expanded) :-
-	take_until_cut(Terms, Taken, Remaining),
-	% no cut if Remaining=[]
-	(	Remaining=[] -> Expanded=Terms
-	% else the first element in Remaining must be a cut
-	% that needs to be applied to goals in Taken
-	;	(	Remaining=[!|WithoutCut],
-			expand_cut(WithoutCut, Remaining_Expanded),
-			Expanded=[limit(1,Taken)|Remaining_Expanded]
-		)
-	).
-
-% split list at cut operator.
-take_until_cut([],[],[]) :- !.
-take_until_cut(['!'|Xs],[],['!'|Xs]) :- !.
-take_until_cut([X|Xs],[X|Ys],Remaining) :-
-	take_until_cut(Xs,Ys,Remaining).
 
 %
 step_expand(ask(Goal), ask(Expanded)) :-

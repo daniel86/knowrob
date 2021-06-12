@@ -1,4 +1,7 @@
-:- module(mongolog_cut, []).
+:- module(mongolog_cut,
+		[ has_cut/1,
+		  expand_cut/3
+		]).
 /** <module> Control structures in mongolog programs.
 
 The following predicates are supported:
@@ -17,22 +20,46 @@ The following predicates are supported:
 %% query commands
 :- mongolog:add_command(!).
 
-%% !
-% Cut. Discard all choice points created since entering the predicate in which
-% the cut appears. In other words, commit to the clause in which the cut appears
-% and discard choice points that have been created by goals to the left of the cut
-% in the current clause. Meta calling is opaque to the cut. This implies that cuts that
-% appear in a term that is subject to meta-calling (call/1) only affect choice points
-% created by the meta-called term.
+%% has_cut(+Goal) is semidet.
 %
-% To realize cut, every clause [X0,...,Xn,!|_] is rewritten as [limit(1, [X0,....,Xn])|_]
-% NOTE: the rewriting is currently a special case in compiler.pl and cannot be handled
-%         through existing interfaces for commands in this file.
-% NOTE: but disjunction below handles cut in disjunction goals
 %
-%mongolog:step_compile('!', _, [['$limit',int(1)]]).
+has_cut(Goal) :-
+	is_list(Goal), !,
+	memberchk('!',Goal).
 
-% TODO: replace cut with unary limit
+has_cut(Goal) :-
+	comma_list(Goal,List),
+	has_cut(List).
+
+%% expand_cut(+Goal, +SuccessorClauses, -Expanded) is semidet.
+%
+%
+expand_cut(Goal, SuccessorClauses, Expanded) :-
+	% split the goal into part left-of and part right-of first cut
+	split_cut(Goal,Before,After),
+	( Before==[] -> If=true   ; If=Before ),
+	( After==[]  -> Then=true ; Then=After ),
+	% handle case where cut does not appear in
+	% disunction (SuccessorClauses==[])
+	( SuccessorClauses==[] -> Else=fail ; Else=SuccessorClauses ),
+	% translate into if-then-else
+	lang_query:kb_expand(
+		(If -> Then ; Else),
+		Expanded
+	).
+
+%%
+split_cut(Goal,Before,After) :-
+	is_list(Goal), !,
+	split_cut1(Goal,Before,After).
+split_cut(Goal,Before,After) :-
+	comma_list(Goal,List),
+	split_cut1(List,Before,After).
+
+split_cut1([],_,_) :- !, fail.
+split_cut1([!|Xs],[],Xs) :- !.
+split_cut1([X|Xs],[X|Ys],Zs) :-
+	split_cut1(Xs,Ys,Zs).
 
 
 		 /*******************************
