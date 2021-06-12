@@ -120,61 +120,119 @@ findall_compile(Goal, _, Ctx, _, [], [],[]) :-
 	!,
 	fail.
 
-findall_compile(Goal, List, Ctx, GoalCollection,
-		StepVars0, InnerStepVars, Pipeline) :-
-	% findall via $group command.
-	% this is useful because findall can be evaluated without lookup.
-	% this is only possible if no nondet predicate preceeds findall,
-	% i.e. there cannot be any choicepoints before the findall.
-	% In such a case we can transform findall into a pipeline with $group
-	% command that groups all incoming documents into one group which
-	% is then used to instantiate the list variable.
-	% But if Goal has no solutions findall with $group fails!
-	% So we add $unionWith("once") before $group and filter this document
-	% again in the $group stage.
-	% FIXME: need to check for nondet predicates before findall
-	\+ option(input_assigned,Ctx), !,
-	% needed to succeed findall if goal has no solution
-	mng_one_db(_,OneCollection),
-	% add list to step variables
-	goal_vars(List, Ctx, StepVars),
-	% compile the goal
-	mongolog:step_compile1(Goal, Ctx, Output_goal),
-	mongolog:compiled_document(Output_goal, InnerPipeline),
-	mongolog:compiled_substitution(Output_goal, InnerStepVars),
-	option(input_collection(GoalCollection), Output_goal, _),
-	%
-	merge_substitutions(StepVars, InnerStepVars, StepVars0),
-	% compile a pipeline for grouping results of Goal into an array
-	findall(Step,
-		(	member(Step, InnerPipeline)
-		% add $unionWith such that we go into $group stage even if Goal has no solutions!
-		% TODO: $unionWith can be skipped in case we know that Goal has at least one
-		%       solution.
-		;	Step=['$unionWith', [
-				[coll, string(OneCollection)],
-				[pipeline, array([['$set', ['dummy',integer(1)]]])]
-			] ]
-		% group incoming documents into 't_next' array
-		;	Step=['$group', [
-				% "null" indicates that all documents are added to the same group.
-				% thus $group will output exactly one document.
-				['_id', constant(null)],
-				% the output document of $group has an array field "t_next"
-				% where all documents are added
-				% NOTE: we need to explicitely filter out the one document generated
-				%       by $unionWith above. Here only documents without "dummy" field will pass
-				%       and added to the list.
-				['t_next', ['$push', ['$cond', array([
-					['$not', array([string('$dummy')])],
-					string('$$ROOT'),
-					string('$$REMOVE')
-				]) ] ] ]
-			] ]
-		% re-add lost vars
-		;	set_grouped_vars(Ctx, StepVars, Step)
-		),
-		Pipeline).
+%findall_compile(Goal, List, Ctx, GoalCollection,
+%		StepVars0, InnerStepVars, Pipeline) :-
+%	% findall via $group command.
+%	% this is useful because findall can be evaluated without lookup.
+%	% this is only possible if no nondet predicate preceeds findall,
+%	% i.e. there cannot be any choicepoints before the findall.
+%	% In such a case we can transform findall into a pipeline with $group
+%	% command that groups all incoming documents into one group which
+%	% is then used to instantiate the list variable.
+%	% But if Goal has no solutions findall with $group fails!
+%	% So we add $unionWith("once") before $group and filter this document
+%	% again in the $group stage.
+%	% FIXME: need to check for nondet predicates before findall
+%	\+ option(input_assigned,Ctx), !,
+%%	option(outer_vars(OV), Ctx, []),
+%	% needed to succeed findall if goal has no solution
+%	mng_one_db(_,OneCollection),
+%	% add list to step variables
+%	goal_vars(List, Ctx, StepVars),
+%	% compile the goal
+%	mongolog:step_compile1(Goal, Ctx, Output_goal),
+%	mongolog:compiled_document(Output_goal, InnerPipeline),
+%	mongolog:compiled_substitution(Output_goal, InnerStepVars),
+%	option(input_collection(GoalCollection), Output_goal, _),
+%	%
+%	merge_substitutions(StepVars, InnerStepVars, StepVars0),
+%	%
+%	findall_outer_varkeys(Ctx, StepVars, VarKeys),
+%	% compile a pipeline for grouping results of Goal into an array
+%	findall(Step,
+%		% FIXME all branches need to get the fields which are there before,
+%		%        the only way I see is to replicate whatever is before the findall
+%		%        in the $unionWith one pipeline.
+%		%		 this seems ok as it is not allowed that input is defined before anyway
+%		%		 so the infor about literals before must be added to compile context
+%		%        then these can be recompiled in the $unionWith operation
+%%db.one.aggregate([
+%%	{$set: {test: 1}},
+%%	{$set: {root_copy: "$$ROOT"}},
+%%	{$set: {root_copy: {test: "$test"}}},
+%%	{$set: {test: 2}},
+%%	{$unionWith: "one"},
+%%	{$group: {
+%%		"_id": null,
+%%		"test": {$min: "$root_copy.test"},
+%%		"array": {$push: "$$ROOT"}
+%%	}}
+%%]).pretty()
+%		(	(	findall([K,string(V)],
+%					(	member(K,VarKeys),
+%						atom_concat('$',K,V)
+%					),
+%					CopyDoc
+%				),
+%				Step=['$set', ['root_copy', CopyDoc]]
+%			)
+%		;	member(Step, InnerPipeline)
+%		% add $unionWith such that we go into $group stage even if Goal has no solutions!
+%		% TODO: $unionWith can be skipped in case we know that Goal has at least one solution.
+%		;	Step=['$unionWith', [
+%				[coll, string(OneCollection)],
+%				[pipeline, array([
+%					['$set', ['dummy',integer(1)]]
+%				])]
+%			] ]
+%		% group incoming documents into 't_next' array
+%		;	(	findall([Key,Val],
+%					(	(Key='_id', Val=constant(null))
+%					;	(	Key='root_copy',
+%							Val=['$mergeObjects', string('$root_copy')]
+%						)
+%%					;	(	member(Key,VarKeys),
+%%							atom_concat('$root_copy.',Key,Key0),
+%%							Val=['$mergeObjects', string(Key0)]
+%%						)
+%					;	(Key='t_next', Val=['$push', ['$cond', array([
+%							['$not', array([string('$dummy')])],
+%							string('$$ROOT'),
+%							string('$$REMOVE')
+%						]) ] ])
+%					),
+%					GroupDoc
+%				),
+%				Step=['$group', GroupDoc]
+%%					[
+%%					% "null" indicates that all documents are added to the same group.
+%%					% thus $group will output exactly one document.
+%%					['_id', constant(null)],
+%%					% the output document of $group has an array field "t_next"
+%%					% where all documents are added
+%%					% NOTE: we need to explicitely filter out the one document generated
+%%					%       by $unionWith above. Here only documents without "dummy" field will pass
+%%					%       and added to the list.
+%%					['t_next', ['$push', ['$cond', array([
+%%						['$not', array([string('$dummy')])],
+%%						string('$$ROOT'),
+%%						string('$$REMOVE')
+%%					]) ] ] ]
+%%				] ]
+%			)
+%		% re-add lost vars
+%		% FIXME: this does not work, ignore test
+%%		;	set_grouped_vars(Ctx, StepVars, Step)
+%		;	(	findall([K,string(V)],
+%					(	member(K,VarKeys),
+%						atom_concat('$root_copy.',K,V)
+%					),
+%					CopyDoc
+%				),
+%				Step=['$set', CopyDoc]
+%			)
+%		),
+%		Pipeline).
 
 findall_compile(Goal, List, Ctx, GoalCollection,
 		StepVars, InnerStepVars, [Lookup]) :-
@@ -251,6 +309,19 @@ template_instantiation(Template, Ctx, [
 template_instantiation(Atomic, _Ctx, Constant) :-
 	atomic(Atomic),
 	mongolog:get_constant(Atomic, Constant).
+
+% get keys of vars that appear before findall plus the list variable key
+findall_outer_varkeys(Ctx, StepVars, VarKeys) :-
+	option(outer_vars(OV), Ctx, []),
+	findall(VarKey,
+		(	(member([VarKey,Var], OV) ; member([VarKey,Var],StepVars)),
+			% FIXME: improve assertion handling
+			VarKey \== 'g_assertions',
+			var(Var)
+		),
+		VarKeys0
+	),
+	list_to_set(VarKeys0,VarKeys).
 
 % re-add fields that were removed by $group
 set_grouped_vars(Ctx, StepVars, ['$set', OuterSet]) :-
