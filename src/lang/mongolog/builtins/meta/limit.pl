@@ -66,13 +66,15 @@ mongolog:step_compile1(limit(Count, Goal), Ctx, Output) :-
 	%		- between(...)
 	%        thus we need to keep track of nonderministic predicate calls.
 	\+ option(input_assigned,Ctx), !,
-	mongolog:step_compile1(Goal,         Ctx, Output1),
+	option(outer_vars(OV), Ctx, []),
+	mongolog:compile_term(Goal, OV->_, Output1, Ctx),
 	mongolog:step_compile1(limit(Count), Ctx, Output2),
 	mongolog:merge_outputs(Output1, Output2, Output).
 
 mongolog:step_compile1(limit(Count, Goal), Ctx, Output) :-
 	% if Goal is an EDB predicate, and the input was assigned before,
 	% then the EDB predicate lookup can perform the limit.
+	% TODO: also the case for IDB views?
 	is_edb_predicate(Goal), !,
 	arg_val(Count,Ctx,Count0),
 	mongolog:step_compile1(Goal, [limit(Count0)|Ctx], Output).
