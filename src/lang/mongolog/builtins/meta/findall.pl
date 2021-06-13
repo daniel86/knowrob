@@ -21,9 +21,6 @@ The following predicates are supported:
 
 %% register query commands
 :- mongolog:add_command(findall).
-% TODO: support bagof (then, setof := bagof o sort)
-%:- mongolog:add_command(bagof).
-%:- mongolog:add_command(setof).
 
 %%
 lang_query:step_expand(
@@ -35,15 +32,6 @@ lang_query:step_expand(
 		findall(Goal, List),
 		findall(Expanded, List)) :-
 	lang_query:kb_expand(Goal, Expanded).
-
-%% setof(+Template, +Goal, -Set)
-% Equivalent to bagof/3, but sorts the result using sort/2 to
-% get a sorted list of alternatives without duplicates.
-%
-%lang_query:step_expand(
-%		setof(Template, Goal, Set),
-%		','(bagof(Template, Expanded, List), sort(List, Set))) :-
-%	lang_query:kb_expand(Goal, Expanded).
 
 %% findall(:Goal, -Bag)
 % Create a list of the different documents where Goal is true.
@@ -82,7 +70,7 @@ mongolog:step_compile1(findall(Goal, List), Ctx,
 % cases where Goal is true.
 % Succeeds with an empty list if Goal has no solutions.
 %
-mongolog:step_compile1(findall(Template, Goal, List), Ctx,
+mongolog:step_compile1(findall(Template, Goal, Bag), Ctx,
 		[ document(Pipeline),
 		  variables(StepVars),
 		  input_collection(GoalCollection)
@@ -91,7 +79,7 @@ mongolog:step_compile1(findall(Template, Goal, List), Ctx,
 	findall_goal_ctx(Template, Ctx, Ctx_goal),
 	% compile the goal
 	findall_compile(
-		Goal, List,
+		Goal, Bag,
 		Ctx_goal,
 		GoalCollection,
 		StepVars,
@@ -106,7 +94,7 @@ mongolog:step_compile1(findall(Template, Goal, List), Ctx,
 		% collect results in 't_next' array
 		(	member(Step,InnerPipeline)
 		% $map $t_next into field(List)
-		;	findall_map(Template, List, Ctx_outer, Ctx_inner, Step)
+		;	findall_map(Template, Bag, Ctx_outer, Ctx_inner, Step)
 		),
 		Pipeline).
 	
@@ -242,14 +230,7 @@ findall_compile(Goal, List, Ctx, GoalCollection,
 	mng_one_db(_,GoalCollection),
 	goal_vars(List, Ctx, StepVars),
 	% compile a $lookup query
-	lookup_findall(
-		Goal,            % lookup goal
-		't_next',        % array field
-		[],              % suffix for inner pipeline
-		Ctx,             % compile context
-		InnerStepVars,   % variables in Goal
-		Lookup           % the $lookup query
-	).
+	lookup_findall(Goal, 't_next', [], Ctx, InnerStepVars, Lookup).
 
 %%
 findall_goal_ctx(Template, Ctx, [step_vars(SV2)|Ctx0]) :-
@@ -259,6 +240,7 @@ findall_goal_ctx(Template, Ctx, [step_vars(SV2)|Ctx0]) :-
 
 %%
 findall_map(Template, List, Ctx_outer, Ctx_inner, Step) :-
+	arg_val(List, Ctx_outer, List0),
 	% Get the $map expression to instantiate the template for each list element.
 	% NOTE: it is not allowed due to handling here to construct
 	% the pattern in a query, it must be given in the findall command compile-time.
@@ -268,10 +250,7 @@ findall_map(Template, List, Ctx_outer, Ctx_inner, Step) :-
 				['input',string('$t_next')],
 				['in', Instantiation] ]]]]
 	;	set_if_var(List, string('$t_list'), Ctx_outer, Step)
-	;	(
-			arg_val(List, Ctx_outer, List0),
-			match_equals(List0, string('$t_list'), Step)
-		)
+	;	match_equals(List0, string('$t_list'), Step)
 	% array at 'next' field not needed anymore
 	;	Step=['$unset', array([string('t_next'), string('t_list')])]
 	).
@@ -311,30 +290,30 @@ template_instantiation(Atomic, _Ctx, Constant) :-
 	mongolog:get_constant(Atomic, Constant).
 
 % get keys of vars that appear before findall plus the list variable key
-findall_outer_varkeys(Ctx, StepVars, VarKeys) :-
-	option(outer_vars(OV), Ctx, []),
-	findall(VarKey,
-		(	(member([VarKey,Var], OV) ; member([VarKey,Var],StepVars)),
-			% FIXME: improve assertion handling
-			VarKey \== 'g_assertions',
-			var(Var)
-		),
-		VarKeys0
-	),
-	list_to_set(VarKeys0,VarKeys).
+%findall_outer_varkeys(Ctx, StepVars, VarKeys) :-
+%	option(outer_vars(OV), Ctx, []),
+%	findall(VarKey,
+%		(	(member([VarKey,Var], OV) ; member([VarKey,Var],StepVars)),
+%			% FIXME: improve assertion handling
+%			VarKey \== 'g_assertions',
+%			var(Var)
+%		),
+%		VarKeys0
+%	),
+%	list_to_set(VarKeys0,VarKeys).
 
 % re-add fields that were removed by $group
-set_grouped_vars(Ctx, StepVars, ['$set', OuterSet]) :-
-	option(outer_vars(OV), Ctx, []),
-	findall([VarKey,[['type',string('var')], ['value',string(VarKey)]]],
-		(	(member([VarKey,Var], OV) ; member([VarKey,Var],StepVars)),
-			% FIXME: improve assertion handling
-			VarKey \== 'g_assertions',
-			var(Var)
-		),
-		OuterSet0
-	),
-	list_to_set(OuterSet0,OuterSet).
+%set_grouped_vars(Ctx, StepVars, ['$set', OuterSet]) :-
+%	option(outer_vars(OV), Ctx, []),
+%	findall([VarKey,[['type',string('var')], ['value',string(VarKey)]]],
+%		(	(member([VarKey,Var], OV) ; member([VarKey,Var],StepVars)),
+%			% FIXME: improve assertion handling
+%			VarKey \== 'g_assertions',
+%			var(Var)
+%		),
+%		OuterSet0
+%	),
+%	list_to_set(OuterSet0,OuterSet).
 
 		 /*******************************
 		 *    	  UNIT TESTING     		*

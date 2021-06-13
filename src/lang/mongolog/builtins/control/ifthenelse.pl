@@ -30,12 +30,12 @@ The following predicates are supported:
 % making the construct fail if the condition fails.
 % This unusual semantics is part of the ISO and all de-facto Prolog standards. 
 %
-%lang_query:step_expand(';'('->'(If,Then),Else), ';'(X,Y)) :-
+%lang_query:step_expand((If -> Then ; Else), (X;Y)) :-
 %	% (If -> Then) ; Else -> (If, !, Then) ; Else
 %	lang_query:kb_expand([If, !, Then], X),
 %	lang_query:kb_expand(Else,          Y).
 
-lang_query:step_expand(';'('->'(If,Then),Else), Expanded) :-
+lang_query:step_expand((If -> Then ; Else), Expanded) :-
 	lang_query:kb_expand((
 		once(
 			(If,assign(X,1))
@@ -46,7 +46,7 @@ lang_query:step_expand(';'('->'(If,Then),Else), Expanded) :-
 		)
 	),Expanded).
 
-lang_query:step_expand('->'(If,Then), Epanded) :-
+lang_query:step_expand((If -> Then), Epanded) :-
 	lang_query:step_expand((If -> Then ; fail), Epanded).
 
 %% TODO: :Condition *-> :Action ; :Else

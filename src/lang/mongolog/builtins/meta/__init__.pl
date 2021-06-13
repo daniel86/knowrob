@@ -1,9 +1,9 @@
 
-:- use_module(call).
+:- ensure_loaded(call).
 :- ensure_loaded(context).
 :- ensure_loaded(touch).
-:- use_module(findall).
-:- use_module(ignore).
-:- use_module(limit).
-:- use_module(pragma).
-:- use_module(project).
+:- ensure_loaded(findall).
+:- ensure_loaded(ignore).
+:- ensure_loaded(limit).
+:- ensure_loaded(pragma).
+:- ensure_loaded(project).

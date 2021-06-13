@@ -57,7 +57,10 @@ lang_query:step_expand(member(Elem, List), Expanded) :-
 % semi deterministic and typically used to test membership of a list. 
 %
 lang_query:step_expand(memberchk(Elem, List), Expanded) :-
-	lang_query:kb_expand(limit(1, member(Elem,List)), Expanded).
+	lang_query:kb_expand(
+		limit(1, member(Elem,List)),
+		Expanded
+	).
 
 %% length(+List, ?Length)
 % True if Length represents the number of elements in List.

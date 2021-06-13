@@ -30,12 +30,12 @@ lang_query:step_expand(project(Term), assert(Term)) :-
 	!.
 
 %%
-mongolog:step_compile1(assert(Term), Ctx,
+mongolog:step_compile1(assert(Literal), Ctx,
 		[ document(Pipeline),
 		  variables(StepVars)
 		]) :-
-	is_edb_predicate(Term),!,
-	db_predicate_zip(Term, Ctx, Zipped, Ctx_pred, write),
+	is_edb_predicate(Literal),!,
+	db_predicate_zip(Literal, Ctx, Zipped, Ctx_pred, write),
 	option(collection(Collection), Ctx_pred),
 	option(step_vars(StepVars), Ctx_pred),
 	% create a document
@@ -50,12 +50,12 @@ mongolog:step_compile1(assert(Term), Ctx,
 		Pipeline).
 
 %%
-mongolog:step_compile1(retractall(Term), Ctx,
+mongolog:step_compile1(retractall(Literal), Ctx,
 		[ document(Pipeline),
 		  variables(StepVars)
 		]) :-
-	is_edb_predicate(Term),!,
-	db_predicate_zip(Term, Ctx, Zipped, Ctx_pred, write),
+	is_edb_predicate(Literal),!,
+	db_predicate_zip(Literal, Ctx, Zipped, Ctx_pred, write),
 	option(collection(Collection), Ctx_pred),
 	option(step_vars(StepVars), Ctx_pred),
 	mongolog_db_predicate:unpack_compound(Zipped, Unpacked),

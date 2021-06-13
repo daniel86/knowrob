@@ -23,11 +23,11 @@ lang_query:step_expand(
 	lang_query:kb_expand(If, If_expanded),
 	lang_query:kb_expand(project(Then), Then_expande).
 
-lang_query:step_expand(project(','(A,B)), ','(C,D)) :-
+lang_query:step_expand(project((A,B)), (C,D)) :-
 	lang_query:step_expand(project(A),C),
 	lang_query:step_expand(project(B),D).
 
-lang_query:step_expand(project(;(A,B)), ;(C,D)) :-
+lang_query:step_expand(project((A;B)), (C;D)) :-
 	lang_query:step_expand(project(A),C),
 	lang_query:step_expand(project(B),D).
 

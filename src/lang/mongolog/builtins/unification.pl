@@ -32,8 +32,8 @@ The following predicates are supported:
 % In other cases, such as ?- X \= Y., the predicate fails although there are solutions.
 % This is due to the incomplete nature of \+/1. 
 %
-lang_query:step_expand(\=(A,B), Expanded) :-
-	lang_query:step_expand(\+(=(A,B)), Expanded).
+lang_query:step_expand((A \= B), Expanded) :-
+	lang_query:step_expand(\+(A = B), Expanded).
 
 %%
 mongolog:step_compile(
@@ -45,11 +45,11 @@ mongolog:step_compile(
 %% ?Term1 = ?Term2
 % Unify Term1 with Term2. True if the unification succeeds.
 %
-mongolog:step_compile(=(Term1, Term2), _, _) :-
+mongolog:step_compile((Term1 = Term2), _, _) :-
 	\+ unifiable(Term1, Term2, _), !,
 	fail.
 
-mongolog:step_compile(=(Term1, Term2), Ctx, Pipeline) :-
+mongolog:step_compile((Term1 = Term2), Ctx, Pipeline) :-
 	arg_val(Term1,Ctx,Term1_val),
 	arg_val(Term2,Ctx,Term2_val),
 	% TODO: if var(Term1) then $set key(Term1) <- t_term1

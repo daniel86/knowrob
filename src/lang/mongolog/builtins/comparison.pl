@@ -23,11 +23,11 @@ The following predicates are supported:
 %% @Term1 == @Term2
 % True if Term1 is equivalent to Term2. A variable is only identical to a sharing variable
 %
-mongolog:step_compile(==(X,Y), _, []) :-
+mongolog:step_compile((X == Y), _, []) :-
 	ground([X,Y]),!,
 	X == Y.
 
-mongolog:step_compile(==(X,Y), Ctx,
+mongolog:step_compile((X == Y), Ctx,
 		[['$match', ['$expr', ['$eq', array([X0,Y0])]]]]) :-
 	arg_val(X,Ctx,X0),
 	arg_val(Y,Ctx,Y0).
@@ -35,11 +35,11 @@ mongolog:step_compile(==(X,Y), Ctx,
 %% @Term1 \== @Term2
 % Equivalent to \+Term1 == Term2.
 %
-mongolog:step_compile(\==(X,Y), _, []) :-
+mongolog:step_compile((X \== Y), _, []) :-
 	ground([X,Y]),!,
 	X \== Y.
 
-mongolog:step_compile(\==(X,Y), Ctx,
+mongolog:step_compile((X \== Y), Ctx,
 		[['$match', ['$expr', ['$ne', array([X0,Y0])]]]]) :-
 	arg_val(X,Ctx,X0),
 	arg_val(Y,Ctx,Y0).

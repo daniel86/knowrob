@@ -1,6 +1,6 @@
 
-:- use_module(cut).
-:- use_module(ifthenelse).
-:- use_module(disjunction).
-:- use_module(negation).
-:- use_module(unwind).
+:- ensure_loaded(cut).
+:- ensure_loaded(ifthenelse).
+:- ensure_loaded(disjunction).
+:- ensure_loaded(negation).
+:- ensure_loaded(unwind).

@@ -13,29 +13,23 @@ mongolog:step_compile(unwind(ListOfDocuments), Ctx, Pipeline) :-
 %% unwind(+ListOfDocuments, +PreserveNullAndEmpty)
 %
 %
-mongolog:step_compile(unwind(ListOfDocuments, PreserveNullAndEmpty), Ctx, Pipeline) :-
-	% retrieve the value of the list
-	arg_val(ListOfDocuments, Ctx, ListOfDocuments0),
-	arg_val(PreserveNullAndEmpty, Ctx, PreserveNullAndEmpty0),
-	% build an aggregation pipeline
-	findall(Step,
-		% make sure the list is assigned to a document field
-		(	Step=['$set', ['t_list', ListOfDocuments0]]
-		% unwind the array, result is in the t_list field
-		;	Step=['$unwind', [
+mongolog:step_compile(unwind(ListOfDocuments, PreserveNullAndEmpty), Ctx,
+		[	['$set', ['t_list', ListOfDocuments0]],
+			% unwind the array, result is in the t_list field
+			['$unwind', [
 				[path, string('$t_list')],
 				[preserveNullAndEmptyArrays, PreserveNullAndEmpty0]
-			] ]
-		% merge the document $t_list into the root document
-		% NOTE: this also works if the t_list field does not exist!
-		;	Step=['$replaceWith', ['$mergeObjects', array([
+			] ],
+			% merge the document $t_list into the root document
+			% NOTE: this also works if the t_list field does not exist!
+			['$replaceWith', ['$mergeObjects', array([
 				string('$$ROOT'), string('$t_list')
-			])]]
-		% and remove the t_list field
-		;	Step=['$unset', string('t_list')]
-		),
-		Pipeline
-	).
+			])]],
+			% and remove the t_list field
+			['$unset', string('t_list')]
+		]) :-
+	arg_val(ListOfDocuments, Ctx, ListOfDocuments0),
+	arg_val(PreserveNullAndEmpty, Ctx, PreserveNullAndEmpty0).
 
 		 /*******************************
 		 *    	  UNIT TESTING     		*
