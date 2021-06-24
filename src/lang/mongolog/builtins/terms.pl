@@ -138,6 +138,7 @@ mongolog:step_compile(=..(Term,List), Ctx, Pipeline) :-
 	%			foo(X,a) =.. [foo,Z,a] would imply X=Z which is not handled here yet!
 	%          - needs additional map/filter operation
 	%				- get args that are different vars in list and term, then add to var array
+	% TODO: I think it needs to use $map and then run unify on each argument?
 	%
 	arg_val(Term,Ctx,Term0),
 	arg_val(List,Ctx,List0),
