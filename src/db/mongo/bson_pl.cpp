@@ -29,6 +29,7 @@ static PlAtom ATOM_string("string");
 static PlAtom ATOM_time("time");
 static PlAtom ATOM_list("list");
 static PlAtom ATOM_null("null");
+static PlAtom ATOM_undefined("undefined");
 static PlAtom ATOM_constant("constant");
 static PlAtom ATOM_array("array");
 static PlAtom ATOM_true("true");
@@ -74,6 +75,11 @@ static bool bson_visit_utf8(const bson_iter_t *iter, const char *key, size_t v_u
 static bool bson_visit_null(const bson_iter_t *iter, const char *key, void *data)
 {
 	return APPEND_BSON_PL_PAIR(data,key,ATOM_null,"constant");
+}
+
+static bool bson_visit_undefined(const bson_iter_t *iter, const char *key, void *data)
+{
+	return APPEND_BSON_PL_PAIR(data,key,ATOM_undefined,"constant");
 }
 
 static bool bson_visit_date_time(const bson_iter_t *iter, const char *key, int64_t msec_since_epoch, void *data)
@@ -188,6 +194,9 @@ static bool bson_iter_append_array(bson_iter_t *iter, PlTail *pl_array)
 	else if(BSON_ITER_HOLDS_NULL(iter)) {
 		pl_array->append(PlCompound("constant", PlTerm(ATOM_null)));
 	}
+	else if(BSON_ITER_HOLDS_UNDEFINED(iter)) {
+		pl_array->append(PlCompound("constant", PlTerm(ATOM_undefined)));
+	}
 	else {
 		bson_type_t iter_t = bson_iter_type(iter);
 		std::cout << "WARN: unsupported array type '" << iter_t << "'" << std::endl;
@@ -233,6 +242,7 @@ static bson_visitor_t get_bson_visitor()
 	visitor.visit_array      = bson_visit_array;
 	visitor.visit_document   = bson_visit_document;
 	visitor.visit_null       = bson_visit_null;
+	visitor.visit_undefined  = bson_visit_undefined;
 	return visitor;
 }
 
@@ -293,6 +303,9 @@ static bool bsonpl_append_typed(bson_t *doc, const char *key, const PlTerm &term
 	}
 	else if(type_atom == ATOM_constant && pl_value == ATOM_null) {
 		BSON_APPEND_NULL(doc, key);
+	}
+	else if(type_atom == ATOM_constant && pl_value == ATOM_undefined) {
+		BSON_APPEND_UNDEFINED(doc, key);
 	}
 	else if(type_atom == ATOM_regex) {
 		BSON_APPEND_REGEX(doc,key,(char*)pl_value,"msi");
