@@ -221,19 +221,18 @@ unpack_compound1([Field,Arg], Unpacked) :-
 unpack_compound1([Field,Arg,Is], [[Field,Arg,Is]]) :-
 	(ground(Arg);var(Arg)),!.
 
-unpack_compound1([Field,Term,Is], [[FunctorField,Functor,Is]|ArgsUnpacked]) :-
+unpack_compound1([Field,Term,Is], ArgsUnpacked) :-
 	compound(Term),!,
 	% compound term with free variables
-	Term =.. [Functor|Args],
-	atom_concat(Field,'.value.functor',FunctorField),
-	arg_fields_(Field, Args, Is, 0, ArgFields),
+	Term =.. TermList,
+	arg_fields_(Field, TermList, Is, 0, ArgFields),
 	unpack_compound(ArgFields, ArgsUnpacked).
 
 %%
-arg_fields_(_, [], _, []) :- !.
+arg_fields_(_, [], _, _, []) :- !.
 arg_fields_(Field, [X|Xs], Is, Index, [[Field,X,[Index|Is]]|Rest]) :-
 	Index1 is Index+1,
-	arg_fields_(Field, Xs, Index1, Rest).
+	arg_fields_(Field, Xs, Is, Index1, Rest).
 
 %%
 set_nested_args(Unpacked, ['$set', NestedArgs]) :-
@@ -246,7 +245,7 @@ set_nested_args(Unpacked, ['$set', NestedArgs]) :-
 	list_to_set(NestedArgs0, NestedArgs).
 
 set_nested_arg(Key, [I|Is], Arg) :-
-	atomic_list_concat(['$',Key,'.value.args'], '', ThisVal),
+	atomic_list_concat(['$',Key,'.value'], '', ThisVal),
 	atomic_list_concat([Key,I],'_',Y),
 	(	Arg=[Y, ['$arrayElemAt', array([string(ThisVal),integer(I)])]]
 	;	set_nested_arg(Y, Is, Y)
@@ -319,7 +318,18 @@ match_predicate(Unpacked, OuterCtx, Ctx, Match) :-
 	% separately because we cannot write path queries that
 	% access array elements.
 	set_nested_args(Unpacked,SetArgs),
+	% NOTE: term arguments are stored as documents {i: _, v: _}
+	%       and we need to do another $set here to read the value
+	%       of the "v" field.
+	findall([Key,string(Val)],
+		(	SetArgs=['$set', Ys],
+			member([Key,_],Ys),
+			atomic_list_concat(['$',Key,'.v'],Val)
+		),
+		SetArgs1
+	),
 	(	Match = SetArgs
+	;	Match = ['$set', SetArgs1]
 	;	match_nested(Unpacked, OuterCtx, Ctx, Match)
 	).
 
@@ -341,11 +351,12 @@ nested_args([_|Xs], Ys) :-
 
 %%
 match_conditional(FieldKey, Arg, OuterCtx, Ctx, ['$expr', ['$or', array([
-			% pass through if var is not grounded
-			['$eq',       array([string(ArgType),   string('var')])],
+			% pass through if field is undefined
+			['$eq',       array([string(ArgValue),  constant(undefined)])],
 			% else perform a match
 			[ArgOperator, array([string(ArgValue), string(FieldQuery)])]
 		])]]) :-
+	% TODO: the whole case can be pruned if ArgValue must be undefined
 	option(rdfs_fields(RDFSFields), Ctx, []),
 	% get the variable in Arg term
 	mng_strip_variable(Arg, Arg0),
@@ -358,7 +369,6 @@ match_conditional(FieldKey, Arg, OuterCtx, Ctx, ['$expr', ['$or', array([
 	->	atom_concat('$$',ArgKey,ArgValue)
 	;	atom_concat('$',ArgKey,ArgValue)
 	),
-	atom_concat(ArgValue,'.type',ArgType),
 	% get the operator
 	mng_strip_operator(Arg0, Operator1, _Arg1),
 	atom_concat('$',FieldKey,FieldQuery0),

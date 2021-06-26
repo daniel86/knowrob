@@ -200,33 +200,11 @@ compile_expanded_term(Expanded, V0->V1, Output0, Context) :-
 	merge_options([outer_vars(V0)], Context, InnerContext),
 	% and finall compile expanded terms
 	once(step_compile1(Expanded, InnerContext, Output)),
-	compiled_document(Output, Doc),
+	compiled_document(Output, Pipeline),
 	compiled_substitution(Output, StepVars),
 	list_to_set(StepVars, StepVars_unique),
 	% merge StepVars with variables in previous steps (V0)
 	merge_substitutions(StepVars_unique, V0, V1),
-	% create a field for each variable that was not referred to before
-	% TODO: do not do this if the variable is assigned anyway
-	findall([VarKey,[['type',string('var')], ['value',string(VarKey)]]],
-		(	(	option(input_assigned,Context)
-			->	InputKeys=[]
-			;	option(input_keys(InputKeys), Output, [])
-			),
-			member([VarKey,_], StepVars_unique),
-			\+ memberchk([VarKey,_], V0),
-			% also skip any keys marked as input as these are coming from the
-			% input collection
-			\+ memberchk(VarKey, InputKeys)
-		),
-		VarDocs0
-	),
-	% make sure there are no duplicate entries as these would cause
-	% compilation failure in a single $set!
-	list_to_set(VarDocs0,VarDocs),
-	(	VarDocs==[]
-	->	Pipeline=Doc
-	;	Pipeline=[['$set', VarDocs]|Doc]
-	),
 	merge_options(
 		[ document(Pipeline),
 		  variables(StepVars_unique)

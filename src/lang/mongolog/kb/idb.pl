@@ -40,7 +40,6 @@ idb_drop(Indicator) :-
 
 %% idb_assert(+Module, +Functor, +Args, +Clauses) is semidet.
 %
-%
 idb_assert(_Module, Functor, Args, Clauses) :-
 	Goal =.. [Functor|Args],
 %	writeln(compile_view(Goal)),
@@ -86,9 +85,8 @@ idb_assert(_Module, Functor, Args, Clauses) :-
 		;	(	member(K0,RDFSFields),
 				atom_concat(K0,'_s',K),
 				atom_concat('$',K,Kv),
-				atom_concat(Kv,'.type',Kt),
 				Condition=['$cond',[
-					[if,   ['$eq', array([string(Kt), string('var')])]],
+					[if,   ['$eq', array([string(Kv), constant(undefined)])]],
 					[then, string('$$REMOVE')],
 					[else, string(Kv)]
 				]]

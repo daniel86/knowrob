@@ -276,14 +276,12 @@ template_instantiation(List, Ctx, array(Elems)) :-
 
 template_instantiation(Template, Ctx, [
 		['type', string('compound')],
-		['value', [
-			['functor', string(Functor)],
-			['args', Args0]
-		]]
+		['value', Flattened]
 	]) :-
 	compound(Template),!,
-	Template =.. [Functor|Args],
-	template_instantiation(Args, Ctx, Args0).
+	% field value lookups "$field" must be written as "$$this.field within $map context.
+	merge_options([root_field('this')], Ctx, TermCtx),
+	mongolog_terms:mng_flatten_term(Template, TermCtx, Flattened).
 	
 template_instantiation(Atomic, _Ctx, Constant) :-
 	atomic(Atomic),

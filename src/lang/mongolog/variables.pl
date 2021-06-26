@@ -12,7 +12,6 @@
 
 :- use_module(library('db/mongo/client')).
 
-
 %% var_key(-Var, +Ctx, -Key) is det.
 %
 % Map a Prolog variable to the key that used to
@@ -47,7 +46,15 @@ arg_val(In, Ctx, Out) :-
 arg_val0(In, Ctx, string(Key)) :-
 	mng_strip_type(In, _, In0),
 	var_key(In0, Ctx, Out),
-	atom_concat('$',Out,Key),
+	% handle root_field/1 option that allows to select the root of the document
+	% where the argument fields are stored.
+	% By default this is "CURRENT" which must not be written out explicitely.
+	% But e.g. in the scope of $map the root is at "this" which must be specified
+	% explicitely when accessing a variable as in "$$this.foo".
+	(	option(root_field(Root), Ctx)
+	->	atomic_list_concat(['$$',Root,'.',Out],'',Key)
+	;	atom_concat('$',Out,Key)
+	),
 	!.
 
 arg_val0(In, _Ctx, Out) :-
@@ -73,19 +80,12 @@ arg_val0(TypedValue, _Ctx, TypedValue) :-
 
 arg_val0(Term, Ctx, [
 		['type', string('compound')],
-		['value', [
-			['functor', string(Functor)],
-			['args', array(Vals)]
-		]]
+		['value', Flattened]
 	]) :-
 	mng_strip_type(Term, term, Stripped),
 	compound(Stripped),
-	Stripped =.. [Functor|Args],
-	findall(X,
-		(	member(Y,Args),
-			arg_val0(Y, Ctx, X)
-		),
-		Vals).
+	% FIXME
+	mongolog_terms:mng_flatten_term(Stripped, Ctx, Flattened).
 
 %%
 %

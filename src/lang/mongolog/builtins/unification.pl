@@ -53,6 +53,7 @@ mongolog:step_compile((Term1 = Term2), Ctx, Pipeline) :-
 	arg_val(Term1,Ctx,Term1_val),
 	arg_val(Term2,Ctx,Term2_val),
 	% TODO: if var(Term1) then $set key(Term1) <- t_term1
+	% FIXME
 	findall(Step,
 		(	set_if_var(Term1, Term2_val, Ctx, Step)
 		;	set_if_var(Term2, Term1_val, Ctx, Step)

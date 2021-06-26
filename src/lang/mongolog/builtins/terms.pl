@@ -1,4 +1,4 @@
-:- module(mongolog_terms, []).
+:- module(mongolog_terms, [ mng_flatten_term/3 ]).
 /** <module> Analysing and constructing terms in mongolog programs.
 
 The following predicates are supported:
@@ -29,6 +29,50 @@ The following predicates are supported:
 %:- mongolog:add_command(term_variables).
 :- mongolog:add_command(=..).
 
+
+%% mng_flatten_term(+Term, +Ctx, -Flattened) is det.
+%
+%     a(b)    -> [ [[i,'1.0'],[v,a]], [[i,'1.1',b]] ]
+%     a(b(c)) -> [ [[i,'1.0'],[v,a]], [[i,'1.1.0'],[v,b]], [[i,'1.1.1'],[v,c]] ]
+%
+mng_flatten_term(Term, Ctx, array(Flattened)) :-
+	findall(X,
+		flatten_term0('', 1, Term, Ctx, X),
+		Flattened
+	).
+
+flatten_term0(Prefix, Index, Term, Ctx, Flattened) :-
+	compound(Term),!,
+	atom_number(IndexAtom,Index),
+	(	Prefix==''
+	->	InnerPrefix=IndexAtom
+	;	atomic_list_concat([Prefix,IndexAtom],'.',InnerPrefix)
+	),
+	Term =.. [Functor|Args],
+	(	flatten_term2(InnerPrefix, 0, Functor, Ctx, Flattened)
+	;	flatten_term1(InnerPrefix, 1, Args, Ctx, Flattened)
+	).
+
+flatten_term0(Prefix, Index, Arg, Ctx, Flattened) :-
+	flatten_term2(Prefix, Index, Arg, Ctx, Flattened).
+
+flatten_term1(Prefix, Index, [Arg|Rest], Ctx, Flattened) :-
+	NextIndex is Index + 1,
+	(	flatten_term0(Prefix, Index, Arg, Ctx, Flattened)
+	;	flatten_term1(Prefix, NextIndex, Rest, Ctx, Flattened)
+	).
+
+flatten_term2(Prefix, Index, Arg, Ctx, Out) :-
+	atom_number(IndexAtom, Index),
+	(	Prefix==[]
+	->	ArgIndex=IndexAtom
+	;	atomic_list_concat([Prefix,IndexAtom],'.',ArgIndex)
+	),
+	(	arg_val(Arg, Ctx, Val)
+	->	Out=[[i,string(ArgIndex)],[v,Val]]
+	;	Out=[[i,string(ArgIndex)]]
+	).
+
 %% functor(?Term, ?Name, ?Arity) [ISO]
 % True when Term is a term with functor Name/Arity.
 %
@@ -39,20 +83,48 @@ mongolog:step_compile(functor(Term,Functor,Arity), Ctx, Pipeline) :-
 	findall(Step,
 		(	set_if_var(Term, [
 				['type', string('compound')],
-				['value', [
-					['functor', Functor0],
-					['args', ['$map', [
+				['value', ['$concatArrays', array([
+					array([ [ [i,string('1.0')], [v,Functor0] ] ]),
+					['$map', [
 						['input', ['$range', array([ integer(0), Arity0, integer(1) ])]],
-						['in', [['type', string('var')], ['value', string('_')]]]
-					]]]
-				]]
+						['in', [[i, ['$concat', array([
+							string('1.'),
+							['$toString', ['$add', array([string('$$this'), integer(1)]) ]]
+						])]]]]
+					]]
+				])]]
 			], Ctx, Step)
 		;	Step=['$set', ['t_term', Term0]]
-		;	set_if_var(Functor,    string('$t_term.value.functor'), Ctx, Step)
-		;	match_equals(Functor0, string('$t_term.value.functor'), Step)
-		;	set_if_var(Arity,    ['$size', string('$t_term.value.args')], Ctx, Step)
-		;	match_equals(Arity0, ['$size', string('$t_term.value.args')], Step)
-		;	Step=['$unset', string('t_term')]
+		;	Step=['$set', [
+				% functor is first element of array at field t_term.value
+				['t_functor', ['$arrayElemAt', array([
+					string('$t_term.value'),
+					integer(0)
+				])]],
+				['t_arity', ['$reduce', [
+					[input, string('$t_term.value')],
+					[initialValue, integer(0)],
+					% this.i holds the index encoded as "i1.i2...in".
+					% max(i2) over all elements of flattened term is the arity of the term.
+					% TODO: store arity in a dedicated field? i.e. {type:compound, arity:n, value:..}
+					[in, ['$max', array([
+						string('$$value'),
+						['$toInt', ['$arrayElemAt', array([
+							['$split', array([string('$$this.i'), string('.')])],
+							integer(1)
+						])]]
+					])]]
+				]]]
+			]]
+		;	set_if_var(Functor,    string('$t_functor.v'), Ctx, Step)
+		;	match_equals(Functor0, string('$t_functor.v'), Step)
+		;	set_if_var(Arity,    string('$t_arity'), Ctx, Step)
+		;	match_equals(Arity0, string('$t_arity'), Step)
+		;	Step=['$unset', array([
+				string('t_arity'),
+				string('t_functor'),
+				string('t_term')
+			])]
 		),
 		Pipeline).
 
@@ -75,6 +147,7 @@ mongolog:step_compile(arg(Arg,Term,Value), Ctx, Pipeline) :-
 	arg_val(Arg,Ctx,Arg0),
 	arg_val(Term,Ctx,Term0),
 	arg_val(Value,Ctx,Value0),
+	% FIXME: use $filter to get all items with index prefix "1.$Arg"
 	findall(Step,
 		(	Step=['$set', ['t_term', Term0]]
 		;	set_if_var(Arg, ['$add', array([
@@ -96,36 +169,38 @@ mongolog:step_compile(arg(Arg,Term,Value), Ctx, Pipeline) :-
 %% copy_term(+In, -Out) [ISO]
 % Create a version of In with renamed (fresh) variables and unify it to Out.
 %
-mongolog:step_compile(copy_term(In,Out), Ctx, Pipeline) :-
+mongolog:step_compile(
+		copy_term(In,Out), Ctx,
+		[['$set', [OutKey, In0]]]) :-
 	arg_val(In,Ctx,In0),
-	var_key(Out,Ctx,OutKey),
-	findall(Step,
-		(	Step=['$set', ['t_term', In0]]
-		;	Step=['$set', [OutKey, ['$cond', [
-				% FIXME "$not 0" and "$not false" evaluates to true!
-				['if', ['$not', array([string('$t_term.value')])]],
-				['then', string('$t_term')],
-				['else', [
-					['type', string('compound')],
-					['value', [
-						['functor', string('$t_term.value.functor')],
-						['args', ['$map', [
-							['input', string('$t_term.value.args')],
-							['in', ['$cond', [
-								% if array element is not a variable
-								['if', ['$ne', array([string('$$this.type'), string('var')])]],
-								% then yield the value
-								['then', string('$$this')],
-								% else map to new variable
-								['else', [['type', string('var')], ['value', string('_')]]]
-							]]]
-						]]]
-					]]
-				]]
-			]]]]
-		;	Step=['$unset', string('t_term')]
-		),
-		Pipeline).
+	var_key(Out,Ctx,OutKey).
+%	findall(Step,
+%		(	Step=['$set', ['t_term', In0]]
+%		;	Step=['$set', [OutKey, ['$cond', [
+%				% FIXME "$not 0" and "$not false" evaluates to true!
+%				['if', ['$not', array([string('$t_term.value')])]],
+%				['then', string('$t_term')],
+%				['else', [
+%					['type', string('compound')],
+%					['value', [
+%						['functor', string('$t_term.value.functor')],
+%						['args', ['$map', [
+%							['input', string('$t_term.value.args')],
+%							['in', ['$cond', [
+%								% if array element is not a variable
+%								['if', ['$ne', array([string('$$this.type'), string('var')])]],
+%								% then yield the value
+%								['then', string('$$this')],
+%								% else map to new variable
+%								['else', [['type', string('var')], ['value', string('_')]]]
+%							]]]
+%						]]]
+%					]]
+%				]]
+%			]]]]
+%		;	Step=['$unset', string('t_term')]
+%		),
+%		Pipeline).
 
 %% ?Term =.. ?List [ISO]
 % List is a list whose head is the functor of Term and the remaining arguments
@@ -142,6 +217,7 @@ mongolog:step_compile(=..(Term,List), Ctx, Pipeline) :-
 	%
 	arg_val(Term,Ctx,Term0),
 	arg_val(List,Ctx,List0),
+	% FIXME:
 	findall(Step,
 		(	set_if_var(Term, [
 				['type', string('compound')],

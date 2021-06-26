@@ -50,6 +50,11 @@ format_doc([X-Y0|Rest0], [[X,Y1]|Rest1]) :-
 	!,
 	format_doc(Y0,Y1),
 	format_doc(Rest0,Rest1).
+format_doc([X|Xs], [Y|Ys]) :-
+	format_doc(X,Y),
+	format_doc(Xs,Ys).
+format_doc(array(Arr), array(Formatted)) :-
+	format_doc(Arr,Formatted).
 format_doc(X, X).
 
 %%

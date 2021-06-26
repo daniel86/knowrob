@@ -49,17 +49,19 @@ mongolog:step_compile(ground(Arg), Ctx, Pipeline) :-
 	arg_val(Arg, Ctx, Arg0),
 	findall(Step,
 		(	Step=['$set', ['t_term', Arg0]]
-		% fail if t_term is a variable
-		;	Step=['$match', ['t_term.type', ['$ne', string('var')]]]
+		% fail if t_term is a variable, i.e. if it is undefined.
+		% NOTE: above set may _not_ actually set the field if Arg0 resolves to undefined!
+		%       so it still makes sense to do this check here.
+		;	Step=['$match', ['t_term', ['$exists', bool(true)]]]
 		% fail if t_term is a term with a variable in arguments
 		;	Step=['$set', ['t_num_vars', ['$cond', [
-					['if', ['$not', array([string('$t_term.value.args')])]],
+					['if', ['$not', array([string('$t_term.value')])]],
 					['then', integer(0)],
 					['else', ['$reduce', [
-						['input', string('$t_term.value.args')],
+						['input', string('$t_term.value')],
 						['initialValue', integer(0)],
 						['in', ['$cond', [
-							['if', ['$ne', array([string('$$this.type'), string('var')])]],
+							['if', ['$ne', array([string('$$this.v'), constant(undefined)])]],
 							['then', string('$$value')],
 							['else', ['$add', array([string('$$value'), integer(1)])]]
 						]]]
@@ -86,10 +88,9 @@ mongolog:step_compile(var(Arg), Ctx, []) :-
 mongolog:step_compile(
 		var(Arg), Ctx,
 		[['$match', [
-			[Key0, ['$eq', string('var')]]
+			[Key, ['$exists', bool(false)]]
 		]]]) :-
-	var_key(Arg, Ctx, Key),
-	atom_concat(Key, '.type', Key0).
+	var_key(Arg, Ctx, Key).
 
 %% nonvar(@Term)
 % True if Term currently is not a free variable.
@@ -101,10 +102,9 @@ mongolog:step_compile(nonvar(Arg), _Ctx, []) :-
 mongolog:step_compile(
 		nonvar(Arg), Ctx,
 		[['$match', [
-			[Key0, ['$ne', string('var')]]
+			[Key, ['$exists', bool(true)]]
 		]]]) :-
-	var_key(Arg, Ctx, Key),
-	atom_concat(Key, '.type', Key0).
+	var_key(Arg, Ctx, Key).
 
 %% number(@Term)
 % True if Term is bound to a rational number (including integers) or a floating point number.
@@ -170,12 +170,11 @@ mongolog:step_compile(compound(Arg), Ctx, []) :-
 mongolog:step_compile(
 		compound(Arg), Ctx,
 		[['$match', [
-			[Key0, ['$exists', bool(true)]]
+			[Key0, string(compound)]
 		]]]) :-
-	% compound terms are represented as documents that have
-	% a field "functor"
+	% compound terms are represented as documents with a "type" field with value "compound"
 	var_key(Arg, Ctx, Key),
-	atom_concat(Key,'.value.functor',Key0).
+	atom_concat(Key,'.type',Key0).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%
@@ -210,11 +209,15 @@ test('ground(?Term)'):-
 	assert_true(mongolog_tests:test_call(
 		ground(Number), Number, 4.5)),
 	assert_true(mongolog_tests:test_call(
-		ground(foo(Number)), Number, 4.5)),
+		ground(a(Number)), Number, 4.5)),
+	assert_true(mongolog_tests:test_call(
+		ground(a(Number,b(c))), Number, 4.5)),
 	assert_false(mongolog_tests:test_call(
 		ground(_), _, 4.5)),
 	assert_false(mongolog_tests:test_call(
-		ground(foo(Number,_)), Number, 4.5)).
+		ground(a(Number,_)), Number, 4.5)),
+	assert_false(mongolog_tests:test_call(
+		ground(a(Number,b(_))), Number, 4.5)).
 
 test('var(?Term)'):-
 	assert_true(mongolog_tests:test_call(

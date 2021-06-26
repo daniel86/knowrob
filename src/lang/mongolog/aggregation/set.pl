@@ -33,15 +33,8 @@ set_next_vars(Vars,
 %
 set_if_var(Arg, Exp, Ctx,
 		['$set', [ArgKey,
-			['$cond', array([
-				% if X is a variable
-				['$eq', array([string(TypeVal), string('var')])],
-				% evaluate the expression and set new value
-				Exp,
-				% else value remains the same
-				string(ArgVal)
-			])]
+			['$ifNull', array([string(ArgVal),Exp])]
 		]]) :-
 	var_key(Arg, Ctx, ArgKey),
-	atom_concat('$',ArgKey,ArgVal),
-	atom_concat(ArgVal,'.type',TypeVal).
+	atom_concat('$',ArgKey,ArgVal).
+

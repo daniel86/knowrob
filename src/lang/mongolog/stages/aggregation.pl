@@ -7,9 +7,6 @@
 %%
 %
 aggregate(Coll, Pipeline, Vars, Result) :-
-	% get DB for cursor creation. use collection with just a
-	% single document as starting point.
-	%mng_one_db(DB, Coll),
 	mng_db_name(DB),
 	% run the query
 	setup_call_cleanup(
@@ -49,7 +46,7 @@ unify_grounded(Doc, [VarKey, Term]) :-
 	!,
 	mng_strip_type(TypedValue, _, Value),
 	% ignore if value in the document is a variable
-	(	Value=_{ type: string(var), value: _ }
+	(	Value=constant(undefined)
 	% try to unify
 	;	Term=Value
 	% special case for number comparison, e.g. `5.0 =:= 5`
@@ -79,35 +76,31 @@ unify_2(array(In), Vars, Out) :-
 	!,
 	unify_array(In, Vars, Out).
 
+unify_2([
+		type-string(compound),
+		value-array(Flattened)
+	], Vars, Out) :-
+	% a variable was instantiated to a compound term
+	!,
+	unflatten_term(Flattened, Vars, Out).
+
 unify_2([K-V|Rest], Vars, Out) :-
 	!,
 	dict_pairs(Dict,_,[K-V|Rest]),
 	unify_2(Dict, Vars, Out).
 
-unify_2(_{
-		type: string(var),
-		value: string(VarKey)
-	}, Vars, Out) :-
+unify_2(constant(null), _Vars, Out) :-
 	% a variable was not instantiated
 	!,
-	memberchk([VarKey, VarVal], Vars),
-	Out = VarVal. 
+	Out = _.
 
 unify_2(_{
 		type: string(compound),
-		value: Val
+		value: array(Flattened)
 	}, Vars, Out) :-
 	% a variable was instantiated to a compound term
 	!,
-	unify_2(Val, Vars, Out).
-
-unify_2(_{
-		functor: string(Functor),
-		args: Args
-	}, Vars, Out) :-
-	!,
-	unify_2(Args, Vars, Args0),
-	Out =.. [Functor|Args0].
+	unflatten_term(Flattened, Vars, Out).
 
 unify_2(TypedValue, _, Value) :-
 	% a variable was instantiated to an atomic value
@@ -118,6 +111,44 @@ unify_array([], _, []) :- !.
 unify_array([X|Xs], Vars, [Y|Ys]) :-
 	unify_2(X, Vars, Y),
 	unify_array(Xs, Vars, Ys).
+
+%%
+unflatten_term([X|Xs], Vars, Term) :-
+	term_index_prefix(X, Prefix),
+	term_value(X, X0),
+	unify_2(X0, Vars, Functor),
+	unflatten_with_prefix(Vars, Prefix, Xs, [], Args),
+	Term =.. [Functor|Args].
+
+%%
+unflatten_with_prefix(Vars, OuterPrefix, [X|Xs], Ys, [Val|Zs]) :-
+	% X is an atomic argument
+	term_index_prefix(X, OuterPrefix),
+	!,
+	term_value(X, X0),
+	once((var(X0) ; unify_2(X0, Vars, Val))),
+	unflatten_with_prefix(Vars, OuterPrefix, Xs, Ys, Zs).
+
+unflatten_with_prefix(Vars, OuterPrefix, [X|Xs], Ys, [Val|Zs]) :-
+	% X starts a new compound term
+	term_index_prefix(X, InnerPrefix),
+	atom_concat(OuterPrefix, _, InnerPrefix),
+	!,
+	unflatten_with_prefix(Vars, InnerPrefix, [X|Xs], Remainder, InnerTerm),
+	Val =.. InnerTerm,
+	unflatten_with_prefix(Vars, OuterPrefix, Remainder, Ys, Zs).
+
+unflatten_with_prefix(_, _, Remainder, Remainder, []) :- !.
+
+%%
+term_index_prefix([i-string(IndexAtom)|_], Prefix) :-
+	atomic_list_concat(X1, '.', IndexAtom),
+	reverse(X1, [_|X2]),
+	atomic_list_concat(X2, '.', Prefix).
+
+%%
+term_value([_,v-Val], Val).
+term_value([_], _).
 
 %%
 atom_to_term_(Atom, Term) :-

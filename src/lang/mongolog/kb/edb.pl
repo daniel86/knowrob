@@ -53,16 +53,14 @@ mongo_typed(X, Typed) :-
 	mng_strip_type(X,Type,Stripped),
 	mng_strip_type(Y,Type,Stripped),
 	mongo_term(Y,Typed).
-	
-mongo_term(term(Literal), [
+
+mongo_term(term(Term), [
 		['type', string('compound')],
-		['value', [
-			['functor', string(Functor)],
-			['args', array(ArgsTyped)]
-		]]
+		['value', Flattened]
 	]) :-
-	!, Literal =.. [Functor|Args],
-	maplist(mongo_typed, Args, ArgsTyped).
+	!,
+	mongolog_terms:mng_flatten_term(Term, [], Flattened).
+%	mng_flatten_term(Term, Flattened).
 mongo_term(X,X).
 
 %%

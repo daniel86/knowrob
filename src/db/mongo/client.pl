@@ -452,15 +452,56 @@ ensure_typed(Untyped,Typed) :-
 %%
 term_document(Term, [
 		['type', string('compound')],
-		['value', [
-			['functor', string(Functor)],
-			['args', array(ArgDocs)]
-		]]
+		['value', Flattened]
 	]) :-
+	flatten_term(Term, Flattened).
+
+
+
+% FIXME: redundant
+%
+%     a(b)    -> [ [[i,'1.0'],[v,a]], [[i,'1.1',b]] ]
+%     a(b(c)) -> [ [[i,'1.0'],[v,a]], [[i,'1.1.0'],[v,b]], [[i,'1.1.1'],[v,c]] ]
+%
+flatten_term(Term, array(Flattened)) :-
+	findall(X,
+		flatten_term0('', 1, Term, X),
+		Flattened
+	).
+
+flatten_term0(Prefix, Index, Term, Flattened) :-
+	compound(Term),!,
+	atom_number(IndexAtom,Index),
+	(	Prefix==''
+	->	InnerPrefix=IndexAtom
+	;	atomic_list_concat([Prefix,IndexAtom],'.',InnerPrefix)
+	),
 	Term =.. [Functor|Args],
-	maplist([Arg,Doc]>>
-		mng_query_value(Arg, ['$eq', Doc]),
-		Args, ArgDocs).
+	(	flatten_term2(InnerPrefix, 0, Functor, Flattened)
+	;	flatten_term1(InnerPrefix, 1, Args, Flattened)
+	).
+
+flatten_term0(Prefix, Index, Arg, Flattened) :-
+	flatten_term2(Prefix, Index, Arg, Flattened).
+
+flatten_term1(Prefix, Index, [Arg|Rest], Flattened) :-
+	NextIndex is Index + 1,
+	(	flatten_term0(Prefix, Index, Arg, Flattened)
+	;	flatten_term1(Prefix, NextIndex, Rest, Flattened)
+	).
+
+flatten_term2(Prefix, Index, Arg, Out) :-
+	atom_number(IndexAtom, Index),
+	(	Prefix==[]
+	->	ArgIndex=IndexAtom
+	;	atomic_list_concat([Prefix,IndexAtom],'.',ArgIndex)
+	),
+	mng_query_value(Arg, ['$eq', Val]),
+	Out=[[i,string(ArgIndex)],[v,Val]].
+%	(	mng_query_value(Arg, ['$eq', Val])
+%	->	Out=[[i,string(ArgIndex)],[v,Val]]
+%	;	Out=[[i,string(ArgIndex)]]
+%	).
 
 %% mng_unflatten(+Flat, -Nested) is det.
 %
