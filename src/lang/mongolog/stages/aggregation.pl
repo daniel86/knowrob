@@ -76,10 +76,10 @@ unify_2(array(In), Vars, Out) :-
 	!,
 	unify_array(In, Vars, Out).
 
-unify_2([
-		type-string(compound),
-		value-array(Flattened)
-	], Vars, Out) :-
+unify_2(List, Vars, Out) :-
+	is_list(List),
+	memberchk(type-string(compound),  List),
+	memberchk(value-array(Flattened), List),
 	% a variable was instantiated to a compound term
 	!,
 	unflatten_term(Flattened, Vars, Out).
@@ -94,10 +94,10 @@ unify_2(constant(null), _Vars, Out) :-
 	!,
 	Out = _.
 
-unify_2(_{
-		type: string(compound),
-		value: array(Flattened)
-	}, Vars, Out) :-
+unify_2(Dict, Vars, Out) :-
+	is_dict(Dict),
+	get_dict(type,  Dict, string(compound)),
+	get_dict(value, Dict, array(Flattened)),
 	% a variable was instantiated to a compound term
 	!,
 	unflatten_term(Flattened, Vars, Out).

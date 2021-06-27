@@ -52,8 +52,6 @@ mongolog:step_compile((Term1 = Term2), _, _) :-
 mongolog:step_compile((Term1 = Term2), Ctx, Pipeline) :-
 	arg_val(Term1,Ctx,Term1_val),
 	arg_val(Term2,Ctx,Term2_val),
-	% TODO: if var(Term1) then $set key(Term1) <- t_term1
-	% FIXME
 	findall(Step,
 		(	set_if_var(Term1, Term2_val, Ctx, Step)
 		;	set_if_var(Term2, Term1_val, Ctx, Step)
@@ -85,49 +83,80 @@ set_term_arguments(List1, List2, List1Key, List2Key,
 	(is_list(List1);is_list(List2)),!,
 	atom_concat('$',List1Key,List1Val),
 	atom_concat('$',List2Key,List2Val),
-	unify_list(List1Val, List2Val, MapList).
+writeln(fixme(set_list_args(List1, List2))),
+	MapList=['$map', [
+		['input', string(List1Val)],
+		['in', ['$cond', [
+			% if not a variable
+			['if', ['$eq', array([string('$$this'), constant(undefined)])]],
+			% then use argument of other term
+			% FIXME: $indexOfArray only return first occurence, we need to call $range to
+			%        iterate over every index!!
+			%        TODO: Is there a way to get index from $map context?
+			['then', ['$arrayElemAt', array([
+				string(List2Val),
+				['$indexOfArray', array([string(List1Val),string('$$this')])]
+			])]],
+			% else use $$this
+			['else', string('$$this')]
+		]]]
+	]].
 
 set_term_arguments(_Term1, _Term2, Term1Key, Term2Key, Set) :-
 	set_term_arguments(Term1Key, Term2Key, Set).
 
 %%
+% assign vars in term1 to values of arguments in term2
+%
 set_term_arguments(Term1Key, Term2Key,
-		['$set', [Term1Key, ['$cond', [
-			['if', ['$not', array([string(Term1Args0)])]],
-			['then', string(Term1Value)],
-			['else', [
-				['type', string('compound')],
-				['value', [
-					['functor', string(FunctorValue)],
-					['args', MapList]
-				]]
-			]]
-		]]]]) :-
+	['$set', [Term1Key, ['$cond', [
+		% if term1 is atomic (no field term.value exists)
+		['if', ['$eq', array([string(Term1Args0), constant(undefined)])]],
+		% then assign self if not a variable, and use term2 as value else
+		['then', ['$ifNull', array([string(Term1Value), string(Term2Value)])]],
+		% if term is non atomic...
+		['else', [
+			['type', string('compound')],
+			['arity', string(Term1Arity)],
+			% NOTE: toplevel $reduce is used to flatten the lists created by $map below
+			['value', ['$reduce', [
+				[initialValue, array([])],
+				[in, ['$concatArrays', array([string('$$value'), string('$$this')]) ]],
+				% map each element in term1 to a list of elements where variables
+				% have been replaced with values from term2.
+				% NOTE: variable aliasing is not supported here!
+				[input, ['$map', [
+					[input, string(Term1Args0)],
+					[as, string('t1')],
+					[in, ['$cond', [
+						% if t1 is a variable
+						[if, ['$eq', array([string('$$t1.v'), constant(undefined)])]],
+						% select each t2 where t1.i is a prefix of t2.i
+						[then, ['$filter', [
+							[input, string(Term2Args0)],
+							[as, string('t2')],
+							% test that t1.i is a prefix of t2.i
+							[cond, ['$eq', array([
+								string('$$t1.i'),
+								['$substr', array([
+									string('$$t2.i'),
+									integer(0),
+									['$strLenCP', string('$$t1.i')]
+								])]
+							])]]
+						]]],
+						% else keep the value
+						[else, array([string('$$t1')])]
+					]]]
+				]]]
+			]]]
+		]]
+	]]]]) :-
 	atom_concat('$',Term1Key,Term1Value),
-	atom_concat(Term1Value,'.value.functor',FunctorValue),
-	atomic_list_concat(['$',Term1Key,'.value.args'],Term1Args0),
-	atomic_list_concat(['$',Term2Key,'.value.args'],Term2Args0),
-	unify_list(Term1Args0, Term2Args0, MapList).
-
-%%
-unify_list(List1Val, List2Val, MapList) :-
-	MapList=['$map', [
-		['input', string(List1Val)],
-		['in', ['$cond', [
-			% if not a variable
-			['if', ['$ne', array([string('$$this.type'), string('var')])]],
-			% then use $$this
-			['then', string('$$this')],
-			% else use argument of other term
-			% FIXME: $indexOfArray only return first occurence, we need to call $range to
-			%        iterate over every index!!
-			%        TODO: Is there a way to get index from $map context?
-			['else', ['$arrayElemAt', array([
-				string(List2Val),
-				['$indexOfArray', array([string(List1Val),string('$$this')])]
-			])]]
-		]]]
-	]].
+	atom_concat('$',Term2Key,Term2Value),
+	atomic_list_concat(['$',Term1Key,'.arity'],Term1Arity),
+	atomic_list_concat(['$',Term1Key,'.value'],Term1Args0),
+	atomic_list_concat(['$',Term2Key,'.value'],Term2Args0).
 
 %%
 % =/2 builds up two fields 't_term1' and 't_term2'.
@@ -155,19 +184,32 @@ set_term_vars(Args, Field, Ctx, SetVars) :-
 set_term_vars(Term, Field, Ctx, SetVars) :-
 	% nonvar(Term),
 	Term =.. [_Functor|Args],
-	atomic_list_concat(['$',Field,'.value.args'], ArrayField),
+	atomic_list_concat(['$',Field,'.value'], ArrayField),
 	set_term_vars1(Args, ArrayField, Ctx, SetVars).
 
 %%
-set_term_vars1(Args, ArrayField, Ctx, ['$set', [ArgField,
-		['$arrayElemAt', array([string(ArrayField),integer(Index)])]]]) :-
+set_term_vars1(Args, ArrayField, Ctx, Step) :-
 	% iterate over arguments
 	length(Args, NumArgs),
 	NumArgs0 is NumArgs - 1,
-	between(0, NumArgs0, Index),
-	nth0(Index, Args, Arg),
+	between(0, NumArgs0, Index0),
+	nth0(Index0, Args, Arg),
 	% get the varkey or fail if it is not a var
-	var_key(Arg, Ctx, ArgField).
+	var_key(Arg, Ctx, ArgField),
+	%
+	(	(	% access argument with given index
+			% FIXME: argument could be a term, or? then there would be a set of entries in the
+			%        array that start with index prefix "1.Index", and a term must be constructed!
+			%        in the new term the prefix is changed from "1.Index" to "1."
+			Index is Index0+1,
+			Step=['$set', [ArgField, ['$arrayElemAt', array([string(ArrayField),integer(Index)])]]]
+		)
+	;	(	% the argument is stored as a document {i:_,v:_}
+			% the i field is removed in this step.
+			atomic_list_concat(['$', ArgField, '.v'], '', FieldValue),
+			Step=['$set', [ArgField, string(FieldValue)]]
+		)
+	).
 
 		 /*******************************
 		 *    	  UNIT TESTING     		*
@@ -232,20 +274,21 @@ test('unification 2-ary term with var'):-
 	mongolog_tests:test_call(=(foo(a,Y),X), X, foo(a,b)),
 	assert_equals(Y,b).
 
-test('unified vars are equivalent'):-
-	mongolog_tests:test_call(=(X,Y), X, _),
-	assert_equals(X,Y).
-
-test('unified vars can be implicitly instantiated',
-		fixme('all equivalent variables must be instantiated together')):-
-	mongolog_tests:test_call((=(X,Y), X is 4), X, _),
-	assert_equals(X,4),
-	assert_equals(Y,4).
-
 test('variables may appear multiple times in terms'):-
 	mongolog_tests:test_call(=(f(g(X),X),f(Y,Z)), Z, a),
 	assert_equals(X,a),
 	assert_equals(Y,g(a)).
+
+test('unified vars are equivalent',
+		fixme('support variable aliasing')):-
+	mongolog_tests:test_call(=(X,Y), X, _),
+	assert_equals(X,Y).
+
+test('unified vars can be implicitly instantiated',
+		fixme('support variable aliasing')):-
+	mongolog_tests:test_call((=(X,Y), X is 4), X, _),
+	assert_equals(X,4),
+	assert_equals(Y,4).
 
 :- end_tests('mongolog_unification').
 

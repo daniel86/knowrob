@@ -168,7 +168,7 @@ mongolog:step_compile(
 	arg_val(List,Ctx,List0),
 	arg_val(Elem,Ctx,Elem0),
 	% compute steps of the aggregate pipeline
-	% FIXME
+	%% FIXME
 	findall(Step,
 		(	set_if_var(Elem,  ['$arrayElemAt', array([List0,Index0])], Ctx, Step)
 		;	set_if_var(Index, ['$indexOfArray', array([List0,Elem0])], Ctx, Step)

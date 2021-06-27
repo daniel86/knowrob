@@ -276,9 +276,11 @@ template_instantiation(List, Ctx, array(Elems)) :-
 
 template_instantiation(Template, Ctx, [
 		['type', string('compound')],
+		['arity', integer(Arity)],
 		['value', Flattened]
 	]) :-
 	compound(Template),!,
+	functor(Template,_,Arity),
 	% field value lookups "$field" must be written as "$$this.field within $map context.
 	merge_options([root_field('this')], Ctx, TermCtx),
 	mongolog_terms:mng_flatten_term(Template, TermCtx, Flattened).

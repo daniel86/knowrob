@@ -79,11 +79,13 @@ arg_val0(TypedValue, _Ctx, TypedValue) :-
 	!.
 
 arg_val0(Term, Ctx, [
-		['type', string('compound')],
+		['type',  string('compound')],
+		['arity', integer(Arity)],
 		['value', Flattened]
 	]) :-
 	mng_strip_type(Term, term, Stripped),
 	compound(Stripped),
+	functor(Term, _, Arity),
 	% FIXME
 	mongolog_terms:mng_flatten_term(Stripped, Ctx, Flattened).
 

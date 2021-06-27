@@ -83,6 +83,7 @@ mongolog:step_compile(functor(Term,Functor,Arity), Ctx, Pipeline) :-
 	findall(Step,
 		(	set_if_var(Term, [
 				['type', string('compound')],
+				['arity', Arity0],
 				['value', ['$concatArrays', array([
 					array([ [ [i,string('1.0')], [v,Functor0] ] ]),
 					['$map', [
@@ -95,33 +96,18 @@ mongolog:step_compile(functor(Term,Functor,Arity), Ctx, Pipeline) :-
 				])]]
 			], Ctx, Step)
 		;	Step=['$set', ['t_term', Term0]]
-		;	Step=['$set', [
+		;	Step=['$set',
 				% functor is first element of array at field t_term.value
 				['t_functor', ['$arrayElemAt', array([
 					string('$t_term.value'),
 					integer(0)
-				])]],
-				['t_arity', ['$reduce', [
-					[input, string('$t_term.value')],
-					[initialValue, integer(0)],
-					% this.i holds the index encoded as "i1.i2...in".
-					% max(i2) over all elements of flattened term is the arity of the term.
-					% TODO: store arity in a dedicated field? i.e. {type:compound, arity:n, value:..}
-					[in, ['$max', array([
-						string('$$value'),
-						['$toInt', ['$arrayElemAt', array([
-							['$split', array([string('$$this.i'), string('.')])],
-							integer(1)
-						])]]
-					])]]
-				]]]
-			]]
+				])]]
+			]
 		;	set_if_var(Functor,    string('$t_functor.v'), Ctx, Step)
 		;	match_equals(Functor0, string('$t_functor.v'), Step)
-		;	set_if_var(Arity,    string('$t_arity'), Ctx, Step)
-		;	match_equals(Arity0, string('$t_arity'), Step)
+		;	set_if_var(Arity,    string('$t_term.arity'), Ctx, Step)
+		;	match_equals(Arity0, string('$t_term.arity'), Step)
 		;	Step=['$unset', array([
-				string('t_arity'),
 				string('t_functor'),
 				string('t_term')
 			])]

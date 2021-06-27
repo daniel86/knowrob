@@ -56,9 +56,11 @@ mongo_typed(X, Typed) :-
 
 mongo_term(term(Term), [
 		['type', string('compound')],
+		['arity', integer(Arity)],
 		['value', Flattened]
 	]) :-
 	!,
+	functor(Term,_,Arity),
 	mongolog_terms:mng_flatten_term(Term, [], Flattened).
 %	mng_flatten_term(Term, Flattened).
 mongo_term(X,X).

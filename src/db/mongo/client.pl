@@ -451,9 +451,11 @@ ensure_typed(Untyped,Typed) :-
 
 %%
 term_document(Term, [
-		['type', string('compound')],
+		['type',  string('compound')],
+		['arity', integer(Arity)],
 		['value', Flattened]
 	]) :-
+	functor(Term,_,Arity),
 	flatten_term(Term, Flattened).
 
 
