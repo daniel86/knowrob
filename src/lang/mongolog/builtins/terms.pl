@@ -17,6 +17,7 @@ The following predicates are supported:
 
 :- use_module('../mongolog').
 :- use_module('../variables').
+:- use_module('../builtins/unification', [ unify_arg_field/4 ]).
 :- use_module('../aggregation/match').
 :- use_module('../aggregation/set').
 
@@ -30,16 +31,77 @@ The following predicates are supported:
 :- mongolog:add_command(=..).
 
 
+%%
+set_term_argument(Input, IndexString, OutputField, Step) :-
+	atom_concat('$',OutputField,OutputField0),
+	% - store some temp values to avoid repetitive computation
+	(	Step=['$set', ['t_isize', ['$strLenCP', IndexString]]]
+	% - retrieve t_index'th argument of term
+	;	Step=['$set', [OutputField, ['$map', [
+			[in, [
+				[v, string('$$this.v')],
+				[i, ['$concat', array([
+					string('1'),
+					['$substr', array([
+						string('$$this.i'),
+						string('$t_isize'),
+						integer(-1)
+					])]
+				])]]
+			]],
+			[input, ['$filter', [
+				% $filter t_term.value, only keeping entries for the selected
+				% argument index
+				[input, Input],
+				[cond, ['$eq', array([
+					IndexString,
+					['$substr', array([
+						string('$$this.i'),
+						integer(0),
+						string('$t_isize')
+					])]
+				])]]
+			]]]
+		]]]]
+	;	Step=['$set', [OutputField, ['$cond', [
+			[if,   ['$eq', array([integer(1), ['$size', string(OutputField0)]])]],
+			% special handling of atomic values
+			[then, ['$arrayElemAt', array([
+				['$map', [
+					[input, string(OutputField0)],
+					[in, string('$$this.v')]
+				]],
+				integer(0)
+			])]],
+			% else create a term document
+			[else, [
+				[type,string(compound)],
+				[arity, ['$max', ['$map', [
+					[input,string(OutputField0)],
+					[in, ['$toInt', ['$arrayElemAt', array([
+						['$split', array([string('$$this.i'), string('.')])],
+						integer(1)
+					])]]]
+				]]]],
+				[value,string(OutputField0)]
+			]]
+		]]]]
+	;	Step=['$unset', string('t_isize')]
+	).
+
 %% mng_flatten_term(+Term, +Ctx, -Flattened) is det.
 %
-%     a(b)    -> [ [[i,'1.0'],[v,a]], [[i,'1.1',b]] ]
+%     a(b)    -> [ [[i,string('1.0')],[v,string(a)]], [[i,string('1.1'),b]] ]
 %     a(b(c)) -> [ [[i,'1.0'],[v,a]], [[i,'1.1.0'],[v,b]], [[i,'1.1.1'],[v,c]] ]
 %
 mng_flatten_term(Term, Ctx, array(Flattened)) :-
 	findall(X,
-		flatten_term0('', 1, Term, Ctx, X),
+		mng_flatten_term1(Term, Ctx, X),
 		Flattened
 	).
+
+mng_flatten_term1(Term, Ctx, X) :-
+	flatten_term0('', 1, Term, Ctx, X).
 
 flatten_term0(Prefix, Index, Term, Ctx, Flattened) :-
 	compound(Term),!,
@@ -62,7 +124,7 @@ flatten_term1(Prefix, Index, [Arg|Rest], Ctx, Flattened) :-
 	;	flatten_term1(Prefix, NextIndex, Rest, Ctx, Flattened)
 	).
 
-flatten_term2(Prefix, Index, Arg, Ctx, Out) :-
+flatten_term2(Prefix, Index, Arg, Ctx, Out0) :-
 	atom_number(IndexAtom, Index),
 	(	Prefix==[]
 	->	ArgIndex=IndexAtom
@@ -71,6 +133,10 @@ flatten_term2(Prefix, Index, Arg, Ctx, Out) :-
 	(	arg_val(Arg, Ctx, Val)
 	->	Out=[[i,string(ArgIndex)],[v,Val]]
 	;	Out=[[i,string(ArgIndex)]]
+	),
+	(	option(keep_vars,Ctx)
+	->	Out0=[[var,Arg]|Out]
+	;	Out0=Out
 	).
 
 %% functor(?Term, ?Name, ?Arity) [ISO]
@@ -122,35 +188,75 @@ mongolog:step_compile(functor(Term,Functor,Arity), Ctx, Pipeline) :-
 % argument number. Backtracking yields alternative solutions.
 %
 mongolog:step_compile(arg(Arg,Term,Value), Ctx, Pipeline) :-
-	% TODO: support var(Arg),var(Value):
-	%	- list all args with their index
-	%	- first add indices to list, then $unwind
-	% FIXME: arg also need to handle var unification as in:
-	%         arg(0,foo(X),Y) would imply X=Y
-	%		- can be handled with conditional $set, add [X,Y] to
-	%         var array if both of them are vars
-	%
 	arg_val(Arg,Ctx,Arg0),
 	arg_val(Term,Ctx,Term0),
-	arg_val(Value,Ctx,Value0),
-	% FIXME: use $filter to get all items with index prefix "1.$Arg"
 	findall(Step,
 		(	Step=['$set', ['t_term', Term0]]
-		;	set_if_var(Arg, ['$add', array([
-					['$indexOfArray', array([ string('$t_term.value.args'), Value0 ])],
-					integer(1)
-			])], Ctx, Step)
-		;	set_if_var(Value, ['$arrayElemAt', array([
-					string('$t_term.value.args'),
-					['$subtract', array([Arg0, integer(1)])]	
-			])], Ctx, Step)
-		;	match_equals(Value0, ['$arrayElemAt', array([
-					string('$t_term.value.args'),
-					['$subtract', array([Arg0, integer(1)])]	
-			])], Step)
-		;	Step=['$unset', string('t_term')]
+		% - compute t_index=[Arg] if ground(Arg) and t_index=[0,...,Arity] else;
+		;	Step=['$set', ['t_index', ['$cond', [
+				[if,   ['$eq', array([Arg0,constant(undefined)])]],
+				[then, ['$range', array([
+					integer(1),
+					['$add', array([integer(1), string('$t_term.arity')])]
+				])]],
+				[else, array([Arg0])]
+			]]]]
+		% - then iterate over each index in $t_index
+		;	Step=['$unwind', string('$t_index')]
+		% - assign the Arg field to the unwinded index
+		;	set_if_var(Arg, string('$t_index'), Ctx, Step)
+		% - convert to index string "1.Arg"
+		%   FIXME: should have a trailing dot! else BUG for terms with more then 9 arguments!!
+		%          but probably need to add trailing dot everywhere...
+		;	Step=['$set', ['t_index', ['$concat', array([
+				string('1.'), ['$toString', string('$t_index')]
+			])]]]
+		% - retrieve t_index'th argument of term
+		;	set_term_argument(
+				string('$t_term.value'),
+				string('$t_index'),
+				't_val1', Step)
+		% unify: Value = t_val1
+		;	unify_arg_field(Value, 't_val1', Ctx, Step)
+		% cleanup
+		;	Step=['$unset', array([
+				string('t_term'),
+				string('t_index'),
+				string('t_val1')
+			])]
 		),
 		Pipeline).
+	
+%mongolog:step_compile(arg(Arg,Term,Value), Ctx, Pipeline) :-
+%	% TODO: support var(Arg),var(Value):
+%	%	- list all args with their index
+%	%	- first add indices to list, then $unwind
+%	% FIXME: arg also need to handle var unification as in:
+%	%         arg(0,foo(X),Y) would imply X=Y
+%	%		- can be handled with conditional $set, add [X,Y] to
+%	%         var array if both of them are vars
+%	%
+%	arg_val(Arg,Ctx,Arg0),
+%	arg_val(Term,Ctx,Term0),
+%	arg_val(Value,Ctx,Value0),
+%	% FIXME: use $filter to get all items with index prefix "1.$Arg"
+%	findall(Step,
+%		(	Step=['$set', ['t_term', Term0]]
+%		;	set_if_var(Arg, ['$add', array([
+%					['$indexOfArray', array([ string('$t_term.value.args'), Value0 ])],
+%					integer(1)
+%			])], Ctx, Step)
+%		;	set_if_var(Value, ['$arrayElemAt', array([
+%					string('$t_term.value.args'),
+%					['$subtract', array([Arg0, integer(1)])]	
+%			])], Ctx, Step)
+%		;	match_equals(Value0, ['$arrayElemAt', array([
+%					string('$t_term.value.args'),
+%					['$subtract', array([Arg0, integer(1)])]	
+%			])], Step)
+%		;	Step=['$unset', string('t_term')]
+%		),
+%		Pipeline).
 
 %% copy_term(+In, -Out) [ISO]
 % Create a version of In with renamed (fresh) variables and unify it to Out.

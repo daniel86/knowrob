@@ -1,4 +1,6 @@
-:- module(mongolog_unification, []).
+:- module(mongolog_unification,
+		[ unify_arg_field/4
+		]).
 /** <module> Unification of terms in mongolog programs.
 
 The following predicates are supported:
@@ -73,6 +75,23 @@ mongolog:step_compile((Term1 = Term2), Ctx, Pipeline) :-
 		Pipeline).
 
 %%
+unify_arg_field(Argument, Field, Ctx, Step) :-
+	arg_val(Argument,Ctx,Argument0),
+	atom_concat('$',Field,Field0),
+	(	set_if_var(Argument, string(Field0), Ctx, Step)
+	% make Argument accessible via field
+	;	Step=['$set', ['t_arg', Argument0]]
+	% assign vars in t_arg to values of arguments in Field
+	;	set_term_arguments('t_arg', Field, Step)
+	% perform equality test
+	;	match_equals(string(Field0), string('$t_arg'), Step)
+	% project new variable groundings
+	;	set_term_vars(Argument, 't_arg', Ctx, Step)
+	% and cleanup
+	;	Step=['$unset', string('t_arg')]
+	).
+
+%%
 % this operation replaces all variable arguments in Term1 with
 % arguments in Term2.
 % NOTE: variables are also replaced if the argument in Term2 is also a variable.
@@ -80,6 +99,7 @@ mongolog:step_compile((Term1 = Term2), Ctx, Pipeline) :-
 %
 set_term_arguments(List1, List2, List1Key, List2Key,
 		['$set', [List1Key, MapList]]) :-
+	% TODO: remove this clause/rule
 	(is_list(List1);is_list(List2)),!,
 	atom_concat('$',List1Key,List1Val),
 	atom_concat('$',List2Key,List2Val),
@@ -183,12 +203,25 @@ set_term_vars(Args, Field, Ctx, SetVars) :-
 
 set_term_vars(Term, Field, Ctx, SetVars) :-
 	% nonvar(Term),
-	Term =.. [_Functor|Args],
-	atomic_list_concat(['$',Field,'.value'], ArrayField),
-	set_term_vars1(Args, ArrayField, Ctx, SetVars).
+	atomic_list_concat(['$',Field,'.value'], Input),
+	set_term_vars0(Term, string(Input), Ctx, SetVars).
+
+%%
+set_term_vars0(Term, Input, Ctx, Step) :-
+	% iterate over variables and their index string in flattened form
+	mongolog_terms:mng_flatten_term1(
+		Term,
+		[keep_vars|Ctx],
+		[[var,Arg],[i,IndexString]|_]),
+	% get the field key for Arg
+	var_key(Arg, Ctx, ArgField),
+	% finally generate $set operation
+	mongolog_terms:set_term_argument(
+		Input, IndexString, ArgField, Step).
 
 %%
 set_term_vars1(Args, ArrayField, Ctx, Step) :-
+	% TODO: remove this clause
 	% iterate over arguments
 	length(Args, NumArgs),
 	NumArgs0 is NumArgs - 1,
