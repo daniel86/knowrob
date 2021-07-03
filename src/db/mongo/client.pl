@@ -500,10 +500,6 @@ flatten_term2(Prefix, Index, Arg, Out) :-
 	),
 	mng_query_value(Arg, ['$eq', Val]),
 	Out=[[i,string(ArgIndex)],[v,Val]].
-%	(	mng_query_value(Arg, ['$eq', Val])
-%	->	Out=[[i,string(ArgIndex)],[v,Val]]
-%	;	Out=[[i,string(ArgIndex)]]
-%	).
 
 %% mng_unflatten(+Flat, -Nested) is det.
 %

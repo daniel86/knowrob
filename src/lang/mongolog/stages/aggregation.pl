@@ -112,13 +112,18 @@ unify_array([X|Xs], Vars, [Y|Ys]) :-
 	unify_2(X, Vars, Y),
 	unify_array(Xs, Vars, Ys).
 
-%%
+% unflatten a term, i.e. translate from mongo terms to Prolog terms
 unflatten_term([X|Xs], Vars, Term) :-
 	term_index_prefix(X, Prefix),
 	term_value(X, X0),
 	unify_2(X0, Vars, Functor),
 	unflatten_with_prefix(Vars, Prefix, Xs, [], Args),
-	Term =.. [Functor|Args].
+	% NOTE: special case for lists needed because mongo n-elemental lists are
+	%       represented as n-ary terms, but Prolog lists are represented as 2-ary terms.
+	(	Functor=='[|]'
+	->	Term = Args
+	;	Term =.. [Functor|Args]
+	).
 
 %%
 unflatten_with_prefix(Vars, OuterPrefix, [X|Xs], Ys, [Val|Zs]) :-
@@ -130,25 +135,33 @@ unflatten_with_prefix(Vars, OuterPrefix, [X|Xs], Ys, [Val|Zs]) :-
 	unflatten_with_prefix(Vars, OuterPrefix, Xs, Ys, Zs).
 
 unflatten_with_prefix(Vars, OuterPrefix, [X|Xs], Ys, [Val|Zs]) :-
-	% X starts a new compound term
+	% X starts a new compound term, consume rest of Xs that is part of the compound
+	% then continue with the Remainder in Xs.
 	term_index_prefix(X, InnerPrefix),
 	atom_concat(OuterPrefix, _, InnerPrefix),
 	!,
 	unflatten_with_prefix(Vars, InnerPrefix, [X|Xs], Remainder, InnerTerm),
-	Val =.. InnerTerm,
+	once((
+		InnerTerm=['[|]'|Val]
+	;	Val =.. InnerTerm
+	)),
 	unflatten_with_prefix(Vars, OuterPrefix, Remainder, Ys, Zs).
 
 unflatten_with_prefix(_, _, Remainder, Remainder, []) :- !.
 
 %%
-term_index_prefix([i-string(IndexAtom)|_], Prefix) :-
+term_index_prefix(Term, Prefix) :-
+	memberchk(i-string(IndexAtom),Term),
 	atomic_list_concat(X1, '.', IndexAtom),
+	% remove last prefix element
 	reverse(X1, [_|X2]),
-	atomic_list_concat(X2, '.', Prefix).
+	reverse(X2, X3),
+	atomic_list_concat(X3, '.', Prefix).
 
 %%
-term_value([_,v-Val], Val).
-term_value([_], _).
+term_value(Term, Val) :-
+	memberchk(v-Val, Term),!.
+term_value(_, _).
 
 %%
 atom_to_term_(Atom, Term) :-

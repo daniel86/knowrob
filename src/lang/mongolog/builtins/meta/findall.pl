@@ -54,14 +54,15 @@ mongolog:step_compile1(findall(Goal, List), Ctx,
 	findall(Step,
 		% collect results in 't_next' array
 		(	member(Step,InnerPipeline)
+		;	mongolog_lists:array_to_list('t_next', 't_list', Step)
 		% field(List) = $t_next
-		;	set_if_var(List, string('$t_next'), Ctx_outer, Step)
+		;	set_if_var(List, string('$t_list'), Ctx_outer, Step)
 		% field(List) == argval(List)
 		;	(	arg_val(List, Ctx_outer, List0),
-				match_equals(List0, string('$t_next'), Step)
+				match_equals(List0, string('$t_list'), Step)
 			)
 		% delete(t_next)
-		;	Step=['$unset', array([string('t_next')])]
+		;	Step=['$unset', array([string('t_list'), string('t_next')])]
 		),
 		Pipeline).
 
@@ -246,13 +247,18 @@ findall_map(Template, List, Ctx_outer, Ctx_inner, Step) :-
 	% the pattern in a query, it must be given in the findall command compile-time.
 	template_instantiation(Template, Ctx_inner, Instantiation),
 	% $set the list variable field from 'next' field
-	(	Step=['$set', ['t_list', ['$map',[
+	(	Step=['$set', ['t_array', ['$map',[
 				['input',string('$t_next')],
 				['in', Instantiation] ]]]]
+	% convert array to list term
+	;	mongolog_lists:array_to_list('t_array', 't_list', Step)
+	% TODO: unify with given list?
+	%          it should be done but blows up code :/
+%	;	unify_arg_field(List, 't_list', Ctx_outer, Step)
 	;	set_if_var(List, string('$t_list'), Ctx_outer, Step)
 	;	match_equals(List0, string('$t_list'), Step)
 	% array at 'next' field not needed anymore
-	;	Step=['$unset', array([string('t_next'), string('t_list')])]
+	;	Step=['$unset', array([string('t_next'), string('t_array'), string('t_list')])]
 	).
 
 %%
@@ -266,13 +272,24 @@ template_instantiation(Var, Ctx, string(Val)) :-
 	var_key(Var, Ctx, Key),
 	atom_concat('$$this.', Key, Val).
 
-template_instantiation(List, Ctx, array(Elems)) :-
+%template_instantiation(List, Ctx, array(Elems)) :-
+%	is_list(List),!,
+%	findall(Y,
+%		(	member(X,List),
+%			template_instantiation(X, Ctx, Y)
+%		),
+%		Elems).
+
+template_instantiation(List, Ctx, [
+		['type', string('compound')],
+		['arity', integer(Arity)],
+		['value', Flattened]
+	]) :-
 	is_list(List),!,
-	findall(Y,
-		(	member(X,List),
-			template_instantiation(X, Ctx, Y)
-		),
-		Elems).
+	length(List,Arity),
+	% field value lookups "$field" must be written as "$$this.field within $map context.
+	merge_options([root_field('this')], Ctx, TermCtx),
+	mongolog_terms:mng_flatten_term(List, TermCtx, Flattened).
 
 template_instantiation(Template, Ctx, [
 		['type', string('compound')],
@@ -394,59 +411,6 @@ test('findall with ungrounded'):-
 	assert_unifies(Results,[_,9.0]),
 	( Results=[Var|_] -> assert_true(var(Var)) ; true ).
 
-test('findall 1-element list'):-
-	mongolog_tests:test_call(
-		(	findall([X],
-				(	X is Num + 5
-				;	X is Num * 2
-				),
-				Results)
-		),
-		Num, double(4.5)
-	),
-	assert_true(ground(Results)),
-	assert_unifies(Results,[[9.5],[9.0]]).
-
-test('findall 2-element list'):-
-	mongolog_tests:test_call(
-		(	findall([X,Y],
-				(	(X is (Num + 5), Y is X + 1)
-				;	(X is (Num * 2), Y is X + 2)
-				),
-				Results)
-		),
-		Num, double(4.5)
-	),
-	assert_true(ground(Results)),
-	assert_unifies(Results,[[9.5,10.5],[9.0,11.0]]).
-
-test('findall 1-ary term'):-
-	mongolog_tests:test_call(
-		(	findall(test(X),
-				(	X is (Num + 5)
-				;	X is (Num * 2)
-				),
-				Results)
-		),
-		Num, double(4.5)
-	),
-	assert_true(ground(Results)),
-	assert_unifies(Results,[test(9.5), test(9.0)]).
-
-test('findall 2-ary term'):-
-	mongolog_tests:test_call(
-		(	findall(test(X,Y),
-				(	(X is (Num + 5), Y is X + 1)
-				;	(X is (Num * 2), Y is X + 2)
-				),
-				Results)
-		),
-		Num, double(4.5)
-	),
-	assert_true(ground(Results)),
-	assert_unifies(Results,[
-		test(9.5,10.5), test(9.0,11.0) ]).
-
 test('findall+length'):-
 	mongolog_tests:test_call(
 		(	findall(X,
@@ -503,12 +467,12 @@ test('findall(fail, -List)'):-
 	mongolog_call(findall(fail, List)),
 	assert_equals(List,[]).
 
-test('findall+nth0'):-
+test('findall+nth1'):-
 	mongolog_tests:test_call(
 		(	findall(X,
 				((X is Num + 5);(X is Num * 2)),
 				List),
-			nth0(0, List, Val)
+			nth1(1, List, Val)
 		),
 		Num, double(4.5)),
 	assert_equals(Val,9.5).
@@ -525,5 +489,58 @@ test('(fail;findall)+length'):-
 		Num, double(4.5)),
 	assert_equals(InnerList,[9.5,9.0]),
 	assert_equals(List,[9.5,9.0]).
+
+test('findall 1-element list'):-
+	mongolog_tests:test_call(
+		(	findall([X],
+				(	X is Num + 5
+				;	X is Num * 2
+				),
+				Results)
+		),
+		Num, double(4.5)
+	),
+	assert_true(ground(Results)),
+	assert_unifies(Results,[[9.5],[9.0]]).
+
+test('findall 2-element list'):-
+	mongolog_tests:test_call(
+		(	findall([X,Y],
+				(	(X is (Num + 5), Y is X + 1)
+				;	(X is (Num * 2), Y is X + 2)
+				),
+				Results)
+		),
+		Num, double(4.5)
+	),
+	assert_true(ground(Results)),
+	assert_unifies(Results,[[9.5,10.5],[9.0,11.0]]).
+
+test('findall 1-ary term'):-
+	mongolog_tests:test_call(
+		(	findall(test(X),
+				(	X is (Num + 5)
+				;	X is (Num * 2)
+				),
+				Results)
+		),
+		Num, double(4.5)
+	),
+	assert_true(ground(Results)),
+	assert_unifies(Results,[test(9.5), test(9.0)]).
+
+test('findall 2-ary term'):-
+	mongolog_tests:test_call(
+		(	findall(test(X,Y),
+				(	(X is (Num + 5), Y is X + 1)
+				;	(X is (Num * 2), Y is X + 2)
+				),
+				Results)
+		),
+		Num, double(4.5)
+	),
+	assert_true(ground(Results)),
+	assert_unifies(Results,[
+		test(9.5,10.5), test(9.0,11.0) ]).
 
 :- end_tests('mongolog_findall').

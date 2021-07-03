@@ -239,8 +239,7 @@ rdf_list_head(SubList, ListHead) ?>
 		),
 		ListHeads),
 	length(ListHeads,NumHeads),
-	Index is NumHeads-1,
-	nth0(Index, ListHeads, ListHead).
+	nth1(NumHeads, ListHeads, ListHead).
 
 		 /*******************************
 		 *	    UNIT TESTS	     		*

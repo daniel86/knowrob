@@ -19,7 +19,7 @@
 %
 var_key(Var, Ctx, Key) :-
 	var(Var),
-	% TODO: can this be done better then iterating over all variables?
+	% TODO: this be done better
 	%		- i.e. by testing if some variable is element of a list
 	%		- member/2 cannot be used as it would unify each array element
 	(	option(outer_vars(Vars), Ctx, [])
@@ -61,14 +61,6 @@ arg_val0(In, _Ctx, Out) :-
 	atomic(In),!,
 	once(arg_constant(In,Out)).
 
-arg_val0(In, Ctx, array(L)) :-
-	is_list(In),!,
-	findall(X,
-		(	member(Y,In),
-			arg_val0(Y, Ctx, X)
-		),
-		L).
-
 arg_val0(:(NS,Atom), _, _) :-
 	throw(unexpanded_namespace(NS,Atom)).
 
@@ -78,6 +70,16 @@ arg_val0(TypedValue, _Ctx, TypedValue) :-
 	mng_client:type_mapping(Type,_),
 	!.
 
+arg_val0(List, Ctx, [
+		['type',  string('compound')],
+		['arity', integer(Arity)],
+		['value', Flattened]
+	]) :-
+	is_list(List),!,
+	length(List,Arity),
+	mongolog_terms:mng_flatten_term(List, Ctx, Flattened).
+	
+
 arg_val0(Term, Ctx, [
 		['type',  string('compound')],
 		['arity', integer(Arity)],
@@ -86,7 +88,6 @@ arg_val0(Term, Ctx, [
 	mng_strip_type(Term, term, Stripped),
 	compound(Stripped),
 	functor(Term, _, Arity),
-	% FIXME
 	mongolog_terms:mng_flatten_term(Stripped, Ctx, Flattened).
 
 %%
@@ -146,13 +147,14 @@ goal_var(Compound, Ctx, Var) :-
 goal_var_in_head(Goal, Ctx) :-
 	option(head_vars(HeadVars), Ctx),
 	goal_vars(Goal, Ctx, InnerVars),
+	% TODO: finding two equivalent variables can be done more efficient!
 	member([_,V],HeadVars),
 	member([_,W],InnerVars),
 	V == W,
 	!.
 
 
-%%
+% TODO: notion of context should not be part of mongolog, or?
 context_var(Ctx, [Key,ReferredVar]) :-
 	option(scope(Scope), Ctx),
 	% NOTE: vars are resolved to keys in scope already!

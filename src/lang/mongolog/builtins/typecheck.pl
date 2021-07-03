@@ -151,8 +151,16 @@ mongolog:step_compile(is_list(Arg), Ctx, []) :-
 	\+ is_referenced(Arg,Ctx), !,
 	fail.
 
-mongolog:step_compile(is_list(Arg), Ctx, Pipeline) :-
-	match_type_(Arg, is_list, array, Ctx, Pipeline).
+mongolog:step_compile(
+		is_list(Arg), Ctx,
+		[['$match', ['$expr', ['$eq', array([
+			% test that first element in $Key.value is the list functor
+			[[i, string('1.0')], [v, string('[|]')]],
+			['$arrayElemAt', array([string(Key0), integer(0)])]
+		])]]]]) :-
+	% compound terms are represented as documents with a "type" field with value "compound"
+	var_key(Arg, Ctx, Key),
+	atomic_list_concat(['$',Key,'.value'],'',Key0).
 
 %% compound(@Term) [ISO]
 % True if Term is bound to a compound term.
