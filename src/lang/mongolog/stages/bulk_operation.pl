@@ -7,11 +7,6 @@
 
 :- use_module(library('db/mongo/client')).
 
-% TODO: come up with a program transformation that organizes
-%       a program into different segments where each segment
-%       is individually evaluated and bulk operations are performed
-%       in between to support programs such as `..,assert(a(x)),..,a(x),..`
-
 %%
 bulk_operation(Result) :-
 	once((

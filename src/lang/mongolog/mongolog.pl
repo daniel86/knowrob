@@ -9,10 +9,15 @@
 @license BSD
 */
 
-% TODO: better support for recursion
+% TODO: support for recursion
 %		- cycles in views are not allowed
 %		- but graphLookup can be used for transitive relations
 %       - unwind can be used to iterate over a list
+% TODO: support for variable aliasing
+% TODO: come up with a program transformation that organizes
+%       a program into different segments where each segment
+%       is individually evaluated and bulk operations are performed
+%       in between to support programs such as `..,assert(a(x)),..,a(x),..`
 
 :- use_module(library('semweb/rdf_db'),
 	    [ rdf_meta/1, rdf_global_term/2 ]).
