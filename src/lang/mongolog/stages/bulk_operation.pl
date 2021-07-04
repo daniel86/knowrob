@@ -72,7 +72,7 @@ bulk_operation(Doc, insert(Doc)).
 %%
 add_assertions(Docs, Coll,
 	['$set', ['g_assertions',['$concatArrays', array([
-		string('$g_assertions'),
+		['$ifNull', array([string('$g_assertions'),array([])])],
 		array([[
 			['collection', string(Coll)],
 			['documents', Docs]

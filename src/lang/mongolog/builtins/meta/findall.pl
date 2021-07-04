@@ -311,8 +311,6 @@ template_instantiation(Atomic, _Ctx, Constant) :-
 %	option(outer_vars(OV), Ctx, []),
 %	findall(VarKey,
 %		(	(member([VarKey,Var], OV) ; member([VarKey,Var],StepVars)),
-%			% FIXME: improve assertion handling
-%			VarKey \== 'g_assertions',
 %			var(Var)
 %		),
 %		VarKeys0
@@ -324,8 +322,6 @@ template_instantiation(Atomic, _Ctx, Constant) :-
 %	option(outer_vars(OV), Ctx, []),
 %	findall([VarKey,[['type',string('var')], ['value',string(VarKey)]]],
 %		(	(member([VarKey,Var], OV) ; member([VarKey,Var],StepVars)),
-%			% FIXME: improve assertion handling
-%			VarKey \== 'g_assertions',
 %			var(Var)
 %		),
 %		OuterSet0

@@ -123,25 +123,14 @@ mongolog_compile(Terminals, Output, Vars, Context) :-
 	).
 
 %%
-query_compile1(Terminals, Output0, Vars, Context) :-
+query_compile1(Terminals, Output, Vars, Context) :-
 	% get global variables supplied by the call context and add it
 	% to the compile context
 	option(global_vars(GlobalVars), Context, []),
 	% compile an aggregation pipeline.
-	% also add a variable with field "g_assertions" used for storing
-	% asserted,retracted and modified documents.
-	% TODO: this variable should only be added if assert etc. actually appear in the query!
 	compile_terms(Terminals,
-		[['g_assertions',_]|GlobalVars]->Vars,
-		Output, Context),
-	compiled_document(Output, Doc0),
-	% add g_assertions field to output documents.
-	% TODO: do not add this field to every output document!
-	merge_options(
-		[ document([
-			['$set',['g_assertions',array([])]]
-		|	Doc0
-		]) ], Output, Output0).
+		GlobalVars->Vars,
+		Output, Context).
 
 %%
 compile_terms([], V0->V0, [document([]),variables([])], _) :-
