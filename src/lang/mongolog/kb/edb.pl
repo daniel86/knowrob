@@ -84,6 +84,13 @@ test('assert(woman)') :-
 	assert_true(mongolog_call(assert(woman(mia)))),
 	assert_true(mongolog_call(assert(woman(jody)))).
 
+test('assert(woman(x)),woman(x)',
+		fixme('asserted facts cannot be accessed within the same query')) :-
+	assert_true(mongolog_call((
+		assert(woman(x)),
+		woman(x)
+	))).
+
 test('woman(+)') :-
 	assert_true(mongolog_call(woman(mia))),
 	assert_true(mongolog_call(woman(jody))),
