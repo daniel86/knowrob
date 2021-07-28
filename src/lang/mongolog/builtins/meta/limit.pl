@@ -26,17 +26,17 @@ The following predicates are supported:
 %% once(:Goal)
 % Make a possibly nondet goal semidet, i.e., succeed at most once.
 %
-lang_query:step_expand(once(Goal), Expanded) :-
-	lang_query:kb_expand(limit(1,Goal), Expanded).
+mongolog:step_expand(once(Goal), Expanded) :-
+	mongolog_expand(limit(1,Goal), Expanded).
 
 %% limit(+Count, :Goal)
 % Limit the number of solutions.
 % True if Goal is true, returning at most Count solutions.
 %
-lang_query:step_expand(
+mongolog:step_expand(
 		limit(Count, Goal),
 		limit(Count, GoalExpanded)) :-
-	lang_query:kb_expand(Goal, GoalExpanded).
+	mongolog_expand(Goal, GoalExpanded).
 
 mongolog:step_compile(limit(Count), Ctx, [['$limit',Count0]]) :-
 	% simple case: unary limit is mapped to $limit command

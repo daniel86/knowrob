@@ -25,7 +25,7 @@ The following predicates are supported:
 % step through goals of a disjunction and expand them.
 % special handling is needed for cut-elimination via program
 % transformation
-lang_query:step_expand((A0;A1), Expanded) :-
+mongolog:step_expand((A0;A1), Expanded) :-
 	semicolon_list((A0;A1), Goals),
 	expand_disunction(Goals, ExpandedGoals),
 	semicolon_list(Expanded, ExpandedGoals).
@@ -39,12 +39,12 @@ expand_disunction([X|Xs],[Expanded]) :-
 	expand_cut(X, Clauses, Expanded).
 expand_disunction([X|Xs],[Y|Ys]) :-
 	% else simply expand X
-	lang_query:kb_expand(X,Y),
+	mongolog_expand(X,Y),
 	expand_disunction(Xs,Ys).
 
-%lang_query:step_expand(';'(A0,A1), ';'(B0,B1)) :-
-%	lang_query:kb_expand(A0,B0),
-%	lang_query:kb_expand(A1,B1).
+%mongolog:step_expand(';'(A0,A1), ';'(B0,B1)) :-
+%	mongolog_expand(A0,B0),
+%	mongolog_expand(A1,B1).
 
 %% :Goal1 ; :Goal2
 % The ‘or' predicate.

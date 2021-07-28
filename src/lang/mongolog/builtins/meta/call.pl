@@ -22,24 +22,24 @@ The following predicates are supported:
 
 %%%% query expansion
 
-lang_query:step_expand(call(Goal), call(Expanded)) :-
-	lang_query:kb_expand(Goal, Expanded).
+mongolog:step_expand(call(Goal), call(Expanded)) :-
+	mongolog_expand(Goal, Expanded).
 
-lang_query:step_expand(call(Goal,Arg1),
+mongolog:step_expand(call(Goal,Arg1),
 		call_with_args(Expanded,[Arg1])) :-
-	lang_query:kb_expand(Goal, Expanded).
+	mongolog_expand(Goal, Expanded).
 
-lang_query:step_expand(call(Goal,Arg1,Arg2),
+mongolog:step_expand(call(Goal,Arg1,Arg2),
 		call_with_args(Expanded,[Arg1,Arg2])) :-
-	lang_query:kb_expand(Goal, Expanded).
+	mongolog_expand(Goal, Expanded).
 
-lang_query:step_expand(call(Goal,Arg1,Arg2,Arg3),
+mongolog:step_expand(call(Goal,Arg1,Arg2,Arg3),
 		call_with_args(Expanded,[Arg1,Arg2,Arg3])) :-
-	lang_query:kb_expand(Goal, Expanded).
+	mongolog_expand(Goal, Expanded).
 
-lang_query:step_expand(call(Goal,Arg1,Arg2,Arg3,Arg4),
+mongolog:step_expand(call(Goal,Arg1,Arg2,Arg3,Arg4),
 		call_with_args(Expanded,[Arg1,Arg2,Arg3,Arg4])) :-
-	lang_query:kb_expand(Goal, Expanded).
+	mongolog_expand(Goal, Expanded).
 
 %% call(:Goal)
 % Call Goal. This predicate is normally used for goals that are not known at compile time.

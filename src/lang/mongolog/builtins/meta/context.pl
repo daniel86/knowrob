@@ -26,10 +26,10 @@ The following predicates are supported:
 :- mongolog:add_command(context).
 
 %%
-lang_query:step_expand(
+mongolog:step_expand(
 		call_with_context(Goal,Args),
 		call_with_context(Expanded,Args)) :-
-	lang_query:kb_expand(Goal, Expanded).
+	mongolog_expand(Goal, Expanded).
 
 %%
 % context(-Option) and context(-Option, +Default) are used to read

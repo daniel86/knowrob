@@ -24,22 +24,22 @@ The following predicates are supported:
 % True if Goal cannot be proven.
 % Retained for compatibility only. New code should use \+/1.
 %
-lang_query:step_expand(not(Goal), Expanded) :-
-	lang_query:step_expand(\+(Goal), Expanded).
+mongolog:step_expand(not(Goal), Expanded) :-
+	mongolog:step_expand(\+(Goal), Expanded).
 
 %% \+ :Goal:
 %
 % True if‘Goal' cannot be proven (mnemonic: + refers to provable and
 % the backslash (\) is normally used to indicate negation in Prolog).
 %
-lang_query:step_expand(\+(Goal), Expanded) :-
-%	lang_query:kb_expand(Goal, GoalExpanded),
+mongolog:step_expand(\+(Goal), Expanded) :-
+%	mongolog_expand(Goal, GoalExpanded),
 %	Expanded=((once(GoalExpanded),!,fail) ; true).
 %	Expanded = (
 %		findall([], (call(GoalExpanded), limit(1)), L),
 %		length(L,0)
 %	).
-	lang_query:kb_expand((
+	mongolog_expand((
 		once((
 			(call(Goal), assign(X,1))
 		;	assign(X,0)

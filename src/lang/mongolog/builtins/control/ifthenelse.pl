@@ -30,13 +30,13 @@ The following predicates are supported:
 % making the construct fail if the condition fails.
 % This unusual semantics is part of the ISO and all de-facto Prolog standards. 
 %
-%lang_query:step_expand((If -> Then ; Else), (X;Y)) :-
+%mongolog:step_expand((If -> Then ; Else), (X;Y)) :-
 %	% (If -> Then) ; Else -> (If, !, Then) ; Else
-%	lang_query:kb_expand([If, !, Then], X),
-%	lang_query:kb_expand(Else,          Y).
+%	mongolog_expand([If, !, Then], X),
+%	mongolog_expand(Else,          Y).
 
-lang_query:step_expand((If -> Then ; Else), Expanded) :-
-	lang_query:kb_expand((
+mongolog:step_expand((If -> Then ; Else), Expanded) :-
+	mongolog_expand((
 		once(
 			(If,assign(X,1))
 		;	assign(X,0)
@@ -46,8 +46,8 @@ lang_query:step_expand((If -> Then ; Else), Expanded) :-
 		)
 	),Expanded).
 
-lang_query:step_expand((If -> Then), Epanded) :-
-	lang_query:step_expand((If -> Then ; fail), Epanded).
+mongolog:step_expand((If -> Then), Epanded) :-
+	mongolog:step_expand((If -> Then ; fail), Epanded).
 
 %% TODO: :Condition *-> :Action ; :Else
 % This construct implements the so-called‘soft-cut'.
@@ -58,7 +58,7 @@ lang_query:step_expand((If -> Then), Epanded) :-
 % conjunction of call(Condition) and Action, otherwise execute Else.
 % The construct is known under the name if/3 in some other Prolog implementations. 
 %
-%lang_query:step_expand(
+%mongolog:step_expand(
 %		';'('*->'(Condition,Action),Else),
 %		';'(X,Y)) :-
 %	fail.

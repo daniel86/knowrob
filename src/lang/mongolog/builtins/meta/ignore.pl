@@ -21,9 +21,9 @@ The following predicates are supported:
 %% ignore(:Goal)
 % Calls Goal as once/1, but succeeds, regardless of whether Goal succeeded or not.
 %
-lang_query:step_expand(ignore(Goal), Expanded) :-
-	lang_query:kb_expand(once((call(Goal) ; true)), Expanded).
-%	lang_query:kb_expand((
+mongolog:step_expand(ignore(Goal), Expanded) :-
+	mongolog_expand(once((call(Goal) ; true)), Expanded).
+%	mongolog_expand((
 %		% collect solutions of once(Goal)
 %		findall(once(Goal),Sols),
 %		% and unwind the solutions, also succeed if Sols is an empty array

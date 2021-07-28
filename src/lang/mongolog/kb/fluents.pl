@@ -117,7 +117,7 @@ mongolog_drop_fluent(Functor) :-
 	mng_drop(DB, Collection).
 
 %%
-lang_query:step_expand(project(Term), assert(Term)) :-
+mongolog:step_expand(project(Term), assert(Term)) :-
 	mongolog_fluent(Term, _, _, _),!.
 
 %%

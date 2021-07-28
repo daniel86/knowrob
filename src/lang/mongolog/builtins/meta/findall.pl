@@ -23,15 +23,15 @@ The following predicates are supported:
 :- mongolog:add_command(findall).
 
 %%
-lang_query:step_expand(
+mongolog:step_expand(
 		findall(Template, Goal, List),
 		findall(Template, Expanded, List)) :-
-	lang_query:kb_expand(Goal, Expanded).
+	mongolog_expand(Goal, Expanded).
 
-lang_query:step_expand(
+mongolog:step_expand(
 		findall(Goal, List),
 		findall(Expanded, List)) :-
-	lang_query:kb_expand(Goal, Expanded).
+	mongolog_expand(Goal, Expanded).
 
 %% findall(:Goal, -Bag)
 % Create a list of the different documents where Goal is true.

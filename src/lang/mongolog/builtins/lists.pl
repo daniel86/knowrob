@@ -41,31 +41,31 @@ The following predicates are supported:
 % NOTE: here list cannot be a variable which is allowed in SWI Prolog.
 %       Prolog then generates all possible list with Elem as member.
 %
-lang_query:step_expand(member(Elem, List), Expanded) :-
-	lang_query:kb_expand(nth1(_, List, Elem), Expanded).
+mongolog:step_expand(member(Elem, List), Expanded) :-
+	mongolog_expand(nth1(_, List, Elem), Expanded).
 
 %% memberchk(?Elem, +List)
 % True when Elem is an element of List. This variant of member/2 is
 % semi deterministic and typically used to test membership of a list. 
 %
-lang_query:step_expand(memberchk(Elem, List), Expanded) :-
-	lang_query:kb_expand(
+mongolog:step_expand(memberchk(Elem, List), Expanded) :-
+	mongolog_expand(
 		limit(1, member(Elem,List)),
 		Expanded).
 
 %% length(+List, ?Length)
 % True if Length represents the number of elements in List.
 %
-lang_query:step_expand(length(List, Length), Expanded) :-
-	lang_query:kb_expand(
+mongolog:step_expand(length(List, Length), Expanded) :-
+	mongolog_expand(
 		functor(List, _, Length),
 		Expanded).
 
 %% nth1(?Index, +List, ?Elem)
 % True when Elem is the Index’th element of List. Counting starts at 0. 
 %
-lang_query:step_expand(nth1(Index, List, Elem), Expanded) :-
-	lang_query:kb_expand(
+mongolog:step_expand(nth1(Index, List, Elem), Expanded) :-
+	mongolog_expand(
 		arg(Index, List, Elem),
 		Expanded).
 

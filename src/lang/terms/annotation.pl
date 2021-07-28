@@ -38,7 +38,7 @@ The following predicates are supported:
 :- mongolog:add_command(annotation).
 
 %%
-lang_query:step_expand(
+mongolog:step_expand(
 	project(annotation(S,P,O)),
 	assert(annotation(S,P,O))) :- !.
 

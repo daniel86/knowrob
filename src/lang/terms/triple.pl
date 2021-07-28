@@ -53,7 +53,7 @@ The following predicates are supported:
 :- mongolog:add_command(triple).
 
 %%
-lang_query:step_expand(
+mongolog:step_expand(
 	project(triple(S,P,O)),
 	assert(triple(S,P,O))) :-
 	!.

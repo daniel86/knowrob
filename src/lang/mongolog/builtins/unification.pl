@@ -34,8 +34,8 @@ The following predicates are supported:
 % In other cases, such as ?- X \= Y., the predicate fails although there are solutions.
 % This is due to the incomplete nature of \+/1. 
 %
-lang_query:step_expand((A \= B), Expanded) :-
-	lang_query:step_expand(\+(A = B), Expanded).
+mongolog:step_expand((A \= B), Expanded) :-
+	mongolog:step_expand(\+(A = B), Expanded).
 
 %%
 mongolog:step_compile(

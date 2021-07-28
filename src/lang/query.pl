@@ -10,7 +10,6 @@
       kb_unproject(t,t,t),    % +Goal, +Scope, +Options
       kb_add_rule(+,t,t),
       kb_drop_rule(t),
-      kb_expand(t,-),
       inline/1,
       is_callable_with(?,t),  % ?Backend, :Goal
       call_with(?,t,+) ,       % +Backend, :Goal, +Options
@@ -45,13 +44,9 @@ one step into the input queue of the next step.
 :- use_module('mongolog/builtins/meta/touch').
 :- use_module('mongolog/builtins/control/cut').
 
-% Stores list of terminal terms for each clause. 
-:- dynamic kb_rule/4.
 :- dynamic kb_predicate/1.
 :- dynamic expanding_term/4.
 :- dynamic inline_predicate/2.
-% optionally implemented by query commands.
-:- multifile step_expand/2.
 % interface implemented by query backends
 :- multifile is_callable_with/2.
 :- multifile call_with/3.
@@ -135,11 +130,13 @@ kb_call1(Goal, QScope, FScope, Options) :-
 		  global_vars([['v_scope',FScope]|GlobalVars0])
 		],
 		Options, Options1),
-	% expand query, e.g. replace rule heads with bodies etc.
-	kb_expand(Goal, Expanded),
-	% FIXME: not so nice that flattening is needed here
-	flatten(Expanded, Flattened),
-	kb_call1(Flattened, Options1).
+%	% expand query, e.g. replace rule heads with bodies etc.
+%	kb_expand(Goal, Expanded),
+%	% FIXME: not so nice that flattening is needed here
+%	flatten(Expanded, Flattened),
+%	kb_call1(Flattened, Options1).
+	comma_list(Goal, SubGoals),
+	kb_call1(SubGoals, Options1).
 
 %%
 kb_call1(SubGoals, Options) :-
@@ -576,192 +573,38 @@ is_callable_with(mongolog, Goal) :- mongolog:is_mongolog_term(Goal).
 
 %% kb_add_rule(+Module, +Head, +Body) is semidet.
 %
-% Register a rule that translates into an aggregation pipeline.
-% Any non-terminal predicate in Body must have a previously asserted
-% rule it can expand into.
-% After being asserted, the Head predicate can be referred to in
-% calls of kb_call/1.
+% ...
 %
 % @param Module module name
 % @param Head The head of a rule.
 % @param Body The body of a rule.
 %
 kb_add_rule(Module, Head, Body) :-
-	% get the functor of the predicate
-	Head =.. [Functor|Args],
-	% expand goals into terminal symbols
-	(	kb_expand(Body, Expanded) -> true
-	;	log_error_and_fail(lang(assertion_failed(Body), Functor))
-	),
-	% assert the clause
-	assertz(kb_rule(Module, Functor, Args, Expanded)).
+	% TODO: support other backends
+	mongolog_add_clause(Module, Head, Body).
 
 
 %% kb_drop_rule(+Head) is semidet.
 %
-% Drop a previously added `mongolog` rule.
-% That is, erase its database record such that it can
-% not be referred to anymore in rules added after removal.
+% ...
 %
 % @param Term A mongolog rule.
 %
 kb_drop_rule(Head) :-
-	compound(Head),
-	Head =.. [Functor|_],
-	retractall(kb_rule(_,Functor, _, _)).
+	% TODO: support other backends
+	mongolog_drop_rule(Head).
 
 		 /*******************************
 		 *	    TERM EXPANSION     		*
 		 *******************************/
-
-%% kb_expand(+Term, -Expanded) is det.
-%
-% Translate a goal into a sequence of terminal commands.
-% Terminal commands are the core predicates supported in queries
-% such as arithmetic and comparison predicates.
-% Rules, on the other hand, are "flattened" during term expansion,
-% and translated to a sequence of these terminal commands.
-%
-% @param Term A compound term, or a list of terms.
-% @param Expanded Sequence of terminal commands
-%
-kb_expand(Goal, Goal) :-
-	% goals maybe not known during expansion, i.e. in case of
-	% higher-level predicates receiving a goal as an argument.
-	% these var goals need to be expanded compile-time
-	% (call-time is not possible)
-	var(Goal), !.
-
-kb_expand(Goal, Expanded) :-
-	% NOTE: do not use is_list/1 here, it cannot handle list that have not
-	%       been completely resolved as in `[a|_]`.
-	%       Here we check just the head of the list.
-	\+ has_list_head(Goal), !,
-	comma_list(Goal, Terms),
-	kb_expand(Terms, Expanded).
-
-kb_expand(Goal, Expanded) :-
-	% special handling for cut
-	has_cut(Goal),!,
-	expand_cut(Goal, [], Expanded).
-
-kb_expand(Terms, Expanded) :-
-	catch(
-		expand_term_0(Terms, Expanded0),
-		Exc,
-		log_error_and_fail(lang(Exc, Terms))
-	),
-	comma_list(Buf,Expanded0),
-	comma_list(Buf,Expanded1),
-	%%
-	(	Expanded1=[One]
-	->	Expanded=One
-	;	Expanded=Expanded1
-	).
-
-%%
-expand_term_0([], []) :- !.
-expand_term_0([X|Xs], [X_expanded|Xs_expanded]) :-
-	once(expand_term_1(X, X_expanded)),
-	% could be that expand-time the list is not fully resolved
-	(	var(Xs) -> Xs_expanded=Xs
-	;	expand_term_0(Xs, Xs_expanded)
-	).
-
-expand_term_1(Goal, Expanded) :-
-	% TODO: seems nested terms sometimes not properly flattened, how does it happen?
-	is_list(Goal),!,
-	expand_term_0(Goal, Expanded).
-
-expand_term_1(Goal, Expanded) :-
-	once((compound(Goal);atomic(Goal))),
-	Goal =.. [Functor|Args],
-	length(Args,Arity),
-	once((
-		expanding_term(Functor, Arity, _, _)
-	;	is_callable_with(_,Goal)
-	)),
-%	once(is_callable_with(_,Goal)),
-	% allow the goal to recursively expand
-	(	step_expand(Goal, Expanded) -> true
-	;	Expanded = Goal
-	).
-
-expand_term_1(Goal, Expanded) :-
-	% expand the rule head (Goal) into terminal symbols (the rule body)
-	(	expand_rule(Goal, Clauses) -> true
-	% handle the case that a predicate is referred to that wasn't asserted before
-	;	throw(expansion_failed(Goal))
-	),
-	% wrap different clauses into ';'
-	semicolon_list(Disjunction, Clauses),
-	kb_expand(Disjunction, Expanded).
-
-%%
-expand_rule(Goal, Terminals) :-
-	% ground goals do not require special handling for variables
-	% as done in the clause below. So this clause here is simpler.
-	ground(Goal),!,
-	% unwrap goal term into functor and arguments.
-	Goal =.. [Functor|Args],
-	% findall rules with matching functor and arguments
-	findall(X, kb_rule(_,Functor, Args, X), TerminalClauses),
-	(	TerminalClauses \== []
-	->	Terminals = TerminalClauses
-	% if TerminalClauses==[] it means that either there is no such rule
-	% in which case expand_rule fails, or there is a matching rule, but
-	% the arguments cannot be unified with the ones provided in which
-	% case expand_rule succeeds with a pipeline [fail] that allways fails.
-	;	(	once(kb_rule(_,Functor,_,_)),
-			Terminals=[fail]
-		)
-	).
-
-expand_rule(Goal, Terminals) :-
-	% unwrap goal term into functor and arguments.
-	Goal =.. [Functor|Args],
-	% find all asserted rules matching the functor
-	findall([Args0,Terminals0],
-			(	kb_rule(_, Functor, Args0, Terminals0),
-				unifiable(Args0, Args, _)
-			),
-			Clauses),
-	Clauses \== [],
-	expand_rule(Args, Clauses, Terminals).
-
-% prepend pragma call that unifies "child" and "parent" arguments
-expand_rule(_, [], []) :- !.
-expand_rule(ParentArgs,
-		[[ChildArgs,Terminals]|Xs],
-		[Expanded|Ys]) :-
-	Expanded=[
-		% "touch" variables in ParentArgs
-		touch(ParentArgs),
-		% unify ChildArgs and ParentArgs
-		pragma(=(ChildArgs,ParentArgs)),
-		Terminals
-	],
-	expand_rule(ParentArgs, Xs, Ys),
-	!.
-
-%
-step_expand(ask(Goal), ask(Expanded)) :-
-	kb_expand(Goal, Expanded).
-
-% 
-has_list_head([]) :- !.
-has_list_head([_|_]).
 
 %%
 flush_predicate1(Module, Functor, Arity) :-
 	% create list of fresh variables
 	length(Args,Arity),
 	Goal =.. [Functor|Args],
-	expand_rule(Goal, Clauses),
-	% wrap different clauses into ';'
-	semicolon_list(Zs, Clauses),
 	% TODO: allow asserting rules into other backends too
-	mongolog_idb:idb_assert(Module, Functor, Args, Zs).
+	mongolog_assert_rule(Goal, Module).
 
 flush_predicate(SrcModule, Functor, Arity) :-
 	expanding_term(Functor, Arity, SrcModule, DstModule),!,
@@ -771,7 +614,6 @@ flush_predicate(SrcModule, Functor, Arity) :-
 flush_predicate(SrcModule) :-
 	forall(
 		expanding_term(Functor, Arity, SrcModule, _),
-%		ignore(flush_predicate(SrcModule, Functor, Arity))
 		flush_predicate(SrcModule, Functor, Arity)
 	).
 
@@ -788,8 +630,8 @@ user:term_expansion(end_of_file, end_of_file) :-
 
 %%
 % Term expansion for *querying* rules using the (?>) operator.
-% The body is rewritten such that mng_ask is called instead
-% with body as argument.
+% The body is rewritten such that the body is evaluated in external
+% querying backends such as via mongolog.
 %
 expand_ask_rule(Head, Body, Export) :-
 	prolog_load_context(module, SrcModule),
@@ -808,9 +650,9 @@ expand_ask_rule(Head, Body, Export) :-
 	;	inline_predicate(Functor, Arity)
 	;	assertz(expanding_term(Functor, Arity, SrcModule, DstModule))
 	)),
-	% add the rule to the DB backend
+	% add the rule to the DB backends
 	kb_add_rule(DstModule, Term, BodyGlobal),
-	%
+	% expand into regular Prolog rule
 	length(Args1,Arity),
 	Term1 =.. [Functor|Args1],
 	(	kb_predicate(Term1)
@@ -825,9 +667,10 @@ user:term_expansion((?>(Head,Body)), Export) :-
 	expand_ask_rule(Head,Body,Export).
 
 %%
-% Term expansion for *project* rules using the (+>) operator.
-% The rules are only asserted into mongo DB and expanded into
-% empty list.
+% Term expansion for *projection* rules using the (+>) operator.
+% These rules are evaluated through an external backend.
+% TODO: it should be configurable which backend is used for tell rules.
+%       i.e. where facts are stored should be configurable. 
 %
 user:term_expansion(
 		(+>(Head,Body)),

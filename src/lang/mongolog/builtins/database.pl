@@ -24,7 +24,7 @@ The following predicates are supported:
 :- mongolog:add_command(retractall).
 
 %%
-lang_query:step_expand(project(Term), assert(Term)) :-
+mongolog:step_expand(project(Term), assert(Term)) :-
 	db_predicate(Term, _, Opts),
 	option(type(edb), Opts, edb),
 	!.

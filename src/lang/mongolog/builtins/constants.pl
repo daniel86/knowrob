@@ -26,7 +26,7 @@ The following predicates are supported:
 %
 % Same as fail, but the name has a more declarative connotation.
 %
-lang_query:step_expand(false, fail).
+mongolog:step_expand(false, fail).
 
 %% true
 %
