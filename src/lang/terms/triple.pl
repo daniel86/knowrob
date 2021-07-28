@@ -64,17 +64,17 @@ mongolog:step_compile1(assert(triple(S,P,term(O))), Ctx, Output) :-
 	%       it would be better to store lists/terms directly without conversion.
 	ground(O),!,
 	( atom(O) -> Atom=O ; term_to_atom(O, Atom) ),
-	mongolog:step_compile(assert(triple(S,P,string(Atom))), Ctx, Output).
+	mongolog:step_compile1(assert(triple(S,P,string(Atom))), Ctx, Output).
 
 mongolog:step_compile1(triple(S,P,term(O)), Ctx, Output) :-
 	% HACK: convert term(A) argument to string.
 	%       it would be better to store lists/terms directly without conversion.
 	ground(O),!,
 	( atom(O) -> Atom=O ; term_to_atom(O, Atom) ),
-	mongolog:step_compile(triple(S,P,string(Atom)), Ctx, Output).
+	mongolog:step_compile1(triple(S,P,string(Atom)), Ctx, Output).
 
 %%
-mongolog:step_compile(assert(triple(S,P,O)), Ctx,
+mongolog:step_compile1(assert(triple(S,P,O)), Ctx,
 		[ document(Pipeline), variables(StepVars) ]) :-
 	% add step variables to compile context
 	triple_step_vars(triple(S,P,O), Ctx, StepVars0),

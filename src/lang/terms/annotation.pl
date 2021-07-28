@@ -49,7 +49,7 @@ mongolog:step_compile1(
 		[ document(Pipeline), variables(StepVars) ]) :-
 	assert_annotation(Entity, Property, Annotation, Ctx, Pipeline, StepVars).
 
-mongolog:step_compile(
+mongolog:step_compile1(
 		annotation(Entity, Property, Annotation), Ctx,
 		[ document(Pipeline),
 		  variables(StepVars),
