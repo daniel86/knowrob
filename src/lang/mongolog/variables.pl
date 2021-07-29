@@ -26,7 +26,9 @@ var_key(Var, Ctx, Key) :-
 	;	option(step_vars(Vars), Ctx, [])
 	),
 	member([Key,ReferredVar],Vars),
-	ReferredVar == Var,
+	(	ReferredVar == Var
+	;	ReferredVar == term(Var)
+	),
 	!.
 var_key(Var, _Ctx, Key) :-
 	var(Var),
