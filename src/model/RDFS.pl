@@ -24,6 +24,8 @@
 :- multifile instance_of/2, subclass_of/2, subproperty_of/2.
 :- dynamic instance_of/2, subclass_of/2, subproperty_of/2.
 
+:- inline rdf_list/2, rdf_list_head/2.
+
 :- rdf_register_ns(rdfs,
 	'http://www.w3.org/2000/01/rdf-schema#', [keep(true)]).
 
@@ -252,68 +254,82 @@ rdf_list_head(SubList, ListHead) ?>
 		]).
 
 test('is_resource(+Resource)') :-
-	assert_true(is_resource(test:'Adult')),
-	assert_false(is_resource(test:'Lea')),
-	assert_false(is_resource(test:'hasNumber')),
-	assert_false(is_resource(test:'NotExisting')).
+	assert_true(mongolog_call(
+		is_resource(test:'Adult'))),
+	assert_false(mongolog_call(
+		is_resource(test:'Lea'))),
+	assert_false(mongolog_call(
+		is_resource(test:'hasNumber'))),
+	assert_false(mongolog_call(
+		is_resource(test:'NotExisting'))).
 
 test('is_property(+Property)') :-
-	assert_true(is_property(test:'hasNumber')),
-	assert_false(is_property(test:'Lea')),
-	assert_false(is_property(test:'NotExisting')).
+	assert_true(mongolog_call(
+		is_property(test:'hasNumber'))),
+	assert_false(mongolog_call(
+		is_property(test:'Lea'))),
+	assert_false(mongolog_call(
+		is_property(test:'NotExisting'))).
 
 test("instance_of(+,+)") :-
-	assert_true(instance_of(test:'Rex', test:'Man')),
-	assert_false(instance_of(test:'Rex', test:'Adult')),
-	assert_true(kb_project(instance_of(test:'Rex', test:'Adult'))),
-	assert_true(instance_of(test:'Rex', test:'Adult')).
+	assert_true(mongolog_call(
+		instance_of(test:'Rex', test:'Man'))),
+	assert_false(
+		mongolog_call(instance_of(test:'Rex', test:'Adult'))),
+	assert_true(
+		kb_project(instance_of(test:'Rex', test:'Adult'))),
+	assert_true(
+		mongolog_call(instance_of(test:'Rex', test:'Adult'))).
 
 test("subproperty_of(+Sub,+Sup)") :-
-	assert_true(subproperty_of(test:'hasParent', test:'hasAncestor')),
-	assert_false(subproperty_of(test:'hasBrother', test:'hasSibling')),
-	assert_true(kb_project(subproperty_of(test:'hasBrother', test:'hasSibling'))),
-	assert_true(subproperty_of(test:'hasBrother', test:'hasSibling')).
+	assert_true(mongolog_call(
+		subproperty_of(test:'hasParent', test:'hasAncestor'))),
+	assert_false(mongolog_call(
+		subproperty_of(test:'hasBrother', test:'hasSibling'))),
+	assert_true(kb_project(
+		subproperty_of(test:'hasBrother', test:'hasSibling'))),
+	assert_true(mongolog_call(
+		subproperty_of(test:'hasBrother', test:'hasSibling'))).
 
 test_list(RDF_list) :-
-	kb_call(triple(test:testchain, owl:propertyChainAxiom, RDF_list)).
+	mongolog_call(triple(test:testchain, owl:propertyChainAxiom, RDF_list)).
 
 test('rdf_list(+,+)') :-
 	test_list(RDF_list),
-	assert_true(rdf_list(RDF_list, [test:hasParent,test:hasAncestor])),
-	assert_false(rdf_list(RDF_list, [test:hasAncestor,test:hasParent])),
-	assert_false(rdf_list(RDF_list, [test:hasParent])).
+	assert_true(mongolog_call(
+		rdf_list(RDF_list, [test:hasParent,test:hasAncestor])
+	)),
+	assert_false(mongolog_call(
+		rdf_list(RDF_list, [test:hasAncestor,test:hasParent])
+	)),
+	assert_false(mongolog_call(
+		rdf_list(RDF_list, [test:hasParent])
+	)).
 
 test('rdf_list(+,-)') :-
 	test_list(RDF_list),
-	assert_true(rdf_list(RDF_list, _)),
-	(	rdf_list(RDF_list, Pl_List)
+	assert_true(mongolog_call(rdf_list(RDF_list, _))),
+	(	mongolog_call(rdf_list(RDF_list, Pl_List))
 	->	assert_equals(Pl_List, [test:hasParent,test:hasAncestor])
 	;	true
 	).
 
 test('rdf_list(-,+)') :-
 	test_list(RDF_list1),
-	assert_true(rdf_list(_, [test:hasParent,test:hasAncestor])),
-	(	rdf_list(RDF_list2, [test:hasParent,test:hasAncestor])
+	assert_true(mongolog_call(
+		rdf_list(_, [test:hasParent,test:hasAncestor])
+	)),
+	(	mongolog_call(rdf_list(RDF_list2, [test:hasParent,test:hasAncestor]))
 	->	assert_equals(RDF_list1, RDF_list2)
 	;	true
 	).
 
 test('rdf_list(+,-),length(+,-)') :-
-	kb_call((
+	mongolog_call((
 		triple(test:testchain, owl:propertyChainAxiom, RDF_list),
 		rdf_list(RDF_list, List),
 		length(List, NumElems)
 	)),
 	assert_equals(NumElems, 2).
-
-test('rdf_list_head(+,-)') :-
-	test_list(RDF_list1),
-	kb_call(triple(SubList, rdf:first, test:hasAncestor)),
-	assert_true(kb_call(rdf_list_head(SubList, _))),
-	(	kb_call(rdf_list_head(SubList, RDF_list2))
-	->	assert_equals(RDF_list2, RDF_list1)
-	;	true
-	).
 
 :- end_rdf_tests('model_RDFS').
