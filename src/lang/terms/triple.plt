@@ -13,6 +13,8 @@
 :- use_module(library('lang/query')).
 :- use_module(library('lang/db')).
 :- use_module(library('lang/scope')).
+:- use_module(library('lang/mongolog/mongolog'),
+		[ mongolog_call/1 ]).
 
 % register namespaces for following tests
 :- rdf_register_ns(swrl_tests,
@@ -40,31 +42,31 @@ test('assert triple(a,b,_)', [throws(error(instantiation_error,project(triple(a,
 	kb_project(triple(a,b,_)).
 
 test('triple(a,b,c)') :-
-	assert_true(kb_call(triple(a,b,c))),
-	assert_false(kb_call(triple(x,b,c))),
-	assert_false(kb_call(triple(a,x,c))),
-	assert_false(kb_call(triple(a,b,x))).
+	assert_true(mongolog_call(triple(a,b,c))),
+	assert_false(mongolog_call(triple(x,b,c))),
+	assert_false(mongolog_call(triple(a,x,c))),
+	assert_false(mongolog_call(triple(a,b,x))).
 
 test('triple(A,b,c)') :-
-	kb_call(triple(A,b,c)),
+	mongolog_call(triple(A,b,c)),
 	assert_equals(A,a),
-	assert_false(kb_call(triple(_,x,c))).
+	assert_false(mongolog_call(triple(_,x,c))).
 
 test('triple(a,B,c)') :-
-	kb_call(triple(a,B,c)),
+	mongolog_call(triple(a,B,c)),
 	assert_equals(B,b),
-	assert_false(kb_call(triple(x,_,c))).
+	assert_false(mongolog_call(triple(x,_,c))).
 
 test('triple(a,b,C)') :-
-	kb_call(triple(a,b,C)),
+	mongolog_call(triple(a,b,C)),
 	assert_equals(C,c),
-	assert_false(kb_call(triple(a,x,_))).
+	assert_false(mongolog_call(triple(a,x,_))).
 
 test('triple(A,b,C)') :-
-	kb_call(triple(A,b,C)),
+	mongolog_call(triple(A,b,C)),
 	assert_equals(A,a),
 	assert_equals(C,c),
-	assert_false(kb_call(triple(_,x,_))).
+	assert_false(mongolog_call(triple(_,x,_))).
 
 % load swrl owl file for tripledb testing
 test('load local owl file') :-
@@ -73,7 +75,7 @@ test('load local owl file') :-
 
 % check via tripledb_ask if individual triple exists
 test('query triple') :-
-	assert_true( kb_call( triple(
+	assert_true( mongolog_call( triple(
 		swrl_tests:'Adult',
 		rdfs:'subClassOf',
 		swrl_tests:'TestThing'
@@ -86,7 +88,7 @@ test('retract triple') :-
 		rdfs:'subClassOf',
 		swrl_tests:'TestThing'
 	))),
-	assert_false( kb_call( triple(
+	assert_false( mongolog_call( triple(
 		swrl_tests:'Adult',
 		rdfs:'subClassOf',
 		swrl_tests:'TestThing'
@@ -99,12 +101,12 @@ test('assert to triplestore and check if triple exists') :-
 		rdfs:'subClassOf',
 		swrl_tests:'TestThing'
 	))),
-	assert_true( kb_call( triple(
+	assert_true( mongolog_call( triple(
 		swrl_tests:'Adult',
 		rdfs:'subClassOf',
 		swrl_tests:'TestThing'
 	))),
-	assert_false( kb_call( triple(
+	assert_false( mongolog_call( triple(
 		swrl_tests:'Adult',
 		rdfs:'subClassOf',
 		swrl_tests:'Car'
@@ -120,10 +122,10 @@ test('assert XSD') :-
 
 % test for xsd:integer, Str, float
 test('query XSD') :-
-	assert_true(forall(kb_call(triple(_, test_datatype:'studentId',  X)), number(X))),
-	assert_true(forall(kb_call(triple(_, test_datatype:'first_name', Y)), atom(Y))),
-	assert_true(forall(kb_call(triple(_, test_datatype:'last_name',  Z)), atom(Z))),
-	assert_true(forall(kb_call(triple(_, test_datatype:'height',     H)), float(H))).
+	assert_true(forall(mongolog_call(triple(_, test_datatype:'studentId',  X)), number(X))),
+	assert_true(forall(mongolog_call(triple(_, test_datatype:'first_name', Y)), atom(Y))),
+	assert_true(forall(mongolog_call(triple(_, test_datatype:'last_name',  Z)), atom(Z))),
+	assert_true(forall(mongolog_call(triple(_, test_datatype:'height',     H)), float(H))).
 
 % test for list as an argument
 test('assert list') :-
@@ -132,9 +134,9 @@ test('assert list') :-
 	% test asserting list value
 	assert_true(kb_project(triple(S, test_datatype:'hasHairColor', term(DataTerm)))),
 	% test with ground value
-	assert_true(kb_call(triple(S, test_datatype:'hasHairColor', term(DataTerm)))),
+	assert_true(mongolog_call(triple(S, test_datatype:'hasHairColor', term(DataTerm)))),
 	% test with var value
-	(	kb_call(triple(S, test_datatype:'hasHairColor', term(Actual)))
+	(	mongolog_call(triple(S, test_datatype:'hasHairColor', term(Actual)))
 	->	assert_equals(Actual,DataTerm)
 	;	true
 	).
@@ -161,16 +163,16 @@ test('extend time scope'):-
 	assert_true(kb_call(triple(S, P, 'Spiendler'), T_S2, _)).
 
 test('query value operators') :-
-	assert_true(kb_call(triple(swrl_tests:'RectangleSmall',swrl_tests:'hasHeightInMeters', =(6)))),
-	assert_true(kb_call(triple(swrl_tests:'RectangleSmall',swrl_tests:'hasHeightInMeters', =<(9)))),
-	assert_true(kb_call(triple(swrl_tests:'RectangleSmall',swrl_tests:'hasHeightInMeters', <(7)))),
-	assert_true(kb_call(triple(swrl_tests:'RectangleSmall',swrl_tests:'hasHeightInMeters', >=(5)))),
-	assert_true(kb_call(triple(swrl_tests:'RectangleSmall',swrl_tests:'hasHeightInMeters', >(3.5)))),
-	assert_false(kb_call(triple(swrl_tests:'RectangleSmall',swrl_tests:'hasHeightInMeters', <(3)))).
+	assert_true(mongolog_call(triple(swrl_tests:'RectangleSmall',swrl_tests:'hasHeightInMeters', =(6)))),
+	assert_true(mongolog_call(triple(swrl_tests:'RectangleSmall',swrl_tests:'hasHeightInMeters', =<(9)))),
+	assert_true(mongolog_call(triple(swrl_tests:'RectangleSmall',swrl_tests:'hasHeightInMeters', <(7)))),
+	assert_true(mongolog_call(triple(swrl_tests:'RectangleSmall',swrl_tests:'hasHeightInMeters', >=(5)))),
+	assert_true(mongolog_call(triple(swrl_tests:'RectangleSmall',swrl_tests:'hasHeightInMeters', >(3.5)))),
+	assert_false(mongolog_call(triple(swrl_tests:'RectangleSmall',swrl_tests:'hasHeightInMeters', <(3)))).
 
 test('query operator in'):-
 	findall(LastName,
-		kb_call(triple(
+		mongolog_call(triple(
 			in(array([
 				string(test_datatype:'Lecturer3'),
 				string(test_datatype:'Lecturer4')
@@ -183,7 +185,7 @@ test('query operator in'):-
 
 test('query operator in + ->'):-
 	findall([Lecturer,LastName],
-		kb_call(triple(
+		mongolog_call(triple(
 			in(array([
 				string(test_datatype:'Lecturer3'),
 				string(test_datatype:'Lecturer4')
@@ -202,7 +204,7 @@ test('non alphabetic character'):-
 		test_datatype:'last@*~!#?_name',
 		'umlaut'
 	))),
-	assert_true(kb_call(triple(
+	assert_true(mongolog_call(triple(
 		test_datatype:'normal_user_test_new',
 		test_datatype:'last@*~!#?_name',
 		'umlaut'
@@ -214,7 +216,7 @@ test('non utf8 character', fixme('bson_pl has issues reading non-utf8')):-
 		test_datatype:'last_name',
 		'Müller'
 	)),
-	assert_true(kb_call(triple(
+	assert_true(mongolog_call(triple(
 		test_datatype:'Lecturer3',
 		test_datatype:'last_name',
 		'Müller'
@@ -222,27 +224,27 @@ test('non utf8 character', fixme('bson_pl has issues reading non-utf8')):-
 
 % test for non existent triples
 test('non existant'):-
-	assert_false(kb_call(
+	assert_false(mongolog_call(
 		triple(test_datatype:'xyz', test_datatype:'last_name', _)
 	)).
 
 test('triple(+,transitive(+),+') :-
-	assert_true(kb_call(triple(
+	assert_true(mongolog_call(triple(
 		swrl_tests:'Rex',
 		transitive(swrl_tests:isParentOf),
 		swrl_tests:'Ernest'))),
-	assert_true(kb_call(triple(
+	assert_true(mongolog_call(triple(
 		swrl_tests:'Rex',
 		transitive(swrl_tests:isParentOf),
 		swrl_tests:'Lea'))),
-	assert_false(kb_call(triple(
+	assert_false(mongolog_call(triple(
 		swrl_tests:'Rex',
 		transitive(swrl_tests:isParentOf),
 		swrl_tests:'Person'))).
 
 test('triple(-,transitive(+),+') :-
 	findall(X,
-		kb_call(triple(X,
+		mongolog_call(triple(X,
 			transitive(swrl_tests:isParentOf),
 			swrl_tests:'Lea')),
 		Ancestors),
@@ -254,7 +256,7 @@ test('triple(-,transitive(+),+') :-
 
 test('triple(+,reflexive(transitive(+)),-)') :-
 	findall(X,
-		kb_call(triple(
+		mongolog_call(triple(
 			swrl_tests:'Rex',
 			transitive(reflexive(swrl_tests:isParentOf)),
 			X)),
@@ -267,11 +269,11 @@ test('triple(+,reflexive(transitive(+)),-)') :-
 	assert_true(member(swrl_tests:'Lea', Ancestors)).
 
 test('call(+Triple)') :-
-	assert_true(kb_call(call(triple(
+	assert_true(mongolog_call(call(triple(
 		swrl_tests:'Rex',
 		swrl_tests:isParentOf,
 		swrl_tests:'Ernest')))),
-	assert_false(kb_call(call(triple(
+	assert_false(mongolog_call(call(triple(
 		swrl_tests:'Rex',
 		swrl_tests:isParentOf,
 		test_datatype:'Lecturer3')))).
