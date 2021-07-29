@@ -347,6 +347,8 @@ fluent_lookup_next(ArrayField, UnpackedKeys, UnpackedValues, TimeKey, Ctx, Step)
 				[TimeKey,>(VarFluentTime),[]]|
 				UnpackedKeys
 			], Ctx, Ctx_inner, InnerStep)
+		% FIXME: why does above not work (i.e. [TimeKey,>(VarFluentTime),[]])
+		;	InnerStep=['$match',[TimeKey,['$gt',string('$$v_fluent_time')]]]
 		;	InnerStep=['$sort',[TimeKey,int(1)]]
 		;	InnerStep=['$limit',int(1)]
 		% match fluent values given in the query
