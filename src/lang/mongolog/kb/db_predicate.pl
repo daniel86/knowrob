@@ -4,6 +4,7 @@
 		  db_predicate_collection/3,
 		  db_predicate_zip/5,
 		  db_predicate_create/3,
+		  db_predicate_update_fields/2,
 		  db_predicate_drop/1,
 		  db_predicate_compile/3
 		]).
@@ -13,7 +14,7 @@
 :- use_module('../aggregation/lookup').
 :- use_module('../stages/bulk_operation').
 
-:- dynamic db_predicate/3.
+:- dynamic db_predicate_f/3.
 
 %% is_db_predicate(+Indicator) is semidet.
 %
@@ -29,18 +30,21 @@ is_db_predicate(Indicator) :-
 db_predicate(Term, Fields, Options) :-
 	db_predicate(Term, _, Fields, Options).
 
+db_predicate(Functor, Fields, Options) :-
+	db_predicate_f(Functor, Fields, Options).
+
 %%
 db_predicate((/(Functor,Arity)), Functor, Fields, Options) :-
 	atom(Functor), number(Arity),
 	!,
-	db_predicate(Functor, Fields, Options),
+	db_predicate_f(Functor, Fields, Options),
 	length(Fields,Arity).
 
 db_predicate(Term, Functor, Fields, Options) :-
 	compound(Term),
 	Term =.. [Functor|Args],
 	!,
-	db_predicate(Functor, Fields, Options),
+	db_predicate_f(Functor, Fields, Options),
 	length(Args,Arity),
 	length(Fields,Arity).
 
@@ -84,7 +88,7 @@ db_predicate_create(Functor, Fields, _) :-
 
 db_predicate_create(Functor, Fields, Options) :-
 	setup_predicate_collection(Functor, Fields, Options),
-	assertz(db_predicate(Functor, Fields, Options)),
+	assertz(db_predicate_f(Functor, Fields, Options)),
 	mongolog:add_command(Functor).
 
 %%
@@ -94,6 +98,14 @@ setup_predicate_collection(Functor, [FirstField|_], Options) :-
 	(	Indices==[] -> true
 	;	setup_collection(Functor, Indices)
 	).
+
+%%
+db_predicate_update_fields(Functor, Fields) :-
+	length(Fields, Arity),
+	db_predicate_f(Functor, OldFields, OldOptions),
+	length(OldFields, Arity),!,
+	retractall(db_predicate_f(Functor, OldFields, OldOptions)),
+	assertz(db_predicate_f(Functor, Fields, OldOptions)).
 
 %% db_predicate_drop(+Predicate) is det.
 %
@@ -106,7 +118,7 @@ db_predicate_drop(Predicate) :-
 	db_predicate_collection(Predicate, DB, Collection),
 	mng_drop(DB, Collection),
 	db_predicate(Predicate, Functor, Fields, _),
-	retractall(db_predicate(Functor, Fields, _)).
+	retractall(db_predicate_f(Functor, Fields, _)).
 
 %%
 db_predicate_compile(Term, Ctx,

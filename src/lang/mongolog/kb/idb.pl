@@ -99,7 +99,9 @@ idb_assert(_Module, Functor, Args, Clauses) :-
 	mng_db_name(DBName),
 	mng_view_create(DBName, ViewOnCollection, ViewName, array(Pipeline0)),
 	% add head as an IDB predicate in mongolog
-	(	is_db_predicate(Goal) -> true
+	(	is_db_predicate(Goal)
+	% must update field keys
+	->	db_predicate_update_fields(Functor, Fields)
 	;	idb_create(Functor, Fields,
 			[ collection(ViewName),
 			  rdfs_fields(RDFSFields)
