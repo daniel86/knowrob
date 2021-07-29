@@ -143,15 +143,17 @@ mongolog:step_compile1(Term, Ctx,
 		  %input_collection(Collection)
 		]) :-
 	mongolog_fluent(Term, _, _, Opts),!,
-	option(collection(Collection), Opts),
+	% TODO: allow using fluent collection as input.
+%	fluent_collection(Functor, Opts, Collection),
+%	option(collection(Collection), Opts),
 	mongolog_fluent_call(Term, Ctx, Pipeline, StepVars).
 
 %%
 %
-mongolog_fluent_call(Term, Ctx, Pipeline, StepVars) :-
-	\+ option(input_assigned,Ctx),
-	writeln(fluent_input_assigned(Term)),
-	fail.
+%mongolog_fluent_call(Term, Ctx, Pipeline, StepVars) :-
+%	TODO: allow drawing input documents directly from fluent collection
+%	\+ option(input_assigned,Ctx),
+%	fail.
 	
 mongolog_fluent_call(Term, Ctx, Pipeline, StepVars) :-
 	fluent_zip(Term, Ctx,
@@ -167,8 +169,8 @@ mongolog_fluent_call(Term, Ctx, Pipeline, StepVars) :-
 	mng_strip_type(Since_typed, _, Since),
 	mng_strip_type(Until_typed, _, Until),
 	% create aggregate pipeline
-	mongolog_database:unpack_compound(ZippedKeyFields,   KeyFields),
-	mongolog_database:unpack_compound(ZippedValueFields, ValueFields),
+	mongolog_db_predicate:unpack_compound(ZippedKeyFields,   KeyFields),
+	mongolog_db_predicate:unpack_compound(ZippedValueFields, ValueFields),
 	findall(Step,
 		% look-up documents into 't_pred' array field
 		(	fluent_lookup(KeyFields, ValueFields, TimeField, Since, Until, Ctx_fluent, Step)
@@ -185,7 +187,7 @@ mongolog_fluent_call(Term, Ctx, Pipeline, StepVars) :-
 		;	Step=['$unset', string('t_next')]
 		;	Step=['$unset', string('v_fluent_time')]
 		% finally project predicate arguments
-		;	mongolog_database:project_predicate(ValueFields, Ctx_fluent, Step)
+		;	mongolog_db_predicate:project_predicate(ValueFields, Ctx_fluent, Step)
 		;	Step=['$unset', string('t_pred')]
 		),
 		Pipeline).
@@ -207,8 +209,8 @@ mongolog_fluent_retractall(Term, Ctx, Pipeline, StepVars) :-
 	mng_strip_type(Since_typed, _, Since),
 	mng_strip_type(Until_typed, _, Until),
 	% create aggregate pipeline
-	mongolog_database:unpack_compound(ZippedKeyFields,   UnpackedKeys),
-	mongolog_database:unpack_compound(ZippedValueFields, UnpackedValues),
+	mongolog_db_predicate:unpack_compound(ZippedKeyFields,   UnpackedKeys),
+	mongolog_db_predicate:unpack_compound(ZippedValueFields, UnpackedValues),
 	findall(Step,
 		% look-up documents into 't_pred' array field
 		(	fluent_lookup(UnpackedKeys, UnpackedValues,
