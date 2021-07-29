@@ -281,7 +281,7 @@ lookup_triple(triple(S,P,V), Ctx, Step) :-
 				triple_arg_value(Arg, ArgValue, FieldValue, Ctx, ArgExpr),
 				MatchQuery=['$expr', ['$or', array([
 					% pass through if var is not grounded
-					['$eq', array([string(ArgType), string('var')])],
+					['$eq', array([string(ArgType), constant(undefined)])],
 					ArgExpr % else perform a match
 				])]]
 			)
