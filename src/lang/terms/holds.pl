@@ -17,6 +17,10 @@
 
 :- dynamic holds/3.
 :- multifile holds/3.
+% mark holds as inline predicate to avoid that a db view is created.
+% the reason is that the unit and OWL term handling currently
+% requires pragma calls that cannot be "viewed".
+:- inline holds/3, holds/1.
 
 %%
 % Enforce arithmetic operator.
@@ -115,21 +119,22 @@ test('holds/1 with ns', [ blocked('holds/1 cannot handle namespaces') ]) :-
 	assert_true(holds(test:'hasHeightInMeters'(test:'RectangleBig',13))).
 
 test('holds(+S,+P,+O)') :-
-	assert_true(holds(test:'Ernest', test:'hasSibling', test:'Fred')).
+	assert_true(mongolog_call(holds(test:'Ernest', test:'hasSibling', test:'Fred'))).
 
 test('project(holds(+S,+P,+O))') :-
-	assert_false(holds(test:'Lea', test:'hasNumber', '+493564754647')),
+	assert_false(mongolog_call(holds(test:'Lea', test:'hasNumber', '+493564754647'))),
 	assert_true(kb_project(holds(test:'Lea', test:'hasNumber', '+493564754647'))),
-	assert_true(holds(test:'Lea', test:'hasNumber', '+493564754647')).
+	assert_true(mongolog_call(holds(test:'Lea', test:'hasNumber', '+493564754647'))).
 
 test('holds(+S,+P,+Unit(+O))') :-
-	assert_false(holds(test:'Lea',test:'hasHeightInMeters', _)),
+	assert_false(mongolog_call(holds(test:'Lea',test:'hasHeightInMeters', _))),
 	assert_true(kb_project(holds(test:'Lea',test:'hasHeightInMeters', m(6.5)))),
-	assert_true(holds(test:'Lea',test:'hasHeightInMeters', cm(650))),
-	assert_true(holds(test:'Lea',test:'hasHeightInMeters', cm(650.0))),
-	assert_false(holds(test:'Lea',test:'hasHeightInMeters', cm(750.0))),
-	assert_false(holds(test:'Lea',test:'hasHeightInMeters', cm(600.0))),
-	assert_true(holds(test:'Lea',test:'hasHeightInMeters', cm(_))),
-	holds(test:'Lea',test:'hasHeightInMeters', cm(X)) -> assert_equals(X,650.0); fail.
+	assert_true(mongolog_call(holds(test:'Lea',test:'hasHeightInMeters', m(6.5)))),
+	assert_true(mongolog_call(holds(test:'Lea',test:'hasHeightInMeters', cm(650)))),
+	assert_true(mongolog_call(holds(test:'Lea',test:'hasHeightInMeters', cm(650.0)))),
+	assert_false(mongolog_call(holds(test:'Lea',test:'hasHeightInMeters', cm(750.0)))),
+	assert_false(mongolog_call(holds(test:'Lea',test:'hasHeightInMeters', cm(600.0)))),
+	assert_true(mongolog_call(holds(test:'Lea',test:'hasHeightInMeters', cm(_)))),
+	mongolog_call(holds(test:'Lea',test:'hasHeightInMeters', cm(X))) -> assert_equals(X,650.0); fail.
 
 :- end_rdf_tests('lang_holds').
