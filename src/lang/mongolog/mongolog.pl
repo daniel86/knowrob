@@ -42,6 +42,8 @@
 
 :- rdf_meta(step_compile(t,t,t)).
 :- rdf_meta(step_compile1(t,t,t)).
+:- rdf_meta(mongolog_call(t)).
+:- rdf_meta(mongolog_call(t,t)).
 
 %% is_mongolog_term(+PredicateIndicator) is semidet.
 %
