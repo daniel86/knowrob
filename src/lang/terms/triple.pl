@@ -277,11 +277,10 @@ lookup_triple(triple(S,P,V), Ctx, Step) :-
 				triple_arg_var(Arg, ArgVar),
 				var_key(ArgVar, Ctx, ArgKey),
 				atom_concat('$$',ArgKey,ArgValue),
-				atom_concat(ArgValue,'.type',ArgType),
 				triple_arg_value(Arg, ArgValue, FieldValue, Ctx, ArgExpr),
 				MatchQuery=['$expr', ['$or', array([
 					% pass through if var is not grounded
-					['$eq', array([string(ArgType), constant(undefined)])],
+					['$eq', array([string(ArgValue), constant(undefined)])],
 					ArgExpr % else perform a match
 				])]]
 			)
