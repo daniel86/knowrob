@@ -618,10 +618,15 @@ flush_predicate(SrcModule) :-
 	).
 
 %
-inline((/(Functor,Arity))) :-
-	atom(Functor),
-	number(Arity),
-	assertz(inline_predicate(Functor,Arity)).
+inline(Args) :-
+	comma_list(Args,List),
+	forall(
+		member((/(Functor,Arity)),List),
+		( atom(Functor),
+		  number(Arity),
+		  assertz(inline_predicate(Functor,Arity))
+		)
+	).
 
 % handle last rule in a file
 user:term_expansion(end_of_file, end_of_file) :-
