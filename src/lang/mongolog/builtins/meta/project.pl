@@ -66,7 +66,7 @@ mongolog:step_expand(project(Goal), Expanded) :-
 	Goal =.. [Functor|Args],
 	atom_concat('project_', Functor, Functor0),
 	Goal0 =.. [Functor0|Args],
-	catch(lang_query:expand_term_0([Goal0], Expanded), _, fail).
+	catch(mongolog:expand_term_0([Goal0], Expanded), _, fail).
 
 %%
 %
