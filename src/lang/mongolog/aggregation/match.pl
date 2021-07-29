@@ -9,7 +9,7 @@ match_equals(A, B,
 
 %%
 match_scope(
-	['$match', ['$expr', ['$lt', array([
+	['$match', ['$expr', ['$lte', array([
 		string('$v_scope.time.since'),
 		string('$v_scope.time.until')
 	])]]]).
