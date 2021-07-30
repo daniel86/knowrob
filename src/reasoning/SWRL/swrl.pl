@@ -160,13 +160,13 @@ swrl_condition_pl(
 
 swrl_condition_pl(
 		class(Cls,S),
-		instance_of(S_var,Cls),
+		has_type(S_var,Cls),
 		Vars) :-
 	swrl_var(Vars, S, S_var).
 
 swrl_condition_pl(
 		property(S,P,O),
-		holds(S_var,P,O_var),
+		triple(S_var,P,O_var),
 		Vars) :-
 	swrl_var(Vars, S, S_var),
 	swrl_var(Vars, O, O_var).
