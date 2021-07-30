@@ -8,6 +8,7 @@
 :- use_module(library('semweb/rdf_db'),    [ rdf_equal/2 ]).
 :- use_module(library('model/RDFS'),       [ has_type/2, instance_of/2 ]).
 :- use_module(library('lang/terms/holds'), [ holds/3 ]).
+:- use_module(library('lang/mongolog/mongolog'), [ mongolog_call/1 ]).
 :- use_module('swrl').
 :- use_module('parser').
 
@@ -148,82 +149,102 @@ test(swrl_parse_area, [nondet]) :-
 
 % % % % % % % % % % % % % % % % % % % % % % % %
 test(swrl_Driver) :-
-	assert_false(has_type(test:'Fred', test:'Driver')),
+	assert_false(mongolog_call(
+		has_type(test:'Fred', test:'Driver'))),
 	swrl_file_path(knowrob,'test.swrl',Filepath),
 	swrl_file_fire(Filepath,'Driver'),
-	assert_true(has_type(test:'Fred', test:'Driver')).
+	assert_true(mongolog_call(
+		has_type(test:'Fred', test:'Driver'))).
 
-test(swrl_Driver_class_unbound, [nondet]) :-
-	has_type(test:'Fred', X),
+test(swrl_Driver_class_unbound) :-
+	mongolog_call(has_type(test:'Fred', X)),
 	rdf_equal(X, test:'Driver').
 
-test(swrl_Driver_subject_unbound, [nondet]) :-
-	has_type(X, test:'Driver'),
+test(swrl_Driver_subject_unbound) :-
+	mongolog_call(has_type(X, test:'Driver')),
 	rdf_equal(X, test:'Fred').
 
 % % % % % % % % % % % % % % % % % % % % % % % %
-test(swrl_Person) :-
-	assert_false(has_type(test:'Alex', dul:'Person')),
-	swrl_file_path(knowrob,'test.swrl',Filepath),
-	swrl_file_fire(Filepath,'Person'),
-	assert_true(has_type(test:'Alex', dul:'Person')).
-
-% % % % % % % % % % % % % % % % % % % % % % % %
-test(swrl_Hermaphrodite) :-
-	assert_false(has_type(test:'Lea', test:'Hermaphrodite')),
-	swrl_file_path(knowrob,'test.swrl',Filepath),
-	swrl_file_fire(Filepath,'Hermaphrodite'),
-	assert_true(has_type(test:'Lea', test:'Hermaphrodite')),
-	assert_false(has_type(test:'Fred', test:'Hermaphrodite')).
-
-% % % % % % % % % % % % % % % % % % % % % % % %
-test(swrl_area) :-
-	assert_false(holds(test:'RectangleBig', test:'hasAreaInSquareMeters', _)),
-	swrl_file_path(knowrob,'test.swrl',Filepath),
-	swrl_file_fire(Filepath,'area'),
-	assert_true(holds(test:'RectangleBig', test:'hasAreaInSquareMeters', _)).
-
-% % % % % % % % % % % % % % % % % % % % % % % %
-test(swrl_startsWith) :-
-	assert_true(has_type(test:'Fred', dul:'Person')),
-	assert_true(holds(test:'Fred', test:'hasNumber', _)),
-	assert_false(holds(test:'Fred', test:'hasInternationalNumber', _)),
-	swrl_file_path(knowrob,'test.swrl',Filepath),
-	swrl_file_fire(Filepath,'startsWith'),
-	assert_true(holds(test:'Fred', test:'hasInternationalNumber', _)).
-
-% % % % % % % % % % % % % % % % % % % % % % % %
-test(swrl_hasBrother) :-
-	assert_false(holds(test:'Fred', test:'hasBrother', _)),
-	swrl_file_path(knowrob,'test.swrl',Filepath),
-	swrl_file_fire(Filepath,'brother'),
-	assert_true(holds(test:'Fred', test:'hasBrother', test:'Ernest')).
-
-% % % % % % % % % % % % % % % % % % % % % % % %
-test(swrl_BigRectangle1) :-
-	assert_false(has_type(test:'RectangleBig', test:'BigRectangle')),
+test(swrl_classification) :-
+	assert_false(mongolog_call(
+		has_type(test:'RectangleBig', test:'BigRectangle'))),
 	swrl_file_path(knowrob,'test.swrl',Filepath),
 	swrl_file_fire(Filepath,'BigRectangle'),
-	assert_true(has_type(test:'RectangleBig', test:'BigRectangle')).
+	assert_true(mongolog_call(
+		has_type(test:'RectangleBig', test:'BigRectangle'))).
 
 % % % % % % % % % % % % % % % % % % % % % % % %
 test(swrl_greaterThen) :-
-	assert_false(has_type(test:'Ernest', test:'Adult')),
+	assert_false(mongolog_call(
+		has_type(test:'Ernest', test:'Adult'))),
 	swrl_file_path(knowrob,'test.swrl',Filepath),
 	swrl_file_fire(Filepath,'greaterThen'),
-	assert_true(has_type(test:'Ernest', test:'Adult')).
+	assert_true(mongolog_call(
+		has_type(test:'Ernest', test:'Adult'))).
 
+% % % % % % % % % % % % % % % % % % % % % % % %
+test(swrl_multiply) :-
+	assert_false(mongolog_call(
+		triple(test:'RectangleBig', test:'hasAreaInSquareMeters', _))),
+	swrl_file_path(knowrob,'test.swrl',Filepath),
+	swrl_file_fire(Filepath,'area'),
+	assert_true(mongolog_call(
+		triple(test:'RectangleBig', test:'hasAreaInSquareMeters', _))).
+
+% % % % % % % % % % % % % % % % % % % % % % % %
+test(swrl_startsWith) :-
+	assert_true(mongolog_call(
+		has_type(test:'Fred', dul:'Person'))),
+	assert_true(mongolog_call(
+		triple(test:'Fred', test:'hasNumber', _))),
+	assert_false(mongolog_call(
+		triple(test:'Fred', test:'hasInternationalNumber', _))),
+	swrl_file_path(knowrob,'test.swrl',Filepath),
+	swrl_file_fire(Filepath,'startsWith'),
+	assert_true(mongolog_call(
+		triple(test:'Fred', test:'hasInternationalNumber', _))).
+
+% % % % % % % % % % % % % % % % % % % % % % % %
+test(swrl_relation) :-
+	assert_false(mongolog_call(
+		triple(test:'Fred', test:'hasBrother', _))),
+	swrl_file_path(knowrob,'test.swrl',Filepath),
+	swrl_file_fire(Filepath,'brother'),
+	assert_true(mongolog_call(
+		triple(test:'Fred', test:'hasBrother', test:'Ernest'))).
+
+% % % % % % % % % % % % % % % % % % % % % % % %
+test(swrl_OWL_disjunction) :-
+	assert_false(mongolog_call(
+		has_type(test:'Alex', dul:'Person'))),
+	swrl_file_path(knowrob,'test.swrl',Filepath),
+	swrl_file_fire(Filepath,'Person'),
+	assert_true(mongolog_call(
+		has_type(test:'Alex', dul:'Person'))).
+
+% % % % % % % % % % % % % % % % % % % % % % % %
+test(swrl_OWL_conjunction) :-
+	assert_false(mongolog_call(
+		has_type(test:'Lea', test:'Hermaphrodite'))),
+	swrl_file_path(knowrob,'test.swrl',Filepath),
+	swrl_file_fire(Filepath,'Hermaphrodite'),
+	assert_true(mongolog_call(
+		has_type(test:'Lea', test:'Hermaphrodite'))),
+	assert_false(mongolog_call(
+		has_type(test:'Fred', test:'Hermaphrodite'))).
 
 % % % % % % % % % % % % % % % % % % % % % % % %
 % % % % SWRL rules asserted from human readable expressions
 % % % % % % % % % % % % % % % % % % % % % % % %
 
 test(swrl_phrase_hasUncle) :-
-	assert_false(holds(test:'Lea', test:'hasUncle', test:'Ernest')),
+	assert_false(mongolog_call(
+		triple(test:'Lea', test:'hasUncle', test:'Ernest'))),
 	assert_true(swrl_parser:swrl_phrase_fire(
 		'hasParent(?x, ?y), hasBrother(?y, ?z) -> hasUncle(?x, ?z)',
 		'http://knowrob.org/kb/swrl_test#')),
-	assert_true(holds(test:'Lea', test:'hasUncle', test:'Ernest')).
+	assert_true(mongolog_call(
+		triple(test:'Lea', test:'hasUncle', test:'Ernest'))).
 
 :- end_rdf_tests('swrl').
 
