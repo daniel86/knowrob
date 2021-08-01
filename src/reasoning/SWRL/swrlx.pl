@@ -50,15 +50,17 @@ swrlx_make_new_individual(Individual, Pattern) +>
 % @param Pattern List of atoms
 %
 swrlx_make_individual(Individual, Pattern) +>
-	ground(Pattern),
+	% FIXME: rather use common semantics in ask/tell rules
+	%        +> is then only used to generate project() endpoints.
+	ask(ground(Pattern)),
 	atomic_list_concat(Pattern, '::', PatternAtom),
 	once((
 		% succeed if individual is an atom already
-		atom(Individual)
+		ask(atom(Individual))
 		% read indiviudal from cache
-	;	(var(Individual), ask(swrlx_individual(Individual, PatternAtom)))
+	;	(ask(var(Individual)), ask(swrlx_individual(Individual, PatternAtom)))
 		% cache miss: create a new individual
-	;	(var(Individual), swrlx_make_new_individual(Individual, PatternAtom))
+	;	(ask(var(Individual)), swrlx_make_new_individual(Individual, PatternAtom))
 	)).
 
 :- begin_rdf_tests(
