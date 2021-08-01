@@ -97,8 +97,10 @@ mongolog_add_clause(Module, Head, Body) :-
 	(	mongolog_expand(Body, Expanded) -> true
 	;	log_error_and_fail(lang(assertion_failed(Body), Functor))
 	),
+	% TODO: better do the flattening inside of mongolog_expand
+	flatten(Expanded, Flattened),
 	% assert the clause
-	assertz(mongolog_rule(Module, Functor, Args, Expanded)).
+	assertz(mongolog_rule(Module, Functor, Args, Flattened)).
 
 %% mongolog_drop_rule(+Head) is semidet.
 %
@@ -214,7 +216,8 @@ compile_terms(Goal, Vars, Output, Context) :-
 %% Compile a single command (Term) into an aggregate pipeline (Doc).
 compile_term(Term, V0->V1, Output, Context) :-
 	mongolog_expand(Term, Expanded),
-	compile_expanded_terms(Expanded, V0->V1, Output, Context).
+	flatten(Expanded, Flattened),
+	compile_expanded_terms(Flattened, V0->V1, Output, Context).
 
 %%
 compile_expanded_terms([], V0->V0, [document([]),variables([])], _) :-
