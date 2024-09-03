@@ -35,7 +35,7 @@ jobs:
         cd ros_ws
         catkin_make_isolated
     - name: Run unit tests
-      if: ${{github.event_name == 'push' || github.event_name == 'pull_request'}}
+      if: github.event_name == 'push' || github.event_name == 'pull_request'
       shell: bash
       run: |
         sudo systemctl start mongod
@@ -53,7 +53,7 @@ jobs:
         action_fail_on_inconclusive: true
     #####
     - name: Run doxygen
-      if: ${{github.event_name == 'push' || github.event_name == 'release'}}
+      if: github.event_name == 'push' || github.event_name == 'release'
       shell: bash
       run: |
         cd $GITHUB_WORKSPACE/ros_ws/build_isolated/knowrob
@@ -63,20 +63,22 @@ jobs:
         mv $GITHUB_WORKSPACE/ros_ws/src/knowrob/.git $GITHUB_WORKSPACE/
         mv $GITHUB_WORKSPACE/ros_ws/src/knowrob/* $GITHUB_WORKSPACE/
     - name: Extract version tag
-      if: ${{github.event_name == 'release'}}
+      if: github.event_name == 'release'
       shell: bash
       # Extract major.minor version from tag
       #run: echo "##[set-output name=doc_version;]$(echo ${GITHUB_REF#refs/tags/})"
-      run: echo "##[set-output name=version;]$(echo ${GITHUB_REF#refs/tags/} | cut -d'.' -f1,2)"
-      id: docu_version
+      #run: echo "##[set-output name=version;]$(echo ${GITHUB_REF#refs/tags/} | cut -d'.' -f1,2)"
+      run: echo "KNOWROB_DOCU_VERSION=$(echo ${GITHUB_REF#refs/tags/} | cut -d'.' -f1,2)"
+      #id: docu_version
     - name: Extract branch name
-      if: ${{github.event_name == 'push'}}
+      if: github.event_name == 'push'
       shell: bash
       # Use branch name as version
-      run: echo "##[set-output name=version;]$(echo ${GITHUB_REF#refs/heads/})"
-      id: docu_version
+      #run: echo "##[set-output name=version;]$(echo ${GITHUB_REF#refs/heads/})"
+      run: echo "KNOWROB_DOCU_VERSION=$(echo ${GITHUB_REF#refs/heads/})"
+      #id: docu_version
     - name: Deploy doc to gh-pages
-      if: ${{github.event_name == 'push' || github.event_name == 'release'}}
+      if: github.event_name == 'push' || github.event_name == 'release'
       uses: JamesIves/github-pages-deploy-action@3.5.7
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -85,6 +87,7 @@ jobs:
         # The folder the action should deploy.
         FOLDER: doc/html
         # The folder in the target branch
-        TARGET_FOLDER: ${{ steps.docu_version.outputs.version }}
+        # TARGET_FOLDER: ${{ steps.docu_version.outputs.version }}
+        TARGET_FOLDER: ${{ env.KNOWROB_DOCU_VERSION }}
         CLEAN: true
         SINGLE_COMMIT: true
