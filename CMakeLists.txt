@@ -420,7 +420,7 @@ set(CPACK_DEBIAN_PACKAGE_SECTION "devel")
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 # in case of catkin, the package includes a "home" directory for some reason. ignore it.
-set(CPACK_SOURCE_IGNORE_FILES "/./home")
+set(CPACK_SOURCE_IGNORE_FILES ".catkin setup.sh setup.bash")
 include(CPack)
 
 ##############
