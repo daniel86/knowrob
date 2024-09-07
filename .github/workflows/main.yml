@@ -40,20 +40,6 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE/ros_ws/build_isolated/knowrob
         cpack
-    - name: Upload debian package
-      if: github.event_name == 'push'
-      uses: actions/upload-artifact@v4
-      with:
-        name: KnowRob debian package
-        path: ./ros_ws/build_isolated/knowrob/knowrob-*.deb
-    - name: Release debian package
-      if: github.event_name == 'release'
-      shell: bash
-      env:
-        GITHUB_TOKEN: ${{ github.TOKEN }}
-      run: |
-        cd $GITHUB_WORKSPACE/ros_ws/build_isolated/knowrob
-        gh release upload ${{github.event.release.tag_name}} knowrob-*.deb
     - name: Run unit tests
       if: github.event_name == 'push' || github.event_name == 'pull_request'
       shell: bash
@@ -105,3 +91,24 @@ jobs:
         TARGET_FOLDER: ${{ env.KNOWROB_DOCU_VERSION }}
         CLEAN: true
         SINGLE_COMMIT: true
+    #####
+    - name: Release debian package
+      if: github.event_name == 'release'
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ github.TOKEN }}
+      run: |
+        # cd $GITHUB_WORKSPACE/ros_ws/build_isolated/knowrob
+        cd $GITHUB_WORKSPACE/ros_ws/src/knowrob
+        gh release upload ${{github.event.release.tag_name}} ../../build_isolated/knowrob/knowrob-*.deb
+    - name: Upload debian package
+      if: github.event_name == 'push'
+      uses: actions/upload-artifact@v4
+      with:
+        name: debian package
+        path: ./ros_ws/build_isolated/knowrob/knowrob-*.deb
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: test results
+        path: ./gtest-knowrob.xml
