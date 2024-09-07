@@ -49,12 +49,12 @@ namespace knowrob {
 		// Override Term
 		const std::set<std::string_view> &variables() const override { return variables_; }
 
+		// Override Printable
+		void write(std::ostream &os) const override;
+
 	protected:
 		const AtomPtr nameAtom_;
 		const std::set<std::string_view> variables_;
-
-		// Override Term
-		void write(std::ostream &os) const override;
 	};
 
 	using VariablePtr = std::shared_ptr<Variable>;

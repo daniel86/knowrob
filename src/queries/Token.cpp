@@ -37,14 +37,6 @@ std::string Token::stringForm() const {
 	return "UnknownToken";
 }
 
-std::ostream &std::operator<<(std::ostream &os, const knowrob::Token &tok) {
-	return os << tok.stringForm();
-}
-
-std::ostream &std::operator<<(std::ostream &os, const knowrob::TokenPtr &tok) {
-	return os << tok->stringForm();
-}
-
 namespace knowrob::py {
 	template<>
 	void createType<Token>() {

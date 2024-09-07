@@ -99,8 +99,8 @@ namespace knowrob::py {
 				.def("formula", &Goal::formula, return_value_policy<copy_const_reference>())
 				.def("answerBuffer", &Goal::answerBuffer, return_value_policy<copy_const_reference>())
 				.def("ctx", &Query::ctx, return_value_policy<copy_const_reference>())
-				.def("push", static_cast<Push1>(&Goal::push))
-				.def("push", static_cast<Push2>(&Goal::push));
+				.def("push", with<no_gil>(static_cast<Push1>(&Goal::push)))
+				.def("push", with<no_gil>(static_cast<Push2>(&Goal::push)));
 		createType<RDFGoal>();
 	}
 }

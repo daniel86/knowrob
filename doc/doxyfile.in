@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = @CMAKE_PROJECT_NAME@
-PROJECT_NUMBER         = dev
+PROJECT_NUMBER         = @PROJECT_VERSION@
 PROJECT_BRIEF          = @CMAKE_PROJECT_DESCRIPTION@
 PROJECT_LOGO           =
 OUTPUT_DIRECTORY       = ./doc

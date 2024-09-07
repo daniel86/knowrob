@@ -26,7 +26,7 @@ namespace knowrob {
 	 * A Prolog term. It can be constructed from several KnowRob datatypes and
 	 * can be used to query a Prolog engine in a worker thread.
 	 */
-	class PrologTerm {
+	class PrologTerm : public Printable {
 	public:
 		/**
 		 * @return the 'fail' atom.
@@ -259,6 +259,9 @@ namespace knowrob {
 		 */
 		static bool display(std::ostream &os, term_t t, const std::string &indent = "");
 
+		// Printable interface
+		void write(std::ostream &os) const override;
+
 	protected:
 		std::map<std::string, term_t, std::less<>> vars_;
 		std::optional<std::string_view> module_;
@@ -308,9 +311,5 @@ namespace knowrob {
 	};
 
 } // knowrob
-
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::PrologTerm &t);
-}
 
 #endif //KNOWROB_PROLOG_TERM_H

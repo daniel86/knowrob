@@ -23,7 +23,7 @@ namespace knowrob {
 	/**
 	 * A term in a graph query.
 	 */
-	class GraphTerm {
+	class GraphTerm : public Printable {
 	public:
 		virtual ~GraphTerm() = default;
 
@@ -60,10 +60,6 @@ namespace knowrob {
 	std::shared_ptr<GraphTerm> operator&(const std::shared_ptr<GraphTerm> &a, const std::shared_ptr<GraphTerm> &b);
 
 	std::shared_ptr<GraphTerm> operator|(const std::shared_ptr<GraphTerm> &a, const std::shared_ptr<GraphTerm> &b);
-}
-
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::GraphTerm &t);
 }
 
 #endif //v

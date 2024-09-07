@@ -16,12 +16,15 @@ file(READ ${CMAKE_CURRENT_SOURCE_DIR}/package.xml package_xml_str)
 if(NOT package_xml_str MATCHES "<version>([0-9]+.[0-9]+.[0-9]+)</version>")
     message(FATAL_ERROR "Could not parse project version from package.xml. Aborting.")
 endif()
+set(PROJECT_NAME "knowrob")
 set(PROJECT_VERSION ${CMAKE_MATCH_1})
+set(PROJECT_DESCRIPTION "A Knowledge Base System for Cognition-enabled Robots")
+set(PROJECT_WEBSITE "https://github.com/knowrob/knowrob")
 message(STATUS "KnowRob version: ${PROJECT_VERSION}")
 
 project(knowrob
         VERSION ${PROJECT_VERSION}
-        DESCRIPTION "A Knowledge Base System for Cognition-enabled Robots"
+        DESCRIPTION ${PROJECT_DESCRIPTION}
         HOMEPAGE_URL "https://github.com/knowrob/knowrob"
 )
 
@@ -403,7 +406,23 @@ if (DOXYGEN_FOUND)
 endif ()
 
 ##############
-########## Unit Testing
+########## CPack
+##############
+
+set(CPACK_GENERATOR "DEB")
+set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+set(CPACK_PACKAGE_DESCRIPTION ${PROJECT_DESCRIPTION})
+set(CPACK_PACKAGE_HOMEPAGE_URL ${PROJECT_WEBSITE})
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Daniel Beßler <danielb@uni-bremen.de>")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-program-options-dev, libboost-serialization-dev, libboost-python-dev, libeigen3-dev, libmongoc-dev, libraptor2-dev, librdf0-dev, libspdlog-dev, libgtest-dev, libswipl-dev, python3-dev")
+set(CPACK_DEBIAN_PACKAGE_SECTION "devel")
+set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+include(CPack)
+
+##############
+########## Unit Testings
 ##############
 
 # add an executable target for GTest.

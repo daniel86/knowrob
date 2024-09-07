@@ -14,6 +14,8 @@
 #include "knowrob/formulas/Disjunction.h"
 #include "knowrob/terms/Function.h"
 #include "knowrob/integration/python/utils.h"
+#include "knowrob/integration/python/converter/dict.h"
+#include "knowrob/Logger.h"
 
 using namespace knowrob;
 
@@ -151,6 +153,16 @@ bool Bindings::unifyWith(const Bindings &other) {
 	return true;
 }
 
+void Bindings::write(std::ostream &os) const {
+	uint32_t i = 0;
+	os << '{';
+	for (const auto &pair: mapping_) {
+		if (i++ > 0) os << ',';
+		os << pair.first << ':' << ' ' << (*pair.second.second);
+	}
+	os << '}';
+}
+
 template<class T>
 std::shared_ptr<T> applyCompoundBindings( //NOLINT
 		const std::shared_ptr<T> &phi,
@@ -270,19 +282,6 @@ namespace knowrob {
 	}
 }
 
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const Bindings &omega) //NOLINT
-	{
-		uint32_t i = 0;
-		os << '{';
-		for (const auto &pair: omega) {
-			if (i++ > 0) os << ',';
-			os << pair.first << ':' << ' ' << (*pair.second.second);
-		}
-		return os << '}';
-	}
-}
-
 namespace knowrob::py {
 	TermPtr applyBindings_t(const TermPtr &t, const Bindings &bindings) {
 		return applyBindings(t, bindings);
@@ -315,5 +314,7 @@ namespace knowrob::py {
 		// Allow implicit conversion from shared_ptr<Bindings> to shared_ptr<const Bindings>
 		register_ptr_to_python<std::shared_ptr<const Bindings> >();
 		implicitly_convertible<std::shared_ptr<Bindings>, std::shared_ptr<const Bindings> >();
+		// Allow conversion from python dict to std::map
+		dict_map_converter<std::shared_ptr<Variable>,std::shared_ptr<Term>>::register_from_python_converter();
 	}
 }

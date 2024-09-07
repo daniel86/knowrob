@@ -32,11 +32,14 @@ namespace knowrob {
 		 * @return the number of seconds since the epoch.
 		 */
 		double toSeconds(const TimePoint &timestamp);
-	} // namespace time
-}
 
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::TimePoint &tp);
+		/**
+		 * Write a time point to an output stream.
+		 * @param tp the time point.
+		 * @param os the output stream.
+		 */
+		void write(const TimePoint &tp, std::ostream &os);
+	} // namespace time
 }
 
 #endif //KNOWROB_TIME_POINT_H_

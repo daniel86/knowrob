@@ -106,6 +106,12 @@ def connective_formulas():
 	assert isinstance(arg1, Disjunction), "argument is not an Conjunction"
 
 
+def create_bindings():
+	key = Variable("key")
+	value = Atom.Tabled("value")
+	bindings = Bindings({key: value})
+	assert isinstance(bindings, Bindings), "argument is not a Bindings"
+
 def answer_queue():
 	yes = AnswerYes()
 	# push "yes" to the queue

@@ -16,10 +16,3 @@ namespace knowrob {
 		return std::make_shared<QueryContext>(QUERY_FLAG_ONE_SOLUTION);
 	}
 }
-
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::Query &q) { //NOLINT
-		QueryWriter(q, os);
-		return os;
-	}
-}

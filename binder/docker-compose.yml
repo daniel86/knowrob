@@ -1,0 +1,19 @@
+version: '3'
+services:
+  knowrob-example:
+    image: knowrob-example:dev
+    build:
+      context: ../
+      dockerfile: ./binder/Dockerfile
+    stdin_open: true
+    tty: true
+    ports: 
+      - 8888:8888
+      # - 11311:11311
+    privileged: true
+    # user: root
+    user: "jovyan:${GID}"
+    # working_dir: /home/jovyan/
+    command: jupyter lab --allow-root --NotebookApp.token='' --no-browser --ip=0.0.0.0
+    # volumes:
+    #   - ../:/home/jovyan/knowrob-example

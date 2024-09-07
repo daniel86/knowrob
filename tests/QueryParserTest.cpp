@@ -32,7 +32,7 @@ static inline void testNumber(const TermPtr &t, const double &expected) {
 		}
 		std::ostringstream oss;
 		oss << expected;
-		EXPECT_EQ(readString(*t), oss.str());
+		EXPECT_EQ(t->format(), oss.str());
     }
 }
 

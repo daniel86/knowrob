@@ -35,7 +35,7 @@ namespace knowrob {
 		 */
 		virtual const char *operator_symbol() const = 0;
 
-		// Override Formula
+		// Override Printable
 		void write(std::ostream &os) const override;
 
 	protected:

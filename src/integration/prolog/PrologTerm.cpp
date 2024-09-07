@@ -975,9 +975,6 @@ bool PrologTerm::display(std::ostream &os, term_t t, const std::string &indent) 
 	return false;
 }
 
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::PrologTerm &t) {
-		PrologTerm::display(os, t());
-		return os;
-	}
+void PrologTerm::write(std::ostream &os) const {
+	display(os, plTerm_);
 }

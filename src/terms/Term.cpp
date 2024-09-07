@@ -66,13 +66,6 @@ bool Term::operator==(const Term &other) const {
 	return false;
 }
 
-namespace std {
-	ostream &operator<<(ostream &os, const knowrob::Term &t) { //NOLINT
-		knowrob::TermWriter(t, os);
-		return os;
-	}
-}
-
 namespace knowrob::py {
 	// this struct is needed because Term has pure virtual methods
 	struct TermWrap : public Term, boost::python::wrapper<Term> {
@@ -96,8 +89,8 @@ namespace knowrob::py {
 		class_<Term, std::shared_ptr<TermWrap>, boost::noncopyable>
 				("Term", no_init)
 				.def("__eq__", &Term::operator==)
-				.def("__repr__", +[](Term &t) { return readString(t); })
-				.def("humanReadableForm", +[](Term &t) { return readString(t); })
+				.def("__repr__", &Term::format)
+				.def("humanReadableForm", &Term::format)
 				.def("__hash__", &Term::hash)
 				.def("termType", &Term::termType)
 				.def("isAtomic", &Term::isAtomic)

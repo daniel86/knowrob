@@ -16,7 +16,7 @@ namespace knowrob {
 	/**
 	 * The indicator of a predicate defined by its functor and arity.
 	 */
-	class PredicateIndicator {
+	class PredicateIndicator : public Printable {
 	public:
 		/**
 		 * @param functor the functor name.
@@ -58,16 +58,13 @@ namespace knowrob {
 		 */
 		std::shared_ptr<Term> toTerm() const;
 
-		void write(std::ostream &os) const;
+		// Override Printable::write
+		void write(std::ostream &os) const override;
 
 	private:
 		const AtomPtr functor_;
 		const uint32_t arity_;
 	};
-}
-
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::PredicateIndicator &i);
 }
 
 #endif //KNOWROB_PREDICATE_INDICATOR_H_

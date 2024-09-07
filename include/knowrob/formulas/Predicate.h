@@ -54,7 +54,7 @@ namespace knowrob {
 		// Override Term
 		const std::set<std::string_view> &variables() { return variables_; }
 
-		// Override Formula
+		// Override Printable
 		void write(std::ostream &os) const override;
 
 		// Override Term
@@ -75,10 +75,6 @@ namespace knowrob {
 	};
 
 	using PredicatePtr = std::shared_ptr<Predicate>;
-}
-
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::Predicate &p);
 }
 
 #endif //KNOWROB_PREDICATE_H_

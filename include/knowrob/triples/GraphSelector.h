@@ -17,7 +17,7 @@ namespace knowrob {
 	 * For example, each point in time is conceptually a separate graph, and
 	 * a query may only address a specific point in time, or time interval.
 	 */
-	struct GraphSelector {
+	struct GraphSelector : public Printable {
 		GraphSelector() = default;
 
 		/**
@@ -63,17 +63,13 @@ namespace knowrob {
 		bool mergeWith(const GraphSelector &other);
 
 		/**
-		 * Write this selector to a stream.
-		 * @param os the stream
-		 * @return the stream
-		 */
-		std::ostream &write(std::ostream &os) const;
-
-		/**
 		 * Set the selector from a property tree.
 		 * @param config the property tree
 		 */
 		void set(const boost::property_tree::ptree &config);
+
+		// Override Printable::write
+		void write(std::ostream &os) const override;
 	};
 
 	// alias
@@ -86,10 +82,6 @@ namespace knowrob {
 		static auto defaultSelector = std::make_shared<const GraphSelector>();
 		return defaultSelector;
 	}
-}
-
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::GraphSelector &selector);
 }
 
 #endif //KNOWROB_GRAPH_SELECTOR_H

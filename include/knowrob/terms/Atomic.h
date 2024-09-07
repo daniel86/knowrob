@@ -79,11 +79,11 @@ namespace knowrob {
 		// Override Term
 		const std::set<std::string_view> &variables() const final { return Term::noVariables_; }
 
+		// override Printable
+		void write(std::ostream &os) const override { os << stringForm(); }
+
 	protected:
 		const AtomicType atomicType_;
-
-		// override Term
-		void write(std::ostream &os) const override { os << stringForm(); }
 	};
 } // knowrob
 

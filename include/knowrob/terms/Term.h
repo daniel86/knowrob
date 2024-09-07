@@ -9,6 +9,7 @@
 #include <set>
 #include <memory>
 #include <ostream>
+#include "knowrob/Printable.h"
 
 namespace knowrob {
 	/**
@@ -27,7 +28,7 @@ namespace knowrob {
 	 * Terms are used as components of formulas and are recursively
 	 * constructed over the set of constants, variables, and function symbols.
 	 */
-	class Term {
+	class Term : public Printable {
 	public:
 		explicit Term(TermType termType) : termType_(termType) {};
 
@@ -110,28 +111,10 @@ namespace knowrob {
 		const TermType termType_;
 		bool isBlank_ = false;
 		bool isIRI_ = false;
-
-		/**
-		 * Write the term into an ostream.
-		 */
-		virtual void write(std::ostream &os) const = 0;
-
-		friend struct TermWriter;
 	};
 
 	// alias declaration
 	using TermPtr = std::shared_ptr<Term>;
-
-	/**
-	 * Writes a term into an ostream.
-	 */
-	struct TermWriter {
-		TermWriter(const Term &term, std::ostream &os) { term.write(os); }
-	};
-}
-
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::Term &t);
 }
 
 #endif //KNOWROB_TERM_H_

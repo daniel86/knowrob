@@ -71,7 +71,7 @@ size_t GraphSelector::hash() const {
 	return val;
 }
 
-std::ostream &GraphSelector::write(std::ostream &os) const {
+void GraphSelector::write(std::ostream &os) const {
 	os << std::setprecision(1);
 
 	bool hasEpistemicOperator = false;
@@ -112,8 +112,6 @@ std::ostream &GraphSelector::write(std::ostream &os) const {
 		}
 		os << ']';
 	}
-
-	return os;
 }
 
 void GraphSelector::set(const boost::property_tree::ptree &config) {
@@ -134,10 +132,6 @@ void GraphSelector::set(const boost::property_tree::ptree &config) {
 	if (config.count("confidence")) {
 		confidence = config.get<double>("confidence");
 	}
-}
-
-std::ostream &std::operator<<(std::ostream &os, const knowrob::GraphSelector &gs) {
-	return gs.write(os);
 }
 
 // optional member must be added with add_property

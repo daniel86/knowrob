@@ -1,0 +1,76 @@
+{
+  "data": {
+    "layout-restorer:data": {
+      "main": {
+        "dock": {
+          "type": "split-area",
+          "orientation": "horizontal",
+          "sizes": [
+            0.6,
+            0.4
+          ],
+          "children": [
+            {
+              "type": "tab-area",
+              "currentIndex": 0,
+              "widgets": [
+                "rviz-knowrob:rviz-knowrob"
+              ]
+            },
+            {
+              "type": "tab-area",
+              "currentIndex": 0,
+              "widgets": [
+                "terminal:1"
+              ]
+            }
+          ]
+        },
+        "current": "terminal:1"
+      },
+      "down": {
+        "size": 0,
+        "widgets": []
+      },
+      "left": {
+        "collapsed": true,
+        "widgets": [
+          "filebrowser",
+          "running-sessions",
+          "git-sessions",
+          "@jupyterlab/toc:plugin",
+          "extensionmanager.main-view",
+          "jupyter-ai-chat"
+        ]
+      },
+      "right": {
+        "collapsed": true,
+        "widgets": [
+          "jp-property-inspector",
+          "debugger-sidebar"
+        ]
+      },
+      "relativeSizes": [
+        0,
+        1,
+        0
+      ]
+    },
+    "file-browser-filebrowser:cwd": {
+      "path": ""
+    },
+    "rviz-knowrob:rviz-knowrob": {
+      "data": {}
+    },
+    "terminal:1": {
+      "data": {
+        "name": "1"
+      }
+    }
+  },
+  "metadata": {
+    "id": "default",
+    "last_modified": "2024-05-29T13:46:34.217937+00:00",
+    "created": "2024-05-29T13:46:34.217937+00:00"
+  }
+}

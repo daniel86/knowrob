@@ -85,6 +85,10 @@ TEST_F(BoostPythonTests, read_settings_from_dict) {
 	EXPECT_NO_THROW(PYTHON_TEST_CALL1("read_settings_from_dict"));
 }
 
+TEST_F(BoostPythonTests, create_bindings) {
+	EXPECT_NO_THROW(PYTHON_TEST_CALL1("create_bindings"));
+}
+
 TEST_F(BoostPythonTests, handle_property_tree) {
 	EXPECT_NO_THROW(PYTHON_TEST_CALL1("handle_property_tree"));
 }

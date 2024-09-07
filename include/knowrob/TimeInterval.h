@@ -10,12 +10,13 @@
 #include <ostream>
 #include <optional>
 #include "TimePoint.h"
+#include "Printable.h"
 
 namespace knowrob {
 	/**
 	 * A fuzzy time interval where start and end time point lie within a range.
 	 */
-	class TimeInterval {
+	class TimeInterval : public Printable {
 	public:
 		/**
 		 * @param since the time point where the interval starts
@@ -62,14 +63,13 @@ namespace knowrob {
 		 */
 		const auto &until() const { return until_; }
 
+		// Printable interface
+		void write(std::ostream &os) const override;
+
 	protected:
 		std::optional<TimePoint> since_;
 		std::optional<TimePoint> until_;
 	};
-}
-
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::TimeInterval &ti);
 }
 
 #endif //KNOWROB_TIME_INTERVAL_H_

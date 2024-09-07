@@ -66,17 +66,12 @@ jobs:
       if: github.event_name == 'release'
       shell: bash
       # Extract major.minor version from tag
-      #run: echo "##[set-output name=doc_version;]$(echo ${GITHUB_REF#refs/tags/})"
-      #run: echo "##[set-output name=version;]$(echo ${GITHUB_REF#refs/tags/} | cut -d'.' -f1,2)"
       run: echo "KNOWROB_DOCU_VERSION=$(echo ${GITHUB_REF#refs/tags/} | cut -d'.' -f1,2)" >> $GITHUB_ENV
-      #id: docu_version
     - name: Extract branch name
       if: github.event_name == 'push'
       shell: bash
       # Use branch name as version
-      #run: echo "##[set-output name=version;]$(echo ${GITHUB_REF#refs/heads/})"
       run: echo "KNOWROB_DOCU_VERSION=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
-      #id: docu_version
     - name: Deploy doc to gh-pages
       if: github.event_name == 'push' || github.event_name == 'release'
       uses: JamesIves/github-pages-deploy-action@3.5.7
@@ -87,7 +82,6 @@ jobs:
         # The folder the action should deploy.
         FOLDER: doc/html
         # The folder in the target branch
-        # TARGET_FOLDER: ${{ steps.docu_version.outputs.version }}
         TARGET_FOLDER: ${{ env.KNOWROB_DOCU_VERSION }}
         CLEAN: true
         SINGLE_COMMIT: true

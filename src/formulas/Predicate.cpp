@@ -101,11 +101,3 @@ namespace knowrob::py {
 				.def("functor", &Predicate::functor, return_value_policy<copy_const_reference>());
 	}
 }
-
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::Predicate &p) //NOLINT
-	{
-		p.write(os);
-		return os;
-	}
-}

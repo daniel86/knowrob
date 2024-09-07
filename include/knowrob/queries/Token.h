@@ -10,6 +10,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include "knowrob/Printable.h"
 
 namespace knowrob {
 	/**
@@ -25,7 +26,7 @@ namespace knowrob {
 	/**
 	 * A token is a single element in a query evaluation pipeline.
 	 */
-	class Token {
+	class Token : public Printable {
 	public:
 		explicit Token(TokenType tokenType) : tokenType_(tokenType) {};
 
@@ -61,6 +62,9 @@ namespace knowrob {
 		 */
 		bool indicatesEndOfEvaluation() const { return isTerminalToken_; }
 
+		// Printable interface
+		void write(std::ostream &os) const override { os << stringForm(); }
+
 	protected:
 		TokenType tokenType_;
 		bool isTerminalToken_ = false;
@@ -69,12 +73,6 @@ namespace knowrob {
 	// alias
 	using TokenPtr = std::shared_ptr<const Token>;
 	using TokenMap = std::map<uint32_t, std::vector<TokenPtr>>;
-}
-
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::Token &tok);
-
-	std::ostream &operator<<(std::ostream &os, const knowrob::TokenPtr &tok);
 }
 
 #endif //KNOWROB_TOKEN_H

@@ -1,9 +1,9 @@
 from knowrob import *
 
 
-class DummyReasoner(RDFGoalReasoner):
+class LPNReasoner(RDFGoalReasoner):
 	def __init__(self):
-		super(DummyReasoner, self).__init__()
+		super(LPNReasoner, self).__init__()
 		self.loves = IRIAtom("http://knowrob.org/kb/lpn#loves")
 		# The reasoner defines a new predicate lpn:jealous that can be evaluated by the reasoner
 		self.defineRelation(IRIAtom("http://knowrob.org/kb/lpn#jealous"))

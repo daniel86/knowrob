@@ -374,7 +374,7 @@ TEST_F(KnowledgeBaseTest, mongolog_lpn_json) {
 	kb_ = KnowledgeBase::create("tests/settings/mongolog-lpn.json");
 	EXPECT_ONLY_SOLUTION(
 			"lpn:jealous(lpn:vincent, X)",
-			Bindings({{varX_, iri("lpn","marsellus")}}))
+			Bindings({{varX_, iri("lpn", "marsellus")}}))
 	kb_ = nullptr;
 }
 

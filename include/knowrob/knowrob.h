@@ -50,19 +50,6 @@ namespace knowrob {
 	 */
 	void insertUnique(std::ostream &os);
 
-	/**
-	 * Read a string representation of an object using the << operator.
-	 * @tparam T the type of the object.
-	 * @param obj the object to read.
-	 * @return a string representation of the object.
-	 */
-	template<typename T>
-	std::string readString(const T &obj) {
-		std::ostringstream oss;
-		oss << obj;
-		return oss.str();
-	}
-
 	namespace py {
 		/**
 		 * Initialize the Python module.

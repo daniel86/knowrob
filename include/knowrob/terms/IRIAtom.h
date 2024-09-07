@@ -48,9 +48,10 @@ namespace knowrob {
 		 */
 		PredicatePtr operator()(const TermPtr &s) const;
 
-	protected:
-		// override Term
+		// override Printable
 		void write(std::ostream &os) const override;
+
+	protected:
 	};
 
 	using IRIAtomPtr = std::shared_ptr<IRIAtom>;

@@ -33,15 +33,12 @@ std::shared_ptr<TimeInterval> TimeInterval::intersectWith(const TimeInterval &ot
 	return std::make_shared<TimeInterval>(std::max(since_, other.since_), std::min(until_, other.until_));
 }
 
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const TimeInterval &ti) { //NOLINT
-		os << '[';
-		if (ti.since().has_value()) os << ti.since().value();
-		else os << '_';
-		os << ",";
-		if (ti.until().has_value()) os << ti.until().value();
-		else os << '_';
-		os << ']';
-		return os;
-	}
+void TimeInterval::write(std::ostream &os) const {
+	os << '[';
+	if (since().has_value()) time::write(since().value(), os);
+	else os << '_';
+	os << ",";
+	if (until().has_value()) time::write(until().value(), os);
+	else os << '_';
+	os << ']';
 }

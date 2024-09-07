@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <ostream>
+#include "knowrob/Printable.h"
 
 namespace knowrob {
 	/**
@@ -30,7 +31,7 @@ namespace knowrob {
 	 * A propositional formula.
 	 * Note that all formulas are immutable.
 	 */
-	class Formula {
+	class Formula : public Printable {
 	public:
 		/**
 		 * @param type the type of the formula.
@@ -72,11 +73,6 @@ namespace knowrob {
 		 */
 		bool isBottom() const;
 
-		/**
-		 * Write the formula into an ostream.
-		 */
-		virtual void write(std::ostream &os) const = 0;
-
 	protected:
 		const FormulaType type_;
 		bool isGround_ = true;
@@ -100,10 +96,6 @@ namespace knowrob {
 	// alias declaration
 	using FormulaPtr = std::shared_ptr<Formula>;
 	using FormulaLabelPtr = std::shared_ptr<FormulaLabel>;
-}
-
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::Formula &phi);
 }
 
 #endif //KNOWROB_FORMULA_H_

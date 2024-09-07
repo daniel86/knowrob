@@ -14,13 +14,6 @@
 
 using namespace knowrob;
 
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::GraphTerm &t) {
-		t.write(os);
-		return os;
-	}
-}
-
 namespace knowrob {
 	std::shared_ptr<GraphTerm> applyBindings(const std::shared_ptr<GraphTerm> &term, const Bindings &bindings) {
 		switch (term->termType()) {

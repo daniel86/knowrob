@@ -3,15 +3,14 @@
  * https://github.com/knowrob/knowrob for license details.
  */
 
+#ifndef _WIN32
+#include <pwd.h>
+#endif
+
 #include <filesystem>
 #include "knowrob/URI.h"
 #include "knowrob/Logger.h"
-
-#ifndef _WIN32
-#include <pwd.h>
 #include <optional>
-
-#endif
 
 using namespace knowrob;
 

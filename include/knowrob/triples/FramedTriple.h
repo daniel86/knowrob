@@ -9,6 +9,7 @@
 #include "optional"
 #include "variant"
 #include "knowrob/terms/XSDType.h"
+#include "knowrob/Printable.h"
 
 namespace knowrob {
 	/**
@@ -16,7 +17,7 @@ namespace knowrob {
 	 * This is an abstract class to support both std::string and std::string_view for triple data,
 	 * however, at the cost of having some virtual methods.
 	 */
-	class FramedTriple {
+	class FramedTriple : public Printable {
 	public:
 		explicit FramedTriple()
 				: xsdType_(std::nullopt), isUncertain_(false), isOccasional_(false) {}
@@ -322,6 +323,9 @@ namespace knowrob {
 		 */
 		bool operator<(const FramedTriple &other) const;
 
+		// Override Printable
+		void write(std::ostream &os) const override;
+
 	protected:
 		bool isOccasional_;
 		bool isUncertain_;
@@ -610,10 +614,6 @@ namespace knowrob {
 
 		FramedTriple &get() const { return *ptr; }
 	};
-}
-
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::FramedTriple &triple);
 }
 
 #endif //KNOWROB_FRAMED_TRIPLE_H

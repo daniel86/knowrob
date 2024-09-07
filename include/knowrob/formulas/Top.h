@@ -21,7 +21,7 @@ namespace knowrob {
 	public:
 		static const std::shared_ptr<Top>& get();
 
-		// Override Term
+		// Override Printable
 		void write(std::ostream& os) const override;
 
 	private:

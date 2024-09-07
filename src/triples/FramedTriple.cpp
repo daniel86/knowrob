@@ -332,38 +332,34 @@ bool FramedTriple::mergeFrame(const FramedTriple &other) {
 	return true;
 }
 
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::FramedTriple &triple) //NOLINT
-	{
-		os << '(';
-		os << triple.subject() << ',' << ' ';
-		os << triple.predicate() << ',' << ' ';
-		if (triple.isObjectIRI() || triple.isObjectBlank()) {
-			os << triple.valueAsString();
-		} else {
-			os << triple.createStringValue();
-		}
-		if (triple.graph()) {
-			os << ',' << " g=" << triple.graph().value();
-		}
-		if (triple.perspective()) {
-			os << ',' << " p=" << triple.perspective().value();
-		}
-		if (triple.isOccasional()) {
-			os << ',' << " o";
-		}
-		if (triple.isUncertain()) {
-			os << ',' << " u";
-		}
-		if (triple.begin()) {
-			os << ',' << " b=" << triple.begin().value();
-		}
-		if (triple.end()) {
-			os << ',' << " e=" << triple.end().value();
-		}
-		os << ')';
-		return os;
+void FramedTriple::write(std::ostream &os) const {
+	os << '(';
+	os << subject() << ',' << ' ';
+	os << predicate() << ',' << ' ';
+	if (isObjectIRI() || isObjectBlank()) {
+		os << valueAsString();
+	} else {
+		os << createStringValue();
 	}
+	if (graph()) {
+		os << ',' << " g=" << graph().value();
+	}
+	if (perspective()) {
+		os << ',' << " p=" << perspective().value();
+	}
+	if (isOccasional()) {
+		os << ',' << " o";
+	}
+	if (isUncertain()) {
+		os << ',' << " u";
+	}
+	if (begin()) {
+		os << ',' << " b=" << begin().value();
+	}
+	if (end()) {
+		os << ',' << " e=" << end().value();
+	}
+	os << ')';
 }
 
 namespace knowrob::py {
@@ -387,7 +383,9 @@ namespace knowrob::py {
 
 		void setGraph(std::string_view graph) override { call_method<void>(self, "setGraph", graph); }
 
-		void setPerspective(std::string_view perspective) override { call_method<void>(self, "setPerspective", perspective); }
+		void setPerspective(std::string_view perspective) override {
+			call_method<void>(self, "setPerspective", perspective);
+		}
 
 		std::optional<std::string_view> graph() const override {
 			return call_method<std::optional<std::string_view>>(self, "graph");

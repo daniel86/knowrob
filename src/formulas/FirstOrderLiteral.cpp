@@ -18,13 +18,12 @@ FirstOrderLiteral::FirstOrderLiteral(const FirstOrderLiteral &other, const Subst
 		  isNegated_(other.isNegated_) {}
 */
 
-std::ostream &FirstOrderLiteral::write(std::ostream &os) const {
+void FirstOrderLiteral::write(std::ostream &os) const {
 	if (isNegated()) {
 		os << "not(" << *predicate_ << ")";
 	} else {
 		os << *predicate_;
 	}
-	return os;
 }
 
 namespace knowrob {
@@ -51,8 +50,4 @@ namespace knowrob::py {
 				.def("arity", &FirstOrderLiteral::arity)
 				.def("numVariables", &FirstOrderLiteral::numVariables);
 	}
-}
-
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::FirstOrderLiteral &l) { return l.write(os); }
 }

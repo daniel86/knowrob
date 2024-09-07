@@ -24,11 +24,11 @@ namespace knowrob {
 		// Override Query
 		const FormulaPtr &formula() const { return formula_; }
 
+		// Override Printable
+		void write(std::ostream &os) const override { os << *formula_; }
+
 	protected:
 		const std::shared_ptr<Formula> formula_;
-
-		// Override Query
-		void write(std::ostream &os) const override { os << *formula_; }
 	};
 }
 

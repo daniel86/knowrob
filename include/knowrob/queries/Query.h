@@ -26,7 +26,7 @@ namespace knowrob {
 	 * A baseclass for queries. The only commitment is that queries are evaluated
 	 * within a certain context. The context defines additional parameters for the evaluation.
 	 */
-	class Query {
+	class Query : public Printable {
 	public:
 		/**
 		 * @param ctx the query context.
@@ -47,22 +47,7 @@ namespace knowrob {
 
 	protected:
 		QueryContextPtr ctx_;
-
-		virtual void write(std::ostream &os) const = 0;
-
-		friend struct QueryWriter;
 	};
-
-	/**
-	 * Writes a term into an ostream.
-	 */
-	struct QueryWriter {
-		QueryWriter(const Query &q, std::ostream &os) { q.write(os); }
-	};
-}
-
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::Query &q);
 }
 
 #endif //KNOWROB_QUERY_H_

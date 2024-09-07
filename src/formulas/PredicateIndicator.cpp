@@ -32,14 +32,6 @@ std::shared_ptr<Term> PredicateIndicator::toTerm() const {
 	}));
 }
 
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::PredicateIndicator &i) //NOLINT
-	{
-		i.write(os);
-		return os;
-	}
-}
-
 namespace knowrob::py {
 	template<>
 	void createType<PredicateIndicator>() {

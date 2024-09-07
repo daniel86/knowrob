@@ -21,4 +21,4 @@ protected:
 #define TEST_JUPYTER(notebook) EXPECT_NO_THROW(\
         PYTHON_TEST_CALL0("test_notebook", python::object(URI::resolve(notebook))));
 
-TEST_F(JupyterTests, python_kb) { TEST_JUPYTER("jupyter/python-kb.ipynb"); }
+TEST_F(JupyterTests, python_kb) { TEST_JUPYTER("jupyter/intro.ipynb"); }

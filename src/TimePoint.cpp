@@ -25,9 +25,6 @@ double time::toSeconds(const TimePoint &timestamp) {
 	return static_cast<double>(time_t_value);
 }
 
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const TimePoint &tp) { // NOLINT
-		os << time::toSeconds(tp);
-		return os;
-	}
+void time::write(const TimePoint &tp, std::ostream &os) {
+	os << time::toSeconds(tp);
 }

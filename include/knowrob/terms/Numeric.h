@@ -170,13 +170,13 @@ namespace knowrob {
 			return numericForm() == otherNumeric->numericForm();
 		}
 
+		// override Printable
+		void write(std::ostream &os) const override { os << std::defaultfloat << std::boolalpha << numericForm(); }
+
 	private:
 		// Note: both are mutable because they are initialized in a lazy fashion
 		mutable std::optional<std::string> stringForm_;
 		mutable std::optional<T1> numericForm_;
-
-		// override Term
-		void write(std::ostream &os) const override { os << std::defaultfloat << std::boolalpha << numericForm(); }
 	};
 
 	/**

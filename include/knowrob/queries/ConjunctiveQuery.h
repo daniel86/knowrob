@@ -41,10 +41,11 @@ namespace knowrob {
 		 */
 		auto &literals() const { return formula_->literals(); }
 
+		// Override Printable
+		void write(std::ostream &os) const override;
+
 	protected:
 		SimpleConjunctionPtr formula_;
-
-		void write(std::ostream &os) const override;
 
 		explicit ConjunctiveQuery(const QueryContextPtr &ctx = DefaultQueryContext()) : Query(ctx) {}
 	};

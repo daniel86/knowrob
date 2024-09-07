@@ -31,7 +31,14 @@ namespace knowrob::py {
 		using namespace boost::python;
 		class_<DataSourceHandler, std::shared_ptr<DataSourceHandler>>("DataSourceHandler", init<>())
 				.def("addDataHandler", +[]
-						(DataSourceHandler &x, const std::string &format, object &fn) { x.addDataHandler(format, fn); })
+						(DataSourceHandler &x, const std::string &format, object &fn) {
+						// when KnowRob calls the data handler, it does not hold the GIL
+						// so we need to acquire it before calling fn.
+						x.addDataHandler(format, [fn] (const DataSourcePtr &dataSource) {
+							gil_lock lock;
+							return fn(dataSource);
+						});
+				})
 				.def("loadDataSource", &DataSourceHandler::loadDataSource);
 	}
 }

@@ -14,7 +14,7 @@ namespace knowrob {
 	/**
 	 * A FOL literal is an atomic formula or its negation.
 	 */
-	class FirstOrderLiteral {
+	class FirstOrderLiteral : public Printable {
 	public:
 		FirstOrderLiteral(const PredicatePtr &predicate, bool isNegative);
 
@@ -53,10 +53,8 @@ namespace knowrob {
 		 */
 		virtual uint32_t numVariables() const { return predicate_->variables().size(); }
 
-		/**
-		 * Write the literal into an ostream.
-		 */
-		virtual std::ostream &write(std::ostream &os) const;
+		// Printable interface
+		void write(std::ostream &os) const override;
 
 	protected:
 		const PredicatePtr predicate_;
@@ -74,9 +72,5 @@ namespace knowrob {
 	FirstOrderLiteralPtr applyBindings(const FirstOrderLiteralPtr &lit, const Bindings &bindings);
 
 } // knowrob
-
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::FirstOrderLiteral &l);
-}
 
 #endif //KNOWROB_FIRST_ORDER_LITERAL_H

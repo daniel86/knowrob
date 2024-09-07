@@ -48,8 +48,7 @@ namespace knowrob {
 		 */
 		auto end() { return arguments_.end(); }
 
-	protected:
-		// Override Term
+		// Override Printable
 		void write(std::ostream &os) const override;
 	};
 }

@@ -15,6 +15,7 @@
 #include "Variable.h"
 #include "knowrob/formulas/Formula.h"
 #include "Atomic.h"
+#include "knowrob/Printable.h"
 
 namespace knowrob {
 	/**
@@ -24,7 +25,7 @@ namespace knowrob {
 	 * Applying a substitution to a term t means to replace occurrences
 	 * of each xi with ti. The resulting term is referred to as an *instance* of t.
 	 */
-	class Bindings {
+	class Bindings : public Printable {
 	public:
 		/**
 		 * A mapping from variable names to terms.
@@ -139,6 +140,9 @@ namespace knowrob {
 		 */
 		static std::shared_ptr<const Bindings> emptyBindings();
 
+		// Printable interface
+		void write(std::ostream &os) const override;
+
 	protected:
 		Map mapping_;
 	};
@@ -162,10 +166,6 @@ namespace knowrob {
 	 * @return the formula with the substitution applied.
 	 */
 	FormulaPtr applyBindings(const FormulaPtr &phi, const Bindings &bindings);
-}
-
-namespace std {
-	std::ostream &operator<<(std::ostream &os, const knowrob::Bindings &omega);
 }
 
 #endif //KNOWROB_BINDINGS_H_

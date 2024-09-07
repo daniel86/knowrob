@@ -9,7 +9,6 @@
 #include <knowrob/ThreadPool.h>
 #include <filesystem>
 #include <iostream>
-#include <locale>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include "knowrob/integration/python/PythonError.h"
@@ -61,7 +60,7 @@ namespace knowrob {
 		setenv("PYTHONPATH", pythonPathStr.c_str(), 1);
 	}
 
-	void InitKnowRob(int argc, char **argv, bool initPython) {
+	void InitKnowRob(char **argv, bool initPython) {
 		// remember the program name.
 		// it is assumed here that argv stays valid during program execution.
 		knowrob::NAME_OF_EXECUTABLE = argv[0];
@@ -90,14 +89,17 @@ namespace knowrob {
 		initialized = true;
 	}
 
+	void InitKnowRob(int /*argc*/, char **argv, bool initPython) {
+		InitKnowRob(argv, initPython);
+	}
+
 	static void InitKnowRobFromPython(boost::python::list py_argv) {
 		if (initialized) return;
 
-		auto argc = boost::python::len(py_argv);
-		std::vector<std::string> arg_strings;
-		std::vector<char *> argv;
+		static std::vector<std::string> arg_strings;
+		static std::vector<char *> argv;
 
-		for (int i = 0; i < argc; ++i) {
+		for (auto i = 0; i < boost::python::len(py_argv); ++i) {
 			std::string arg = boost::python::extract<std::string>(py_argv[i]);
 			arg_strings.push_back(arg);
 		}
@@ -107,7 +109,7 @@ namespace knowrob {
 		}
 
 		// Call the actual InitKnowRob function with the converted arguments
-		knowrob::InitKnowRob(argc, argv.data(), false);
+		knowrob::InitKnowRob(argv.data(), false);
 	}
 
 	void InitKnowRobFromPythonSysArgv() {
@@ -145,5 +147,6 @@ namespace knowrob::py {
 		// mappings for static functions
 		def("InitKnowRobWithArgs", &InitKnowRobFromPython, "Initialize the Knowledge Base with arguments.");
 		def("InitKnowRob", &InitKnowRobFromPythonSysArgv, "Initialize the Knowledge Base using sys.argv.");
+		def("ShutdownKnowRob", &ShutdownKnowRob);
 	}
 }
