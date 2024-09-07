@@ -35,15 +35,25 @@ jobs:
         cd ros_ws
         catkin_make_isolated
     - name: Create debian package
+      if: ${{github.event_name == 'push' || github.event_name == 'release'}}
       shell: bash
       run: |
         cd $GITHUB_WORKSPACE/ros_ws/build_isolated/knowrob
         cpack
     - name: Upload debian package
+      if: github.event_name == 'push'
       uses: actions/upload-artifact@v4
       with:
         name: KnowRob debian package
         path: ./ros_ws/build_isolated/knowrob/knowrob-*.deb
+    - name: Release debian package
+      if: github.event_name == 'release'
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ github.TOKEN }}
+      run: |
+        cd $GITHUB_WORKSPACE/ros_ws/build_isolated/knowrob
+        gh release upload ${{github.event.release.tag_name}} knowrob-*.deb
     - name: Run unit tests
       if: github.event_name == 'push' || github.event_name == 'pull_request'
       shell: bash
