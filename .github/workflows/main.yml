@@ -37,9 +37,7 @@ jobs:
     - name: Create debian package
       shell: bash
       run: |
-        cd $GITHUB_WORKSPACE/ros_ws/
-        ls
-        cd build/knowrob
+        cd $GITHUB_WORKSPACE/ros_ws/build_isolated/knowrob
         cpack
     - name: Run unit tests
       if: github.event_name == 'push' || github.event_name == 'pull_request'
