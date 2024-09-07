@@ -34,6 +34,13 @@ jobs:
             doxygen graphviz
         cd ros_ws
         catkin_make_isolated
+    - name: Create debian package
+      shell: bash
+      run: |
+        cd $GITHUB_WORKSPACE/ros_ws/
+        ls
+        cd build/knowrob
+        cpack
     - name: Run unit tests
       if: github.event_name == 'push' || github.event_name == 'pull_request'
       shell: bash
