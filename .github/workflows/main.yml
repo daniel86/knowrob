@@ -26,7 +26,7 @@ jobs:
         cd knowrob
         mkdir build
         cd build
-        cmake ../knowrob/
+        cmake ../src/
         make
     - name: Create debian package
       if: ${{github.event_name == 'push' || github.event_name == 'release'}}
