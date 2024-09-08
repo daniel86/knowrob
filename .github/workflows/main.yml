@@ -55,10 +55,10 @@ jobs:
       run: |
         cd knowrob/build
         make doc
-    - name: Move checkout
-      run: |
-        mv $GITHUB_WORKSPACE/knowrob/src/.git $GITHUB_WORKSPACE/
-        mv $GITHUB_WORKSPACE/knowrob/src/* $GITHUB_WORKSPACE/
+    #- name: Move checkout
+    #  run: |
+    ##    mv $GITHUB_WORKSPACE/knowrob/src/.git $GITHUB_WORKSPACE/
+    #    mv $GITHUB_WORKSPACE/knowrob/src/* $GITHUB_WORKSPACE/
     - name: Extract version tag
       if: github.event_name == 'release'
       shell: bash
@@ -77,7 +77,7 @@ jobs:
         # The branch the action should deploy to.
         BRANCH: gh-pages
         # The folder the action should deploy.
-        FOLDER: doc/html
+        FOLDER: knowrob/src/doc/html
         # The folder in the target branch
         TARGET_FOLDER: ${{ env.KNOWROB_DOCU_VERSION }}
         CLEAN: true
