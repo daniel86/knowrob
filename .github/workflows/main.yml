@@ -21,7 +21,7 @@ jobs:
         sudo apt-get install swi-prolog libspdlog-dev \
             libboost-python-dev libboost-serialization-dev libboost-program-options-dev \
             libraptor2-dev librdf0-dev \
-            libfmt-dev libeigen-dev \
+            libfmt-dev libeigen3-dev \
             doxygen graphviz
         cd knowrob
         mkdir build
