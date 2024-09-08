@@ -31,11 +31,11 @@ jobs:
         cmake ../src/
         make  2> >(tee "make-output.txt")
     - name: Post PR comment for warnings/errors
-      if: always()
+      if: ${{github.event_name == 'pull_request'}}
       uses: JacobDomagala/CompileResult@master
       with:
         comment_title: Make output
-        compile_result_file: ${{runner.workspace}}/build/output.txt
+        compile_result_file: ${{runner.workspace}}/build/make-output.txt
     - name: Create debian package
       if: ${{github.event_name == 'push' || github.event_name == 'release'}}
       shell: bash
@@ -43,7 +43,7 @@ jobs:
         cd knowrob/build
         cpack
     - name: Run unit tests
-      if: github.event_name == 'push' || github.event_name == 'pull_request'
+      if: ${{github.event_name == 'push' || github.event_name == 'pull_request'}}
       shell: bash
       run: |
         sudo systemctl start mongod
