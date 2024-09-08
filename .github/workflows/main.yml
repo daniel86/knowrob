@@ -55,10 +55,6 @@ jobs:
       run: |
         cd knowrob/build
         make doc
-    #- name: Move checkout
-    #  run: |
-    ##    mv $GITHUB_WORKSPACE/knowrob/src/.git $GITHUB_WORKSPACE/
-    #    mv $GITHUB_WORKSPACE/knowrob/src/* $GITHUB_WORKSPACE/
     - name: Extract version tag
       if: github.event_name == 'release'
       shell: bash
@@ -69,6 +65,10 @@ jobs:
       shell: bash
       # Use branch name as version
       run: echo "KNOWROB_DOCU_VERSION=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+    - name: Move checkout
+      run: |
+        mv $GITHUB_WORKSPACE/knowrob/src/.git $GITHUB_WORKSPACE/
+        mv $GITHUB_WORKSPACE/knowrob/src/* $GITHUB_WORKSPACE/
     - name: Deploy doc to gh-pages
       if: github.event_name == 'push' || github.event_name == 'release'
       uses: JamesIves/github-pages-deploy-action@3.5.7
@@ -79,7 +79,7 @@ jobs:
         # The branch the action should deploy to.
         BRANCH: gh-pages
         # The folder the action should deploy.
-        FOLDER: knowrob/src/doc/html
+        FOLDER: doc/html
         # The folder in the target branch
         TARGET_FOLDER: ${{ env.KNOWROB_DOCU_VERSION }}
         CLEAN: true
