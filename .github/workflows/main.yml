@@ -31,7 +31,7 @@ jobs:
         cmake ../src/
         make  2> >(tee "make-output.txt")
     - name: Post PR comment for warnings/errors
-      if: always()
+      if: ${{github.event_name == 'pull_request'}}
       uses: JacobDomagala/CompileResult@master
       with:
         comment_title: Make output
@@ -43,7 +43,7 @@ jobs:
         cd knowrob/build
         cpack
     - name: Run unit tests
-      if: github.event_name == 'push' || github.event_name == 'pull_request'
+      if: ${{github.event_name == 'push' || github.event_name == 'pull_request'}}
       shell: bash
       run: |
         sudo systemctl start mongod
@@ -58,7 +58,7 @@ jobs:
         action_fail_on_inconclusive: true
     #####
     - name: Run doxygen
-      if: github.event_name == 'push' || github.event_name == 'release'
+      if: ${{github.event_name == 'push' || github.event_name == 'release'}}
       shell: bash
       run: |
         cd knowrob/build
@@ -78,7 +78,7 @@ jobs:
         mv $GITHUB_WORKSPACE/knowrob/src/.git $GITHUB_WORKSPACE/
         mv $GITHUB_WORKSPACE/knowrob/src/* $GITHUB_WORKSPACE/
     - name: Deploy doc to gh-pages
-      if: github.event_name == 'push' || github.event_name == 'release'
+      if: ${{github.event_name == 'push' || github.event_name == 'release'}}
       uses: JamesIves/github-pages-deploy-action@3.5.7
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
