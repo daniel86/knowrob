@@ -12,16 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        path: 'ros_ws/src/knowrob'
-    - name: Setup KnowRob workspace
-      uses: betwo/github-setup-catkin@master
-      env:
-            ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-      with:
-        # Version range or exact version of ROS version to use, using SemVer's version range syntax. 
-        ros-version: noetic
-        # Root directory of the catkin workspace
-        workspace: $GITHUB_WORKSPACE/ros_ws
+        path: 'knowrob/src'
     - name: Build KnowRob workspace
       shell: bash
       run: |
@@ -32,24 +23,24 @@ jobs:
             libraptor2-dev librdf0-dev \
             libfmt-dev \
             doxygen graphviz
-        cd ros_ws
-        catkin_make_isolated
+        cd knowrob
+        mkdir build
+        cd build
+        cmake ../knowrob/
+        make
     - name: Create debian package
       if: ${{github.event_name == 'push' || github.event_name == 'release'}}
       shell: bash
       run: |
-        cd $GITHUB_WORKSPACE/ros_ws/build_isolated/knowrob
+        cd knowrob/build
         cpack
     - name: Run unit tests
       if: github.event_name == 'push' || github.event_name == 'pull_request'
       shell: bash
       run: |
         sudo systemctl start mongod
-        export ROS_HOSTNAME=localhost
-        roscore &
-        cd $GITHUB_WORKSPACE/ros_ws/src/knowrob
-        source $GITHUB_WORKSPACE/ros_ws/devel_isolated/setup.bash
-        $GITHUB_WORKSPACE/ros_ws/devel_isolated/knowrob/lib/knowrob/all_gtests --gtest_filter=* --gtest_output="xml:$GITHUB_WORKSPACE/gtest-knowrob.xml" --gtest_color=no
+        cd knowrob/build
+        ./all_gtests --gtest_filter=* --gtest_output="xml:$GITHUB_WORKSPACE/gtest-knowrob.xml" --gtest_color=no
     - name: Report test results
       uses: EnricoMi/publish-unit-test-result-action@v2
       if: ${{github.event_name == 'push' || github.event_name == 'pull_request'}}
@@ -62,12 +53,12 @@ jobs:
       if: github.event_name == 'push' || github.event_name == 'release'
       shell: bash
       run: |
-        cd $GITHUB_WORKSPACE/ros_ws/build_isolated/knowrob
+        cd knowrob/build
         make doc
     - name: Move checkout
       run: |
-        mv $GITHUB_WORKSPACE/ros_ws/src/knowrob/.git $GITHUB_WORKSPACE/
-        mv $GITHUB_WORKSPACE/ros_ws/src/knowrob/* $GITHUB_WORKSPACE/
+        mv $GITHUB_WORKSPACE/knowrob/src/.git $GITHUB_WORKSPACE/
+        mv $GITHUB_WORKSPACE/knowrob/src/* $GITHUB_WORKSPACE/
     - name: Extract version tag
       if: github.event_name == 'release'
       shell: bash
@@ -98,15 +89,14 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.TOKEN }}
       run: |
-        # cd $GITHUB_WORKSPACE/ros_ws/build_isolated/knowrob
-        cd $GITHUB_WORKSPACE/ros_ws/src/knowrob
+        cd knowrob/src
         gh release upload ${{github.event.release.tag_name}} ../../build_isolated/knowrob/knowrob-*.deb
     - name: Upload debian package
       if: github.event_name == 'push'
       uses: actions/upload-artifact@v4
       with:
         name: debian package
-        path: ./ros_ws/build_isolated/knowrob/knowrob-*.deb
+        path: ./knowrob/build/knowrob-*.deb
     - name: Upload test results
       uses: actions/upload-artifact@v4
       with:
