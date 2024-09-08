@@ -29,7 +29,13 @@ jobs:
         mkdir build
         cd build
         cmake ../src/
-        make
+        make  2> >(tee "make-output.txt")
+    - name: Post PR comment for warnings/errors
+      if: always()
+      uses: JacobDomagala/CompileResult@master
+      with:
+        comment_title: Make output
+        compile_result_file: ${{runner.workspace}}/build/output.txt
     - name: Create debian package
       if: ${{github.event_name == 'push' || github.event_name == 'release'}}
       shell: bash
