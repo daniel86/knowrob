@@ -72,6 +72,8 @@ jobs:
     - name: Deploy doc to gh-pages
       if: github.event_name == 'push' || github.event_name == 'release'
       uses: JamesIves/github-pages-deploy-action@3.5.7
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         # The branch the action should deploy to.
@@ -90,7 +92,7 @@ jobs:
         GITHUB_TOKEN: ${{ github.TOKEN }}
       run: |
         cd knowrob/src
-        gh release upload ${{github.event.release.tag_name}} ../../build_isolated/knowrob/knowrob-*.deb
+        gh release upload ${{github.event.release.tag_name}} ../build/knowrob-*.deb
     - name: Upload debian package
       if: github.event_name == 'push'
       uses: actions/upload-artifact@v4
