@@ -30,13 +30,14 @@ jobs:
         cd build
         cmake ../src/
         make  2> >(tee "make-output.txt")
+        cp make-output.txt ../src/
     - name: foo warnings/errors
       if: ${{github.event_name == 'pull_request'}}
       uses: JacobDomagala/CompileResult@master
       with:
         comment_title: Make output
         work_dir: knowrob/src
-        compile_result_file: knowrob/build/make-output.txt
+        compile_result_file: make-output.txt
     - name: Create debian package
       if: ${{github.event_name == 'push' || github.event_name == 'release'}}
       shell: bash
