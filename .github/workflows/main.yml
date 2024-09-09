@@ -30,7 +30,7 @@ jobs:
         cd build
         cmake ../src/
         make  2> >(tee "make-output.txt")
-    - name: Post PR comment for warnings/errors
+    - name: foo warnings/errors
       if: ${{github.event_name == 'pull_request'}}
       uses: JacobDomagala/CompileResult@master
       with:
