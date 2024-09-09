@@ -37,7 +37,7 @@ jobs:
       with:
         comment_title: Make output
         work_dir: knowrob/src
-        compile_result_file: make-output.txt
+        compile_result_file: knowrob/src/make-output.txt
     - name: Create debian package
       if: ${{github.event_name == 'push' || github.event_name == 'release'}}
       shell: bash
