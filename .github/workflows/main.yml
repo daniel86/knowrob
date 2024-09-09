@@ -11,8 +11,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
-      with:
-        path: 'knowrob/src'
     - name: Build KnowRob workspace
       shell: bash
       run: |
@@ -25,23 +23,22 @@ jobs:
             libraptor2-dev librdf0-dev libgtest-dev \
             libfmt-dev libeigen3-dev libmongoc-dev \
             doxygen graphviz mongodb-org
-        cd knowrob
         mkdir build
         cd build
-        cmake ../src/
+        cmake ../
         make  2> >(tee "make-output.txt")
     - name: Create debian package
       if: ${{github.event_name == 'push' || github.event_name == 'release'}}
       shell: bash
       run: |
-        cd knowrob/build
+        cd build
         cpack
     - name: Run unit tests
       if: ${{github.event_name == 'push' || github.event_name == 'pull_request'}}
       shell: bash
       run: |
         sudo systemctl start mongod
-        cd knowrob/build
+        cd build
         ./all_gtests --gtest_filter=* --gtest_output="xml:$GITHUB_WORKSPACE/gtest-knowrob.xml" --gtest_color=no
     - name: Report test results
       uses: EnricoMi/publish-unit-test-result-action@v2
@@ -55,7 +52,7 @@ jobs:
       if: github.event_name == 'push' || github.event_name == 'release'
       shell: bash
       run: |
-        cd knowrob/build
+        cd build
         make doc
     - name: Extract version tag
       if: github.event_name == 'release'
@@ -67,16 +64,12 @@ jobs:
       shell: bash
       # Use branch name as version
       run: echo "KNOWROB_DOCU_VERSION=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
-    - name: Move checkout
-      run: |
-        mv $GITHUB_WORKSPACE/knowrob/src/.git $GITHUB_WORKSPACE/
-        mv $GITHUB_WORKSPACE/knowrob/src/* $GITHUB_WORKSPACE/
     - name: foo warnings/errors
       if: ${{github.event_name == 'pull_request'}}
       uses: JacobDomagala/CompileResult@master
       with:
         comment_title: Make output
-        compile_result_file: knowrob/build/make-output.txt
+        compile_result_file: build/make-output.txt
     - name: Deploy doc to gh-pages
       if: github.event_name == 'push' || github.event_name == 'release'
       uses: JamesIves/github-pages-deploy-action@3.5.7
@@ -99,16 +92,16 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.TOKEN }}
       run: |
-        cd knowrob/src
-        gh release upload ${{github.event.release.tag_name}} ../build/knowrob-*.deb
+        gh release upload ${{github.event.release.tag_name}} ./build/knowrob-*.deb
     - name: Upload debian package
       if: github.event_name == 'push'
       uses: actions/upload-artifact@v4
       with:
         name: debian package
-        path: ./knowrob/build/knowrob-*.deb
+        path: ./build/knowrob-*.deb
     - name: Upload test results
       uses: actions/upload-artifact@v4
       with:
         name: test results
         path: ./gtest-knowrob.xml
+
