@@ -40,15 +40,14 @@ jobs:
     - name: setup init_script
       shell: bash
       run: |
+        add-apt-repository ppa:oibaf/graphics-drivers
+        sudo apt-get install -y -qq libvulkan1 mesa-vulkan-drivers vulkan-utils
+        
         echo "#!/bin/bash
         # Input args provided by StaticAnalysis action
         root_dir=\${1}
         build_dir=\${2}
-        echo \"Hello from the init script! First arg=\${root_dir} second arg=\${build_dir}\"
-        
-        add-apt-repository ppa:oibaf/graphics-drivers
-        apt update && apt upgrade
-        apt install -y libvulkan1 mesa-vulkan-drivers vulkan-utils" > init_script.sh
+        echo \"Hello from the init script! First arg=\${root_dir} second arg=\${build_dir}\"" > init_script.sh
     - name: Run static analysis
       uses: JacobDomagala/StaticAnalysis@master
       with:
