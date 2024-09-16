@@ -1,4 +1,5 @@
-\page terms Terms
+Terms {#terms}
+============
 
 Terms are central data structures in KnowRob. They are used to recursively
 form complex formula that can be queried and reasoned about. The following
