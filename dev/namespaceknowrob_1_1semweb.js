@@ -1,0 +1,87 @@
+var namespaceknowrob_1_1semweb =
+[
+    [ "Class", "classknowrob_1_1semweb_1_1_class.html", "classknowrob_1_1semweb_1_1_class" ],
+    [ "Property", "classknowrob_1_1semweb_1_1_property.html", "classknowrob_1_1semweb_1_1_property" ],
+    [ "Resource", "classknowrob_1_1semweb_1_1_resource.html", "classknowrob_1_1semweb_1_1_resource" ],
+    [ "ClassPtr", "namespaceknowrob_1_1semweb.html#a3e66faf8173ed1412221492e4444307f", null ],
+    [ "ClassTupleVisitor", "namespaceknowrob_1_1semweb.html#ac29aafe93763ea15bfc253f366d4ebe4", null ],
+    [ "ClassVisitor", "namespaceknowrob_1_1semweb.html#a8f6867deec3743ef6e48d0200182d50d", null ],
+    [ "PropertyPtr", "namespaceknowrob_1_1semweb.html#ac0bf1c6ef36cb951fd8e6b6f22a952e9", null ],
+    [ "PropertyTupleVisitor", "namespaceknowrob_1_1semweb.html#af5233bea145c0d6376038134eb2d050b", null ],
+    [ "PropertyVisitor", "namespaceknowrob_1_1semweb.html#ab467409574f97bb72a0e7df22f3467ab", null ],
+    [ "OntologyLanguage", "namespaceknowrob_1_1semweb.html#ae2a1d4e3b9f5ee213898fe595afff9c6", [
+      [ "RDFS", "namespaceknowrob_1_1semweb.html#ae2a1d4e3b9f5ee213898fe595afff9c6abe87eb71482f5836fd265e9d1415f830", null ],
+      [ "OWL", "namespaceknowrob_1_1semweb.html#ae2a1d4e3b9f5ee213898fe595afff9c6a4e8e97ade0ec0d202577c6b7215ea959", null ],
+      [ "RDFS", "namespaceknowrob_1_1semweb.html#ae2a1d4e3b9f5ee213898fe595afff9c6abe87eb71482f5836fd265e9d1415f830", null ],
+      [ "OWL", "namespaceknowrob_1_1semweb.html#ae2a1d4e3b9f5ee213898fe595afff9c6a4e8e97ade0ec0d202577c6b7215ea959", null ]
+    ] ],
+    [ "OntologyLanguage", "namespaceknowrob_1_1semweb.html#ae2a1d4e3b9f5ee213898fe595afff9c6", [
+      [ "RDFS", "namespaceknowrob_1_1semweb.html#ae2a1d4e3b9f5ee213898fe595afff9c6abe87eb71482f5836fd265e9d1415f830", null ],
+      [ "OWL", "namespaceknowrob_1_1semweb.html#ae2a1d4e3b9f5ee213898fe595afff9c6a4e8e97ade0ec0d202577c6b7215ea959", null ],
+      [ "RDFS", "namespaceknowrob_1_1semweb.html#ae2a1d4e3b9f5ee213898fe595afff9c6abe87eb71482f5836fd265e9d1415f830", null ],
+      [ "OWL", "namespaceknowrob_1_1semweb.html#ae2a1d4e3b9f5ee213898fe595afff9c6a4e8e97ade0ec0d202577c6b7215ea959", null ]
+    ] ],
+    [ "PropertyFlag", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387", [
+      [ "DATATYPE_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387a47833b00153fcf48da6e168d84abb2ff", null ],
+      [ "ANNOTATION_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387a6e0340e671b26e290babfd189ef22cef", null ],
+      [ "OBJECT_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387ada745a89f3c28146d4bbff65c10ac8aa", null ],
+      [ "TRANSITIVE_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387a63e1273873c7d1100a365561a8d3b37c", null ],
+      [ "REFLEXIVE_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387ac940d0c22291f65a79c22f30a549bd5a", null ],
+      [ "SYMMETRIC_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387a2264960d621cbe09d657b5328a0d6a8e", null ],
+      [ "DATATYPE_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387a47833b00153fcf48da6e168d84abb2ff", null ],
+      [ "ANNOTATION_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387a6e0340e671b26e290babfd189ef22cef", null ],
+      [ "OBJECT_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387ada745a89f3c28146d4bbff65c10ac8aa", null ],
+      [ "TRANSITIVE_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387a63e1273873c7d1100a365561a8d3b37c", null ],
+      [ "REFLEXIVE_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387ac940d0c22291f65a79c22f30a549bd5a", null ],
+      [ "SYMMETRIC_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387a2264960d621cbe09d657b5328a0d6a8e", null ]
+    ] ],
+    [ "PropertyFlag", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387", [
+      [ "DATATYPE_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387a47833b00153fcf48da6e168d84abb2ff", null ],
+      [ "ANNOTATION_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387a6e0340e671b26e290babfd189ef22cef", null ],
+      [ "OBJECT_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387ada745a89f3c28146d4bbff65c10ac8aa", null ],
+      [ "TRANSITIVE_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387a63e1273873c7d1100a365561a8d3b37c", null ],
+      [ "REFLEXIVE_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387ac940d0c22291f65a79c22f30a549bd5a", null ],
+      [ "SYMMETRIC_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387a2264960d621cbe09d657b5328a0d6a8e", null ],
+      [ "DATATYPE_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387a47833b00153fcf48da6e168d84abb2ff", null ],
+      [ "ANNOTATION_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387a6e0340e671b26e290babfd189ef22cef", null ],
+      [ "OBJECT_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387ada745a89f3c28146d4bbff65c10ac8aa", null ],
+      [ "TRANSITIVE_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387a63e1273873c7d1100a365561a8d3b37c", null ],
+      [ "REFLEXIVE_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387ac940d0c22291f65a79c22f30a549bd5a", null ],
+      [ "SYMMETRIC_PROPERTY", "namespaceknowrob_1_1semweb.html#a3ed2d64f4e6756cbb2dace0ee80fb387a2264960d621cbe09d657b5328a0d6a8e", null ]
+    ] ],
+    [ "TripleFormat", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177d", [
+      [ "RDF_XML", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177da9308cfcbec7dcfdd75bba01cf044833a", null ],
+      [ "RDFA", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177da8ff062e3313a4a1556c9e81b97744b0c", null ],
+      [ "TRIG", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177daefd7b8c0b468ef059ceba45716fcf706", null ],
+      [ "GRDDL", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177da18cc648a819ad8afa70163921847d5cb", null ],
+      [ "TURTLE", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177dab69f580006d7abbae8aaf828f9b23fac", null ],
+      [ "N_TRIPLES", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177da13b5d7b89a7f87f63b9753019dd567a6", null ],
+      [ "RDF_XML", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177da9308cfcbec7dcfdd75bba01cf044833a", null ],
+      [ "RDFA", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177da8ff062e3313a4a1556c9e81b97744b0c", null ],
+      [ "TRIG", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177daefd7b8c0b468ef059ceba45716fcf706", null ],
+      [ "GRDDL", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177da18cc648a819ad8afa70163921847d5cb", null ],
+      [ "TURTLE", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177dab69f580006d7abbae8aaf828f9b23fac", null ],
+      [ "N_TRIPLES", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177da13b5d7b89a7f87f63b9753019dd567a6", null ]
+    ] ],
+    [ "TripleFormat", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177d", [
+      [ "RDF_XML", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177da9308cfcbec7dcfdd75bba01cf044833a", null ],
+      [ "RDFA", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177da8ff062e3313a4a1556c9e81b97744b0c", null ],
+      [ "TRIG", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177daefd7b8c0b468ef059ceba45716fcf706", null ],
+      [ "GRDDL", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177da18cc648a819ad8afa70163921847d5cb", null ],
+      [ "TURTLE", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177dab69f580006d7abbae8aaf828f9b23fac", null ],
+      [ "N_TRIPLES", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177da13b5d7b89a7f87f63b9753019dd567a6", null ],
+      [ "RDF_XML", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177da9308cfcbec7dcfdd75bba01cf044833a", null ],
+      [ "RDFA", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177da8ff062e3313a4a1556c9e81b97744b0c", null ],
+      [ "TRIG", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177daefd7b8c0b468ef059ceba45716fcf706", null ],
+      [ "GRDDL", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177da18cc648a819ad8afa70163921847d5cb", null ],
+      [ "TURTLE", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177dab69f580006d7abbae8aaf828f9b23fac", null ],
+      [ "N_TRIPLES", "namespaceknowrob_1_1semweb.html#af1775521e580d58ac5ae797a7e49177da13b5d7b89a7f87f63b9753019dd567a6", null ]
+    ] ],
+    [ "isOntologyLanguageString", "namespaceknowrob_1_1semweb.html#ad16e7bbbc4e60a65c4c976eb0ba5afe9", null ],
+    [ "isTripleFormatString", "namespaceknowrob_1_1semweb.html#a0aac21341e5dfd7e548f6900f43be6f3", null ],
+    [ "ontologyLanguageFromString", "namespaceknowrob_1_1semweb.html#ad9cd595540968314b292dd47043d282f", null ],
+    [ "ontologyLanguageToString", "namespaceknowrob_1_1semweb.html#a5cb2d6978ad542ec7b093044a6dffbb4", null ],
+    [ "tripleFormatFromString", "namespaceknowrob_1_1semweb.html#a9c93223835369f63ceeed0730352011a", null ],
+    [ "tripleFormatMimeType", "namespaceknowrob_1_1semweb.html#ab8ac87e0b8837a999e4cbab9d7a43e04", null ],
+    [ "tripleFormatToString", "namespaceknowrob_1_1semweb.html#a1b26ce4106d85f78656ebfa57f26824a", null ]
+];

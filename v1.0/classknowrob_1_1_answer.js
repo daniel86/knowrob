@@ -1,0 +1,27 @@
+var classknowrob_1_1_answer =
+[
+    [ "Answer", "classknowrob_1_1_answer.html#aa1c0ef44701df022223caedaff111f6e", null ],
+    [ "Answer", "classknowrob_1_1_answer.html#a3e3830706b57c6b52a94c7076622acb2", null ],
+    [ "applyFrame", "classknowrob_1_1_answer.html#aa716be6e8c14e2d3665303261db3e8dc", null ],
+    [ "frame", "classknowrob_1_1_answer.html#ad6984686d9803559a6770055cc4665b5", null ],
+    [ "hashOfAnswer", "classknowrob_1_1_answer.html#a130f0cc37746d986e3ff8c0c08ea2196", null ],
+    [ "humanReadableForm", "classknowrob_1_1_answer.html#a451ac031a70c2f5fa6c0158e0042dd2a", null ],
+    [ "isAllwaysTrue", "classknowrob_1_1_answer.html#a5fc3a0fe14890c158e6fc35c95c36858", null ],
+    [ "isCertain", "classknowrob_1_1_answer.html#a4a124f716efbbbaffd9abd39026f4c9b", null ],
+    [ "isNegative", "classknowrob_1_1_answer.html#afac4b1fbdf43f27b8350350b2f96b21b", null ],
+    [ "isOccasionallyTrue", "classknowrob_1_1_answer.html#a3f4c43d146c300c565e3f5fedb1457ef", null ],
+    [ "isPositive", "classknowrob_1_1_answer.html#a2f8304eef8a8354546630762bd061c45", null ],
+    [ "isUncertain", "classknowrob_1_1_answer.html#a7157e857c339f80a9424830d554f0ab9", null ],
+    [ "reasonerTerm", "classknowrob_1_1_answer.html#a456ac5a2741c3a347bf32c5c007c9278", null ],
+    [ "setFrame", "classknowrob_1_1_answer.html#ad71cd4ad55a0fb4a132442626794178d", null ],
+    [ "setIsNegative", "classknowrob_1_1_answer.html#a8d6f6d3a778a021f6bb4befda9ba7770", null ],
+    [ "setIsOccasionallyTrue", "classknowrob_1_1_answer.html#ac499f6c585b60cb66255f2a2abcc37db", null ],
+    [ "setIsPositive", "classknowrob_1_1_answer.html#a495a8e0853c3d17aaca10f2d25e8c950", null ],
+    [ "setIsUncertain", "classknowrob_1_1_answer.html#a731eefce3300e4804dbd33fd0ab22b86", null ],
+    [ "setReasonerTerm", "classknowrob_1_1_answer.html#af55a4c6c86b03eb8d6d91e260de00dfd", null ],
+    [ "stringFormOfAnswer", "classknowrob_1_1_answer.html#a145a953f5f3837bd5e04cdb6c6836afc", null ],
+    [ "frame_", "classknowrob_1_1_answer.html#a826c8ff3a6dd4515f4d191b7942a44ad", null ],
+    [ "isNegative_", "classknowrob_1_1_answer.html#abdd27f8d32909a1073bda120e4de4993", null ],
+    [ "isPositive_", "classknowrob_1_1_answer.html#ae23d08fa0be3df86f8e4f68ad668b66e", null ],
+    [ "reasonerTerm_", "classknowrob_1_1_answer.html#a45d386731610ce301fd60928d191e9cb", null ]
+];

@@ -1,0 +1,10 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" title=" " alt="" coords="5,107,116,133"/>
+<area shape="rect" id="node2" href="$classknowrob_1_1_know_rob_error.html" title=" " alt="" coords="164,107,343,133"/>
+<area shape="rect" id="node3" href="$classknowrob_1_1_ontology_error.html" title=" " alt="" coords="392,5,568,32"/>
+<area shape="rect" id="node4" href="$classknowrob_1_1_python_error.html" title=" " alt="" coords="399,56,561,83"/>
+<area shape="rect" id="node5" href="$classknowrob_1_1_query_error.html" title=" " alt="" coords="402,107,558,133"/>
+<area shape="rect" id="node6" href="$classknowrob_1_1_reasoner_error.html" title=" " alt="" coords="391,157,569,184"/>
+<area shape="rect" id="node7" href="$classknowrob_1_1_storage_error.html" title=" " alt="" coords="397,208,563,235"/>
+<area shape="rect" id="node8" href="$classknowrob_1_1mongo_1_1_mongo_exception.html" title=" " alt="" coords="617,208,864,235"/>
+</map>

@@ -1,0 +1,52 @@
+<map id="src/reasoner/ReasonerManager.cpp" name="src/reasoner/ReasonerManager.cpp">
+<area shape="rect" id="node1" title=" " alt="" coords="767,5,1018,32"/>
+<area shape="rect" id="node2" href="$_logger_8h.html" title=" " alt="" coords="2691,698,2828,725"/>
+<area shape="rect" id="node6" href="$_reasoner_manager_8h.html" title=" " alt="" coords="791,80,995,121"/>
+<area shape="rect" id="node43" href="$_reasoner_error_8h.html" title=" " alt="" coords="95,519,221,546"/>
+<area shape="rect" id="node3" title=" " alt="" coords="2699,787,2823,814"/>
+<area shape="rect" id="node4" title=" " alt="" coords="2847,787,2979,814"/>
+<area shape="rect" id="node5" title=" " alt="" coords="2524,780,2675,821"/>
+<area shape="rect" id="node7" href="$_plugin_manager_8h.html" title=" " alt="" coords="1933,519,2175,546"/>
+<area shape="rect" id="node22" href="$_storage_manager_8h.html" title=" " alt="" coords="511,355,765,382"/>
+<area shape="rect" id="node32" href="$_knowledge_base_8h.html" title=" " alt="" coords="1384,177,1583,203"/>
+<area shape="rect" id="node41" href="$_goal_driven_reasoner_8h.html" title=" " alt="" coords="785,169,1001,211"/>
+<area shape="rect" id="node49" href="$_data_driven_reasoner_8h.html" title=" " alt="" coords="167,348,384,389"/>
+<area shape="rect" id="node8" title=" " alt="" coords="1167,869,1245,896"/>
+<area shape="rect" id="node9" title=" " alt="" coords="533,787,583,814"/>
+<area shape="rect" id="node10" title=" " alt="" coords="1486,787,1545,814"/>
+<area shape="rect" id="node11" title=" " alt="" coords="2117,609,2181,635"/>
+<area shape="rect" id="node12" href="$_typed_plugin_factory_8h.html" title=" " alt="" coords="1426,601,1637,643"/>
+<area shape="rect" id="node14" href="$_plugin_library_8h.html" title=" " alt="" coords="1763,609,1991,635"/>
+<area shape="rect" id="node16" href="$_plugin_module_8h.html" title=" " alt="" coords="2205,609,2439,635"/>
+<area shape="rect" id="node21" href="$_u_r_i_8h.html" title=" " alt="" coords="2066,698,2183,725"/>
+<area shape="rect" id="node13" href="$_plugin_factory_8h.html" title=" " alt="" coords="1579,698,1697,725"/>
+<area shape="rect" id="node15" title=" " alt="" coords="1773,698,1839,725"/>
+<area shape="rect" id="node17" title=" " alt="" coords="1209,787,1251,814"/>
+<area shape="rect" id="node18" title=" " alt="" coords="2250,787,2341,814"/>
+<area shape="rect" id="node19" title=" " alt="" coords="2365,787,2500,814"/>
+<area shape="rect" id="node20" href="$utils_8h.html" title=" " alt="" coords="2309,691,2463,732"/>
+<area shape="rect" id="node23" href="$_vocabulary_8h.html" title=" " alt="" coords="825,609,1048,635"/>
+<area shape="rect" id="node28" href="$_queryable_storage_8h.html" title=" " alt="" coords="755,437,905,464"/>
+<area shape="rect" id="node24" title=" " alt="" coords="888,698,985,725"/>
+<area shape="rect" id="node25" href="$_property_8h.html" title=" " alt="" coords="777,698,864,725"/>
+<area shape="rect" id="node26" href="$_class_8h.html" title=" " alt="" coords="967,787,1037,814"/>
+<area shape="rect" id="node27" href="$_import_hierarchy_8h.html" title=" " alt="" coords="1111,698,1250,725"/>
+<area shape="rect" id="node29" href="$_token_buffer_8h.html" title=" " alt="" coords="861,519,1082,546"/>
+<area shape="rect" id="node30" href="$_storage_8h.html" title=" " alt="" coords="752,519,836,546"/>
+<area shape="rect" id="node31" href="$_graph_path_query_8h.html" title=" " alt="" coords="1106,512,1301,553"/>
+<area shape="rect" id="node33" title=" " alt="" coords="1384,355,1444,382"/>
+<area shape="rect" id="node34" href="$_query_context_8h.html" title=" " alt="" coords="1443,266,1679,293"/>
+<area shape="rect" id="node35" href="$_storage_interface_8h.html" title=" " alt="" coords="511,266,765,293"/>
+<area shape="rect" id="node36" href="$_ontology_source_8h.html" title=" " alt="" coords="1703,259,1853,300"/>
+<area shape="rect" id="node37" href="$_simple_conjunction_8h.html" title=" " alt="" coords="1081,355,1360,382"/>
+<area shape="rect" id="node38" href="$_conjunctive_query_8h.html" title=" " alt="" coords="1158,259,1369,300"/>
+<area shape="rect" id="node39" href="$_observer_8h.html" title=" " alt="" coords="2081,355,2286,382"/>
+<area shape="rect" id="node40" href="$_observer_manager_8h.html" title=" " alt="" coords="2035,259,2230,300"/>
+<area shape="rect" id="node42" href="$_reasoner_8h.html" title=" " alt="" coords="228,437,323,464"/>
+<area shape="rect" id="node47" href="$_goal_8h.html" title=" " alt="" coords="1019,266,1083,293"/>
+<area shape="rect" id="node48" href="$_predicate_indicator_8h.html" title=" " alt="" coords="790,259,995,300"/>
+<area shape="rect" id="node44" title=" " alt="" coords="172,698,261,725"/>
+<area shape="rect" id="node45" href="$_know_rob_error_8h.html" title=" " alt="" coords="5,609,191,635"/>
+<area shape="rect" id="node46" title=" " alt="" coords="61,698,135,725"/>
+<area shape="rect" id="node50" href="$_reasoner_event_8h.html" title=" " alt="" coords="621,698,753,725"/>
+</map>

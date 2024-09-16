@@ -1,0 +1,52 @@
+<map id="src/queries/ModalStage.cpp" name="src/queries/ModalStage.cpp">
+<area shape="rect" id="node1" title=" " alt="" coords="1949,5,2150,32"/>
+<area shape="rect" id="node2" title=" " alt="" coords="2106,975,2166,1001"/>
+<area shape="rect" id="node3" href="$_modal_stage_8h.html" title=" " alt="" coords="1306,80,1529,107"/>
+<area shape="rect" id="node46" href="$_modal_formula_8h.html" title=" " alt="" coords="389,721,638,748"/>
+<area shape="rect" id="node48" href="$_query_error_8h.html" title=" " alt="" coords="2437,803,2652,830"/>
+<area shape="rect" id="node4" href="$_query_stage_8h.html" title=" " alt="" coords="1030,401,1141,427"/>
+<area shape="rect" id="node34" href="$_knowledge_base_8h.html" title=" " alt="" coords="1386,155,1585,181"/>
+<area shape="rect" id="node5" href="$_query_8h.html" title=" " alt="" coords="814,647,885,673"/>
+<area shape="rect" id="node23" href="$_answer_8h.html" title=" " alt="" coords="1344,572,1425,599"/>
+<area shape="rect" id="node27" href="$_token_buffer_8h.html" title=" " alt="" coords="987,572,1096,599"/>
+<area shape="rect" id="node28" href="$_token_broadcaster_8h.html" title=" " alt="" coords="868,721,1016,748"/>
+<area shape="rect" id="node31" href="$_answer_no_8h.html" title=" " alt="" coords="1337,490,1437,517"/>
+<area shape="rect" id="node33" href="$_answer_dont_know_8h.html" title=" " alt="" coords="1012,490,1160,517"/>
+<area shape="rect" id="node6" title=" " alt="" coords="325,1049,401,1076"/>
+<area shape="rect" id="node7" href="$formulas_2_formula_8h.html" title=" " alt="" coords="37,893,246,919"/>
+<area shape="rect" id="node10" href="$_query_context_8h.html" title=" " alt="" coords="1770,721,1894,748"/>
+<area shape="rect" id="node8" title=" " alt="" coords="703,975,780,1001"/>
+<area shape="rect" id="node9" href="$_printable_8h.html" title=" " alt="" coords="438,975,590,1001"/>
+<area shape="rect" id="node11" href="$_modal_operator_8h.html" title=" " alt="" coords="1225,803,1477,830"/>
+<area shape="rect" id="node20" href="$_graph_selector_8h.html" title=" " alt="" coords="1942,803,2173,830"/>
+<area shape="rect" id="node22" href="$_query_flag_8h.html" title=" " alt="" coords="1654,803,1867,830"/>
+<area shape="rect" id="node12" title=" " alt="" coords="971,893,1014,919"/>
+<area shape="rect" id="node13" title=" " alt="" coords="1547,975,1598,1001"/>
+<area shape="rect" id="node14" title=" " alt="" coords="1448,975,1523,1001"/>
+<area shape="rect" id="node15" href="$_term_8h.html" title=" " alt="" coords="472,893,640,919"/>
+<area shape="rect" id="node16" href="$_perspective_8h.html" title=" " alt="" coords="1705,893,1920,919"/>
+<area shape="rect" id="node18" href="$_time_interval_8h.html" title=" " alt="" coords="270,893,448,919"/>
+<area shape="rect" id="node17" title=" " alt="" coords="1783,975,1842,1001"/>
+<area shape="rect" id="node19" href="$_time_point_8h.html" title=" " alt="" coords="313,975,413,1001"/>
+<area shape="rect" id="node21" title=" " alt="" coords="2174,885,2325,927"/>
+<area shape="rect" id="node24" href="$_token_8h.html" title=" " alt="" coords="1038,893,1109,919"/>
+<area shape="rect" id="node26" href="$_atom_8h.html" title=" " alt="" coords="1459,893,1528,919"/>
+<area shape="rect" id="node25" title=" " alt="" coords="174,975,237,1001"/>
+<area shape="rect" id="node30" href="$_token_queue_8h.html" title=" " alt="" coords="1012,647,1125,673"/>
+<area shape="rect" id="node29" href="$_token_stream_8h.html" title=" " alt="" coords="918,803,1149,830"/>
+<area shape="rect" id="node32" href="$_framed_predicate_8h.html" title=" " alt="" coords="1720,647,1987,673"/>
+<area shape="rect" id="node35" href="$_queryable_storage_8h.html" title=" " alt="" coords="1562,393,1764,435"/>
+<area shape="rect" id="node37" href="$_graph_path_query_8h.html" title=" " alt="" coords="1462,483,1656,524"/>
+<area shape="rect" id="node39" href="$_storage_manager_8h.html" title=" " alt="" coords="1700,319,1954,345"/>
+<area shape="rect" id="node40" href="$_storage_interface_8h.html" title=" " alt="" coords="1536,237,1790,263"/>
+<area shape="rect" id="node41" href="$_ontology_source_8h.html" title=" " alt="" coords="2124,393,2274,435"/>
+<area shape="rect" id="node42" href="$_simple_conjunction_8h.html" title=" " alt="" coords="698,319,977,345"/>
+<area shape="rect" id="node43" href="$_conjunctive_query_8h.html" title=" " alt="" coords="732,229,943,271"/>
+<area shape="rect" id="node44" href="$_observer_8h.html" title=" " alt="" coords="1002,319,1207,345"/>
+<area shape="rect" id="node45" href="$_observer_manager_8h.html" title=" " alt="" coords="1106,229,1300,271"/>
+<area shape="rect" id="node36" href="$_storage_8h.html" title=" " alt="" coords="1913,572,1997,599"/>
+<area shape="rect" id="node38" href="$_answer_yes_8h.html" title=" " alt="" coords="1732,490,1946,517"/>
+<area shape="rect" id="node47" href="$_compound_formula_8h.html" title=" " alt="" coords="34,796,249,837"/>
+<area shape="rect" id="node49" title=" " alt="" coords="2540,975,2629,1001"/>
+<area shape="rect" id="node50" href="$_know_rob_error_8h.html" title=" " alt="" coords="2401,893,2586,919"/>
+</map>

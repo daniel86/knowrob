@@ -1,0 +1,23 @@
+var searchData=
+[
+  ['range_4745',['range',['../namespaceknowrob_1_1rdfs.html#a6ac150cf718b7f0862215e5752d67812',1,'knowrob::rdfs']]],
+  ['raptordata_5f_4746',['raptorData_',['../classknowrob_1_1_raptor_container.html#a54130f55f0f9204371dfbd530cd90fba',1,'knowrob::RaptorContainer']]],
+  ['rdfliterals_5f_4747',['rdfLiterals_',['../classknowrob_1_1_r_d_f_goal.html#a637901a31bc744ed87ef26223b9678b1',1,'knowrob::RDFGoal']]],
+  ['rdfnodetype_5f_4748',['rdfNodeType_',['../classknowrob_1_1_r_d_f_node.html#a57aa4c1e221be433b239abaf3a847966',1,'knowrob::RDFNode']]],
+  ['reasoner_4749',['reasoner',['../classknowrob_1_1_reasoner_runner.html#a1949353649d8211af9b3bc1147004773',1,'knowrob::ReasonerRunner']]],
+  ['reasoner_5f_4750',['reasoner_',['../classknowrob_1_1_prolog_tests.html#aa463e6a831282f35311934e7a0183cb7',1,'knowrob::PrologTests']]],
+  ['reasonerlist_5f_4751',['reasonerList_',['../classknowrob_1_1_computable.html#ad53f32eea001c8002eacd7854f74bb55',1,'knowrob::Computable']]],
+  ['reasonermanager_5f_4752',['reasonerManager_',['../classknowrob_1_1_knowledge_base.html#a8da683fce837598baaf9c1d9b22bca13',1,'knowrob::KnowledgeBase']]],
+  ['reasonerterm_5f_4753',['reasonerTerm_',['../classknowrob_1_1_framed_predicate.html#a4ce82e98ba8b9adc41c03e86b3e389db',1,'knowrob::FramedPredicate::reasonerTerm_()'],['../classknowrob_1_1_answer.html#a45d386731610ce301fd60928d191e9cb',1,'knowrob::Answer::reasonerTerm_()']]],
+  ['reflexiveproperty_4754',['ReflexiveProperty',['../namespaceknowrob_1_1owl.html#ac02dbed274f47a3f9d1f107c2ff84f44',1,'knowrob::owl']]],
+  ['reification_5f_4755',['reification_',['../classknowrob_1_1semweb_1_1_property.html#ad593b62d224da78c06dcb843d53ffc00',1,'knowrob::semweb::Property']]],
+  ['reified_5f_4756',['reified_',['../classknowrob_1_1_reified_triple.html#aba360ebd100f696d88efc87aae338cfc',1,'knowrob::ReifiedTriple']]],
+  ['reifiednames_5f_4757',['reifiedNames_',['../classknowrob_1_1_reification_container.html#a0c4f073dcc81e62e6104f557f99ca2f6',1,'knowrob::ReificationContainer']]],
+  ['reifiedrelation_4758',['ReifiedRelation',['../namespaceknowrob_1_1reification.html#aaf22e279929b6b385314d2a3837b846e',1,'knowrob::reification']]],
+  ['renaming_5f_4759',['renaming_',['../classknowrob_1_1_graph_renaming.html#aedb7adcd0c1f9d1451d3a2322e3e4ea6',1,'knowrob::GraphRenaming']]],
+  ['restriction_4760',['Restriction',['../namespaceknowrob_1_1owl.html#a7b66c67b95518dee5e330e62f32cd287',1,'knowrob::owl']]],
+  ['resultdocument_5f_4761',['resultDocument_',['../classknowrob_1_1mongo_1_1_bindings_cursor.html#a51348c187d88d6622d65bbc3e7dd0387',1,'knowrob::mongo::BindingsCursor']]],
+  ['resultiter_5f_4762',['resultIter_',['../classknowrob_1_1mongo_1_1_bindings_cursor.html#a95f6e807e5b8d375d4b951881fe0f133',1,'knowrob::mongo::BindingsCursor']]],
+  ['rootnode_5f_4763',['rootNode_',['../classknowrob_1_1_query_tree.html#a6577a1e9e84ae88335e359d6250fe809',1,'knowrob::QueryTree']]],
+  ['rules_5f_4764',['rules_',['../classknowrob_1_1_graph_restructuring.html#a0c91d50a027dd686350988dc4f79b2b8',1,'knowrob::GraphRestructuring']]]
+];

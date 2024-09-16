@@ -1,0 +1,22 @@
+<map id="include/knowrob/queries" name="include/knowrob/queries">
+<area shape="rect" id="node5" href="dir_de73bd6e1643a3220aceb22dc41dcb86.html" title="reasoner" alt="" coords="249,88,327,136"/>
+<area shape="rect" id="edge12-headlabel" href="dir_000004_000013.html" title="2" alt="" coords="269,60,279,75"/>
+<area shape="rect" id="node2" href="dir_6aefa4b8bb98ce28da6b78856563d590.html" title="parsers" alt="" coords="133,88,205,136"/>
+<area shape="rect" id="node3" href="dir_6eb89981a014a1874e03aec4ab6e84d8.html" title="formulas" alt="" coords="257,184,337,232"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000005_000003.html" title="2" alt="" coords="252,159,261,173"/>
+<area shape="rect" id="node4" href="dir_dc326898006b70bac667835e31c57f0d.html" title="triples" alt="" coords="176,280,248,328"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000005_000023.html" title="2" alt="" coords="206,252,216,267"/>
+<area shape="rect" id="node6" href="dir_e5d5ab94edcea7cde650429262565652.html" title="terms" alt="" coords="261,376,333,424"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000005_000022.html" title="4" alt="" coords="242,369,251,384"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000003_000023.html" title="3" alt="" coords="238,264,248,278"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000003_000022.html" title="9" alt="" coords="293,349,303,364"/>
+<area shape="rect" id="edge7-headlabel" href="dir_000023_000004.html" title="3" alt="" coords="89,148,99,163"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000023_000003.html" title="2" alt="" coords="261,233,271,248"/>
+<area shape="rect" id="edge8-headlabel" href="dir_000023_000022.html" title="11" alt="" coords="262,349,279,364"/>
+<area shape="rect" id="edge9-headlabel" href="dir_000013_000003.html" title="3" alt="" coords="297,157,306,172"/>
+<area shape="rect" id="edge10-headlabel" href="dir_000013_000023.html" title="2" alt="" coords="224,256,233,271"/>
+<area shape="rect" id="edge11-headlabel" href="dir_000013_000022.html" title="3" alt="" coords="323,356,333,371"/>
+<area shape="rect" id="edge13-headlabel" href="dir_000022_000003.html" title="2" alt="" coords="292,243,301,258"/>
+<area shape="rect" id="clust2" href="dir_e69966848e735621ffb66642f9ab0958.html" alt="" coords="27,77,216,146"/>
+<area shape="rect" id="clust1" href="dir_b1765075b97813cac26ea3c829a1769e.html" title="knowrob" alt="" coords="16,41,227,157"/>
+</map>

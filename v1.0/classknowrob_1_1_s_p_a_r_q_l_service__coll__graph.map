@@ -1,0 +1,12 @@
+<map id="knowrob::SPARQLService" name="knowrob::SPARQLService">
+<area shape="rect" id="node1" title=" " alt="" coords="111,425,295,452"/>
+<area shape="rect" id="node2" href="$classknowrob_1_1_ontology_source.html" title=" " alt="" coords="5,336,195,363"/>
+<area shape="rect" id="node3" href="$classknowrob_1_1_data_source.html" title=" " alt="" coords="19,247,181,273"/>
+<area shape="rect" id="node4" href="$classknowrob_1_1_u_r_i.html" title=" " alt="" coords="45,157,155,184"/>
+<area shape="rect" id="node5" href="$classknowrob_1_1_redland_model.html" title=" " alt="" coords="219,336,397,363"/>
+<area shape="rect" id="node6" href="$classknowrob_1_1_s_p_a_r_q_l_backend.html" title=" " alt="" coords="209,247,399,273"/>
+<area shape="rect" id="node7" href="$classknowrob_1_1_queryable_storage.html" title=" " alt="" coords="203,157,405,184"/>
+<area shape="rect" id="node8" href="$classknowrob_1_1_storage.html" title=" " alt="" coords="236,81,372,108"/>
+<area shape="rect" id="node9" href="$classknowrob_1_1_data_source_handler.html" title=" " alt="" coords="198,5,410,32"/>
+<area shape="rect" id="node10" href="$classknowrob_1_1_redland_u_r_i.html" title=" " alt="" coords="424,247,587,273"/>
+</map>

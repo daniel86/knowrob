@@ -1,0 +1,23 @@
+var searchData=
+[
+  ['backend_5f_4643',['backend_',['../classknowrob_1_1_observer_manager.html#a7cb445edd6105825cb863179c7b0cba1',1,'knowrob::ObserverManager']]],
+  ['backendmanager_5f_4644',['backendManager_',['../classknowrob_1_1_knowledge_base.html#a65a5b65a8128464296f7cf6c6aef5c96',1,'knowrob::KnowledgeBase::backendManager_()'],['../classknowrob_1_1_storage_interface.html#ab4c91658a02ac6ad049cc619a5055913',1,'knowrob::StorageInterface::backendManager_()']]],
+  ['backends_5f_4645',['backends_',['../classknowrob_1_1transaction_1_1_transaction.html#aa19768e02dc97df53eb432828099ea5d',1,'knowrob::transaction::Transaction']]],
+  ['batchsize_5f_4646',['batchSize_',['../classknowrob_1_1_global_settings.html#a42ce2937298e563877f0ba537be28b0d',1,'knowrob::GlobalSettings::batchSize_()'],['../classknowrob_1_1_triple_view_batch.html#a1216b3acfa934220c18cb734b136a398',1,'knowrob::TripleViewBatch::batchSize_()']]],
+  ['begin_4647',['begin',['../structknowrob_1_1_graph_selector.html#aac558ef95b826848fb9afd4917a4fe8a',1,'knowrob::GraphSelector']]],
+  ['begin_5f_4648',['begin_',['../classknowrob_1_1_framed_triple.html#ae5ab937b3be520cb851ccca960125e25',1,'knowrob::FramedTriple']]],
+  ['beginterm_5f_4649',['beginTerm_',['../classknowrob_1_1_framed_triple_pattern.html#a1a3514381a932a04f3baeb4ffbb59f03',1,'knowrob::FramedTriplePattern']]],
+  ['bindfunctor_4650',['bindFunctor',['../namespaceknowrob_1_1graph_1_1builtins.html#a426526f2a8c5412fcf5478eecf939488',1,'knowrob::graph::builtins']]],
+  ['bindvar_5f_4651',['bindVar_',['../classknowrob_1_1_graph_builtin.html#a9b55986cdfdbd98294db52ee2b16652a',1,'knowrob::GraphBuiltin']]],
+  ['blankprefix_5f_4652',['blankPrefix_',['../classknowrob_1_1_ontology_parser.html#a81058ba062d572d713baded4b86bba8a',1,'knowrob::OntologyParser']]],
+  ['bnode_5fmap_4653',['bnode_map',['../class_factxx_reasoner_1_1_factxx_backend.html#a844c78671796430a639dcab06198a627',1,'FactxxReasoner::FactxxBackend']]],
+  ['bson_4654',['bson',['../structknowrob_1_1mongo_1_1bson__wrapper.html#a0ed78270079872dfef444cfbd7c66e2e',1,'knowrob::mongo::bson_wrapper::bson()'],['../structknowrob_1_1mongo_1_1bson__wrapper__ptr.html#ade3c532ae69b20044a9f4970201ff2e0',1,'knowrob::mongo::bson_wrapper_ptr::bson()']]],
+  ['bson_5f_4655',['bson_',['../classknowrob_1_1mongo_1_1_document.html#a9ca8358dc2b4344ed7bf7e9fdab95f3d',1,'knowrob::mongo::Document']]],
+  ['bsonmessage_5f_4656',['bsonMessage_',['../classknowrob_1_1mongo_1_1_mongo_exception.html#a106598163a2d8fa62fdd6f2a0b954efc',1,'knowrob::mongo::MongoException']]],
+  ['buffer_5f_4657',['buffer_',['../classknowrob_1_1_conjunctive_broadcaster.html#abb5fdd14b2b017b3af524bfd4df0887d',1,'knowrob::ConjunctiveBroadcaster::buffer_()'],['../classknowrob_1_1_token_buffer.html#aaca3c1266d464f36e41f9db10a0fb728',1,'knowrob::TokenBuffer::buffer_()']]],
+  ['buffer_5fmutex_5f_4658',['buffer_mutex_',['../classknowrob_1_1_conjunctive_broadcaster.html#af020974f141666316899aa212ed64683',1,'knowrob::ConjunctiveBroadcaster']]],
+  ['buffermutex_5f_4659',['bufferMutex_',['../classknowrob_1_1_token_buffer.html#a47c4b590988a549f8ef2b70003a0f086',1,'knowrob::TokenBuffer']]],
+  ['bufferstage_5f_4660',['bufferStage_',['../classknowrob_1_1_query_pipeline.html#a800fc1053421d4029b8b41e537687d42',1,'knowrob::QueryPipeline']]],
+  ['builtins_4661',['builtins',['../structknowrob_1_1_observer_job_1_1_node.html#aaee4e797d89715c8da2c8f71461a3ac3',1,'knowrob::ObserverJob::Node']]],
+  ['builtintype_5f_4662',['builtinType_',['../classknowrob_1_1_graph_builtin.html#adf660d359de60445258e05a49411d073',1,'knowrob::GraphBuiltin']]]
+];

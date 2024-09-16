@@ -1,0 +1,28 @@
+<map id="include/knowrob/integration" name="include/knowrob/integration">
+<area shape="rect" id="node4" href="dir_6eb89981a014a1874e03aec4ab6e84d8.html" title="formulas" alt="" coords="99,255,179,303"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000006_000003.html" title="3" alt="" coords="130,227,140,242"/>
+<area shape="rect" id="node2" href="dir_9fb67c1bdc0fac47d6ece57af2ddd7e2.html" title="prolog" alt="" coords="155,63,227,111"/>
+<area shape="rect" id="edge9-headlabel" href="dir_000007_000003.html" title="2" alt="" coords="153,232,163,247"/>
+<area shape="rect" id="node5" href="dir_dc326898006b70bac667835e31c57f0d.html" title="triples" alt="" coords="188,351,260,399"/>
+<area shape="rect" id="edge10-headlabel" href="dir_000007_000023.html" title="4" alt="" coords="223,324,232,339"/>
+<area shape="rect" id="node7" href="dir_dd34d4732eb66171b2831b9eec52b33a.html" title="storage" alt="" coords="267,159,339,207"/>
+<area shape="rect" id="edge11-headlabel" href="dir_000007_000019.html" title="1" alt="" coords="258,133,267,148"/>
+<area shape="rect" id="node8" href="dir_e5d5ab94edcea7cde650429262565652.html" title="terms" alt="" coords="103,447,175,495"/>
+<area shape="rect" id="edge12-headlabel" href="dir_000007_000022.html" title="3" alt="" coords="120,419,129,434"/>
+<area shape="rect" id="node3" href="dir_2910a852f5e780c3a0338a51f762e4a8.html" title="python" alt="" coords="251,63,323,111"/>
+<area shape="rect" id="node6" href="dir_0bf0310424b7466e07abc88a25fa1a0d.html" title="ontologies" alt="" coords="355,255,445,303"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000009_000011.html" title="1" alt="" coords="391,227,400,242"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000003_000023.html" title="3" alt="" coords="184,324,193,339"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000003_000022.html" title="9" alt="" coords="135,420,144,435"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000023_000003.html" title="2" alt="" coords="170,315,179,329"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000023_000022.html" title="11" alt="" coords="169,432,187,446"/>
+<area shape="rect" id="edge7-headlabel" href="dir_000011_000023.html" title="13" alt="" coords="271,346,289,361"/>
+<area shape="rect" id="edge8-headlabel" href="dir_000011_000019.html" title="4" alt="" coords="338,218,347,233"/>
+<area shape="rect" id="edge13-headlabel" href="dir_000019_000003.html" title="1" alt="" coords="194,245,204,260"/>
+<area shape="rect" id="edge14-headlabel" href="dir_000019_000023.html" title="31" alt="" coords="240,330,257,344"/>
+<area shape="rect" id="edge15-headlabel" href="dir_000019_000011.html" title="1" alt="" coords="356,229,365,243"/>
+<area shape="rect" id="edge16-headlabel" href="dir_000019_000022.html" title="3" alt="" coords="190,455,199,470"/>
+<area shape="rect" id="edge17-headlabel" href="dir_000022_000003.html" title="2" alt="" coords="133,314,143,329"/>
+<area shape="rect" id="clust2" href="dir_23eb974dfffdc0fd86c950f7ca76240a.html" alt="" coords="27,52,333,121"/>
+<area shape="rect" id="clust1" href="dir_b1765075b97813cac26ea3c829a1769e.html" title="knowrob" alt="" coords="16,16,344,132"/>
+</map>
