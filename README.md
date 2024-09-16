@@ -293,7 +293,7 @@ For more information on reasoning in KnowRob, please have a look
 
 More documentation can be found in the following pages:
 
-- [Terms](src/terms/README.md)
+- [Terms](@ref terms)
 - [Formulas](src/formulas/README.md)
 - [Triples](src/triples/README.md)
 - [Ontologies](src/ontologies/README.md)
